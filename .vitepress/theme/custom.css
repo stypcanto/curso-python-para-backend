@@ -1,0 +1,193 @@
+/* ─────────────────────────────────────────────────────────────
+   Tema de los apuntes (estilo Styp)
+   AJUSTA EL COLOR DEL CURSO en --vp-c-brand-1/2/3 (abajo).
+   Ejemplos: TypeScript #3178c6 · Python #3776ab · Angular #dd0031
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  /* ▼ Color de marca del curso ▼ (Python) */
+  --vp-c-brand-1: #3776ab;
+  --vp-c-brand-2: #3776ab;
+  --vp-c-brand-3: #ffd43b;
+  --vp-c-brand-soft: rgba(55, 118, 171, 0.14);
+
+  /* Colores de los callouts (no hace falta tocarlos) */
+  --callout-info-border: #16a34a;
+  --callout-info-bg: rgba(22, 163, 74, 0.08);
+  --callout-warning-border: #d97706;
+  --callout-warning-bg: rgba(217, 119, 6, 0.1);
+  --callout-tip-border: #0ea5e9;
+  --callout-tip-bg: rgba(14, 165, 233, 0.1);
+  --callout-interview-border: #9333ea;
+  --callout-interview-bg: rgba(147, 51, 234, 0.1);
+  --callout-note-border: #64748b;
+  --callout-note-bg: rgba(100, 116, 139, 0.1);
+  --callout-question-border: #db2777;
+  --callout-question-bg: rgba(219, 39, 119, 0.1);
+  --callout-goal-border: #2f74c0;
+  --callout-goal-bg: rgba(47, 116, 192, 0.1);
+}
+
+.dark {
+  --callout-info-bg: rgba(22, 163, 74, 0.14);
+  --callout-warning-bg: rgba(217, 119, 6, 0.16);
+  --callout-tip-bg: rgba(14, 165, 233, 0.15);
+  --callout-interview-bg: rgba(147, 51, 234, 0.16);
+  --callout-note-bg: rgba(148, 163, 184, 0.14);
+  --callout-question-bg: rgba(219, 39, 119, 0.16);
+  --callout-goal-bg: rgba(74, 144, 217, 0.16);
+}
+
+/* ── Callouts ─────────────────────────────────────────────── */
+.vp-doc blockquote.callout {
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 18px 0;
+  border-left: 5px solid var(--callout-note-border);
+  background: var(--callout-note-bg);
+  color: var(--vp-c-text-1);
+}
+.vp-doc blockquote.callout > p { margin: 6px 0; }
+.vp-doc blockquote.callout > p:first-child { margin-top: 0; }
+.vp-doc blockquote.callout > p:last-child { margin-bottom: 0; }
+
+.vp-doc blockquote.callout-info { border-left-color: var(--callout-info-border); background: var(--callout-info-bg); }
+.vp-doc blockquote.callout-warning { border-left-color: var(--callout-warning-border); background: var(--callout-warning-bg); }
+.vp-doc blockquote.callout-tip { border-left-color: var(--callout-tip-border); background: var(--callout-tip-bg); }
+.vp-doc blockquote.callout-interview { border-left-color: var(--callout-interview-border); background: var(--callout-interview-bg); }
+.vp-doc blockquote.callout-note { border-left-color: var(--callout-note-border); background: var(--callout-note-bg); }
+.vp-doc blockquote.callout-question { border-left-color: var(--callout-question-border); background: var(--callout-question-bg); }
+.vp-doc blockquote.callout-goal { border-left-color: var(--callout-goal-border); background: var(--callout-goal-bg); }
+
+/* ── Tablas ───────────────────────────────────────────────── */
+.vp-doc table { display: table; width: 100%; }
+.vp-doc th { background: var(--vp-c-brand-soft); }
+
+/* ── Código ───────────────────────────────────────────────── */
+.vp-doc div[class*='language-'] { border-radius: 10px; }
+
+/* ── Home hero ────────────────────────────────────────────── */
+:root {
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg, var(--vp-c-brand-2) 30%, var(--vp-c-brand-3));
+  --vp-home-hero-image-background-image: linear-gradient(120deg, var(--vp-c-brand-soft), transparent);
+  --vp-home-hero-image-filter: blur(44px);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Caja de búsqueda en el sidebar (encima de "Clases")
+   Abre el buscador local de VitePress (SidebarSearch.vue)
+   ───────────────────────────────────────────────────────────── */
+.apuntes-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 12px 0 4px;
+  padding: 8px 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  background: var(--vp-c-bg-alt);
+  color: var(--vp-c-text-2);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.apuntes-search:hover {
+  border-color: var(--vp-c-brand-1);
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text-1);
+}
+.apuntes-search__icon {
+  font-size: 14px;
+  line-height: 1;
+}
+.apuntes-search__text {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.apuntes-search__kbd {
+  padding: 1px 6px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 4px;
+  background: var(--vp-c-bg);
+  font-family: var(--vp-font-family-mono);
+  font-size: 11px;
+  color: var(--vp-c-text-2);
+}
+
+/* ── Terminal demo para salidas esperadas ─────────────────── */
+.terminal-shot {
+  margin: 16px 0 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #11161d;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+}
+
+.terminal-shot__titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, #3a3936 0%, #2f2e2b 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.terminal-shot__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  display: inline-block;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.terminal-shot__dot--red { background: #ff5f57; }
+.terminal-shot__dot--yellow { background: #febc2e; }
+.terminal-shot__dot--green { background: #28c840; }
+
+.terminal-shot__title {
+  margin-left: auto;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.terminal-shot__screen {
+  margin: 0;
+  padding: 16px 18px 18px;
+  background:
+    radial-gradient(circle at top left, rgba(43, 217, 110, 0.07), transparent 32%),
+    linear-gradient(180deg, #131922 0%, #0d1218 100%);
+  color: #e6edf3;
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  overflow-x: auto;
+}
+
+.terminal-shot__screen code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  white-space: pre;
+}
+
+.terminal-shot__prompt {
+  color: #5eea63;
+  font-weight: 700;
+}
+
+.terminal-shot__output {
+  color: #e6edf3;
+}
+
+.terminal-shot__output--accent {
+  color: #f2cc60;
+  font-weight: 700;
+}
