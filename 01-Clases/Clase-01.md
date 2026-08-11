@@ -19,6 +19,8 @@ sidebar: "Clase 1 · Fundamentos de Python"
 - Manejar errores con `try`/`except`/`raise` en vez de dejar que el programa se detenga.
 - *(profundización propia)* Mutabilidad/aliasing, tipos opcionales, `dataclass`,
   excepciones propias, `logging`, variables de entorno y comprehensions.
+- *(práctica libre)* `input()` para leer datos del usuario por consola, combinado con
+  conversión de tipos (`float`) para trabajar el dato como número.
 
 # 📖 PARTE TEÓRICA
 
@@ -510,6 +512,40 @@ Solicitud 1004: Prioridad desconocida: Urgentisima</span></code></pre>
 > una API? **La función que valida la prioridad y calcula el tiempo de respuesta** — la
 > lógica de negocio no cambia, solo cambia cómo se recibe y se entrega el resultado
 > (consola vs. una respuesta HTTP).
+
+## 🖊️ Práctica libre: variables e `input()`
+Aparte del reto, practiqué por mi cuenta variables y la función `input()` — que ya había
+aparecido de pasada en el ejemplo de `try`/`except` de la teoría (sección 8), pero acá la
+uso directamente para pedirle datos al usuario por consola.
+
+| Archivo | Qué practica |
+|---|---|
+| [`02-Ejercicios/Clase-01/variables.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-01/variables.py) | Declarar variables, `print()` con varios argumentos, sumar variables numéricas |
+| [`02-Ejercicios/Clase-01/input.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-01/input.py) | `input()` para leer texto del usuario y concatenarlo con `+` |
+| [`02-Ejercicios/Clase-01/temperatura.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-01/temperatura.py) | `input()` + conversión a `float` + `str()` para insertar un número en un texto |
+
+> 📌 `input()` **siempre devuelve texto (`str`)**, aunque el usuario escriba un número —
+> por eso `temperatura.py` lo envuelve en `float(...)` antes de usarlo como número (el
+> mismo patrón de conversión de tipos de la sección 4 de la teoría).
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · variables.py / input.py / temperatura.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 variables.py
+<span class="terminal-shot__output">Mi edad es: 25
+La suma de edades es: 55
+El valor total es de: 30</span>
+<span class="terminal-shot__prompt">$</span> python3 input.py
+Ingrese su nombre: Styp
+<span class="terminal-shot__output">Hola, Styp! Bienvenido/a a la clase de Python.</span>
+<span class="terminal-shot__prompt">$</span> python3 temperatura.py
+Ingrese la temperatura del lunes: 18.5
+<span class="terminal-shot__output">La temperatura del lunes es: 18.5°C</span></code></pre>
+</div>
 
 # 🏋️ EJERCICIOS CON SOLUCIÓN
 
