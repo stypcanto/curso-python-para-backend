@@ -1,3 +1,7 @@
+---
+sidebar: "🎤 Entrevistas"
+---
+
 # 🎤 Preguntas de entrevista — Python para Backend
 
 > Preguntas típicas de examen/entrevista relacionadas a los temas del curso, con respuesta

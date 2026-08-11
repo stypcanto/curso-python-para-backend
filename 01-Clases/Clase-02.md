@@ -1,3 +1,7 @@
+---
+sidebar: "Clase 2 · POO y arquitectura"
+---
+
 # 📙 Clase 2 — Programación orientada a objetos y arquitectura
 
 > Python para Backend · 2026-08-04 · Carpeta: `02-Ejercicios/Clase-02`

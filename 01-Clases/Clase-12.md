@@ -1,3 +1,7 @@
+---
+sidebar: "Clase 12 · IA y proyecto final"
+---
+
 # 📙 Clase 12 — Integración con IA y proyecto final
 
 > Python para Backend · fecha por confirmar · Carpeta: `02-Ejercicios/Clase-12`

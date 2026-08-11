@@ -1,3 +1,7 @@
+---
+sidebar: "Clase 10 · Docker"
+---
+
 # 📙 Clase 10 — Docker y contenerización
 
 > Python para Backend · fecha por confirmar · Carpeta: `02-Ejercicios/Clase-10`

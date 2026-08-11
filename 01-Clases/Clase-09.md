@@ -1,3 +1,7 @@
+---
+sidebar: "Clase 9 · Event Driven"
+---
+
 # 📙 Clase 9 — Arquitecturas Event Driven
 
 > Python para Backend · fecha por confirmar · Carpeta: `02-Ejercicios/Clase-09`

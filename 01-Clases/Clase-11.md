@@ -1,3 +1,7 @@
+---
+sidebar: "Clase 11 · CI/CD en AWS"
+---
+
 # 📙 Clase 11 — CI/CD y despliegue en AWS
 
 > Python para Backend · fecha por confirmar · Carpeta: `02-Ejercicios/Clase-11`

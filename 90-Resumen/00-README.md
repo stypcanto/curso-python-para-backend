@@ -1,3 +1,7 @@
+---
+sidebar: "📦 Resumen final"
+---
+
 # 📦 Resumen final — Python para Backend
 
 > Se arma al terminar el curso, juntando lo esencial de `01-Clases/` y `00-Notas/` para un

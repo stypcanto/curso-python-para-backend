@@ -1,3 +1,7 @@
+---
+sidebar: "Clase 4 · PostgreSQL"
+---
+
 # 📙 Clase 4 — PostgreSQL y persistencia de datos
 
 > Python para Backend · 2026-08-11 · Carpeta: `02-Ejercicios/Clase-04`

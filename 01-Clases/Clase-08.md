@@ -1,3 +1,7 @@
+---
+sidebar: "Clase 8 · Serverless AWS"
+---
+
 # 📙 Clase 8 — Microservicios Serverless con AWS
 
 > Python para Backend · fecha por confirmar · Carpeta: `02-Ejercicios/Clase-08`

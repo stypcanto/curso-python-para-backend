@@ -1,3 +1,7 @@
+---
+sidebar: "Clase 1 · Fundamentos de Python"
+---
+
 # 📙 Clase 1 — Fundamentos de Python para Backend
 
 > Python para Backend · 2026-07-30 · Carpeta: `02-Ejercicios/Clase-01`
@@ -13,6 +17,8 @@
 - Tomar decisiones y repetir procesos (`if`/`elif`/`else`, `for`, `while`).
 - Organizar la lógica en funciones tipadas y módulos separados.
 - Manejar errores con `try`/`except`/`raise` en vez de dejar que el programa se detenga.
+- *(profundización propia)* Mutabilidad/aliasing, tipos opcionales, `dataclass`,
+  excepciones propias, `logging`, variables de entorno y comprehensions.
 
 # 📖 PARTE TEÓRICA
 
@@ -75,6 +81,16 @@ backend_python/
 > 📝 La diapositiva solo mostraba la activación en Windows (`.\.venv\Scripts\activate`).
 > Trabajo en macOS, así que documento primero `source .venv/bin/activate` (ver
 > `CLAUDE.md` — comandos de sistema siempre en macOS/Linux primero).
+
+### 🧩 Extensiones de VS Code recomendadas por el profe
+| Extensión | Publisher (id) | Para qué sirve |
+|---|---|---|
+| [Python Indent](https://marketplace.visualstudio.com/items?itemName=KevinRose.vsc-python-indent) | Kevin Rose (`KevinRose.vsc-python-indent`) | Corrige la indentación automática al presionar Enter — analiza el código hasta el cursor para calcular el nivel correcto (la indentación por defecto de VS Code para Python falla seguido en `if`, `for`, listas multilínea, etc.). |
+| [Python Debugger](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy) | Microsoft (`ms-python.debugpy`) | Debugger de Python basado en `debugpy`: poner breakpoints, ejecutar paso a paso, inspeccionar variables. Se separó de la extensión "Python" principal de Microsoft para poder actualizarse de forma independiente. |
+
+> 💡 Ambas se instalan igual que cualquier extensión: `Cmd+Shift+X` en VS Code, buscar por
+> nombre e instalar (o `code --install-extension KevinRose.vsc-python-indent` /
+> `code --install-extension ms-python.debugpy` desde la terminal).
 
 ### 🐍 ¿Qué versión de Python instalar?
 El profe hizo mención a instalar la **versión más estable**, no la última a secas — y
@@ -243,6 +259,222 @@ if estimated_hours <= 0:
 
 > ⚠️ `except:` sin especificar el tipo de error es una mala práctica común — atrapa
 > absolutamente todo (incluso errores de programación) y hace muy difícil depurar.
+
+# 🔬 PARA IR MÁS ALLÁ — profundizando rumbo a Backend
+
+> 📌 Esto **no lo dio el profe en esta clase** — lo agrego por mi cuenta sobre la misma
+> base de la Clase 1, porque son los primeros huecos que aparecen apenas se empieza a
+> pensar en construir un backend de verdad (una API, una base de datos, un servicio en
+> producción). Todo el código está verificado en terminal.
+
+## 🧬 9. Mutabilidad y aliasing: el bug más común en backend
+En la teoría vimos que las listas y diccionarios son mutables. La consecuencia práctica
+(y la fuente de un bug clásico) es que **una variable no "contiene" el dato: apunta a
+él**. Si paso una lista/diccionario a una función y la función lo modifica *en el mismo
+lugar* (sin reasignarlo), el cambio se ve también afuera — aunque nunca hice `return`.
+
+```python
+def add_processed_tag(requests_list):
+    for r in requests_list:
+        r["tag"] = "revisado"   # modifica el diccionario EN SU LUGAR
+    return requests_list
+
+original = [{"id": 1001, "priority": "Alta"}]
+result = add_processed_tag(original)
+
+print(original)          # también quedó con 'tag' — no hizo falta reasignar nada
+print(result is original)  # True: es el MISMO objeto en memoria, no una copia
+```
+```
+[{'id': 1001, 'priority': 'Alta', 'tag': 'revisado'}]
+True
+```
+
+En cambio, si dentro de la función **reasigno** el parámetro a algo nuevo (`requests_list
+= []`), esa reasignación es local — no afecta a la variable de quien llamó a la función:
+
+```python
+def try_replace(requests_list):
+    requests_list = []              # esto crea una lista NUEVA, solo local
+    requests_list.append({"id": 9999})
+    return requests_list
+
+other = [{"id": 1}]
+new_list = try_replace(other)
+print(other)     # [{'id': 1}]  -- sin cambios
+print(new_list)  # [{'id': 9999}]
+```
+
+> ⚠️ En una API, este es el bug que aparece cuando una función "de validación" termina
+> modificando el payload original sin querer, y otro endpoint más adelante recibe datos
+> ya alterados. La regla de oro: si no querés efectos secundarios, trabajá sobre una
+> copia (`list(original)`, `dict(original)`, o el módulo `copy` para copias profundas).
+
+## 🏷️ 10. Tipos más expresivos: `Optional` y anotaciones modernas
+En la teoría usamos `priority: str -> int`. En backend real, muchos campos son
+**opcionales** (pueden no venir en la petición). Desde Python 3.10 se anota así, con `|
+None` en vez de `Optional[...]` de `typing`:
+
+```python
+def build_summary(title: str, hours: float | None = None) -> str:
+    if hours is None:
+        return f"{title} (sin estimar)"
+    return f"{title} ({hours}h)"
+
+print(build_summary("Error de acceso"))
+print(build_summary("Falla de red", 2.5))
+```
+```
+Error de acceso (sin estimar)
+Falla de red (2.5h)
+```
+
+> 🧪 Tip de entrevista: `str | None` y `Optional[str]` (de `from typing import Optional`)
+> significan exactamente lo mismo — la sintaxis con `|` es la forma moderna (3.10+) y la
+> que vas a ver en proyectos con FastAPI/Pydantic.
+
+## 📦 11. `dataclass`: estructurar una entidad sin tanto diccionario suelto
+Hasta ahora representamos una solicitud como `dict`. Funciona, pero nada impide escribir
+`request["titel"]` (con un typo) y que Python no avise hasta que falle en producción. Una
+**`dataclass`** define la forma de un objeto una sola vez, con tipos, y el editor avisa
+si te equivocás de nombre de campo:
+
+```python
+from dataclasses import dataclass, field
+
+@dataclass
+class SupportRequest:
+    id: int
+    title: str
+    priority: str
+    tags: list[str] = field(default_factory=list)  # evita el bug del valor por defecto mutable
+
+r1 = SupportRequest(id=1001, title="Error de acceso", priority="Alta")
+print(r1)             # SupportRequest(id=1001, title='Error de acceso', priority='Alta', tags=[])
+r1.tags.append("urgente")
+print(r1.tags)         # ['urgente']
+```
+
+Y si necesito que un objeto **no se pueda modificar después de creado** (útil para datos
+que no deberían cambiar, como un ID ya asignado), existe la variante `frozen`:
+
+```python
+@dataclass(frozen=True)
+class ImmutableRequest:
+    id: int
+    title: str
+
+r2 = ImmutableRequest(id=1, title="Solo lectura")
+r2.id = 2   # FrozenInstanceError: cannot assign to field 'id'
+```
+
+> 💡 Esto es, literalmente, el paso previo a los `BaseModel` de **Pydantic** que vamos a
+> usar en la Clase 3 (FastAPI) — misma idea (definir la forma de los datos con tipos),
+> pero Pydantic además valida en tiempo de ejecución (por ejemplo, rechaza un `priority`
+> que no sea texto).
+
+## 🚨 12. Excepciones propias: modelar errores del dominio
+En la teoría usamos `ValueError` para todo. En un backend más grande conviene crear
+**excepciones propias**, organizadas en una jerarquía, para poder distinguir "no
+encontrado" de "dato inválido" y capturarlas por separado (o todas juntas, por el error
+base):
+
+```python
+class DomainError(Exception):
+    """Error base para reglas de negocio del dominio."""
+
+class RequestNotFoundError(DomainError):
+    def __init__(self, request_id: int):
+        self.request_id = request_id
+        super().__init__(f"Solicitud {request_id} no encontrada")
+
+class InvalidPriorityError(DomainError):
+    pass
+
+def find_request(requests_list, request_id):
+    for r in requests_list:
+        if r["id"] == request_id:
+            return r
+    raise RequestNotFoundError(request_id)
+
+requests_db = [{"id": 1001, "priority": "Alta"}]
+try:
+    find_request(requests_db, 9999)
+except RequestNotFoundError as e:
+    print(e)   # Solicitud 9999 no encontrada
+```
+
+> 📌 Como `RequestNotFoundError` **hereda** de `DomainError`, un `except DomainError`
+> también la captura — así una API puede tener un único manejador para "cualquier error
+> de negocio" y devolver el código HTTP correcto según el tipo exacto de excepción
+> (`RequestNotFoundError` → 404, `InvalidPriorityError` → 400). Esto es exactamente lo
+> que se arma con los `exception_handlers` de FastAPI más adelante en el curso.
+
+## 🪵 13. `logging` en vez de `print` en servicios reales
+`print()` está perfecto para practicar, pero un backend corriendo en un servidor no tiene
+a nadie mirando la consola en vivo — necesita **quedar registrado**, con nivel de
+severidad y timestamp, en un log que se pueda revisar después.
+
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logger = logging.getLogger("soporte")
+
+logger.info("Solicitud 1001 procesada")
+logger.warning("Solicitud 1002 sin prioridad asignada")
+```
+```
+INFO: Solicitud 1001 procesada
+WARNING: Solicitud 1002 sin prioridad asignada
+```
+
+| Nivel | Cuándo usarlo |
+|---|---|
+| `DEBUG` | Detalle solo útil mientras se desarrolla/depura. |
+| `INFO` | Eventos normales del negocio ("solicitud creada", "usuario autenticado"). |
+| `WARNING` | Algo raro pero el programa sigue funcionando. |
+| `ERROR` | Algo falló y hay que revisarlo. |
+| `CRITICAL` | El servicio no puede seguir operando. |
+
+## 🔐 14. Variables de entorno: no hardcodear configuración sensible
+La URL de una base de datos, una API key, una contraseña — **nunca** van escritas
+directamente en el código. Se leen del entorno del sistema operativo con `os.environ`,
+normalmente cargadas desde un archivo `.env` (que **no** se sube a git):
+
+```python
+import os
+
+db_host = os.environ.get("DB_HOST", "127.0.0.1")  # usa un valor por defecto si no existe
+db_port = os.environ.get("DB_PORT", "5432")
+print(f"Conectando a {db_host}:{db_port}")
+```
+
+> ⚠️ Si algún día ves un `.env` con credenciales reales, va en el `.gitignore` — **nunca**
+> se commitea. En este mismo repo el `.gitignore` (raíz del proyecto) ya excluye
+> archivos que no deben ir a git (entornos virtuales, cachés, etc.).
+
+## ⚡ 15. Comprehensions: transformar listas de diccionarios sin tanto `for`
+Es el patrón que más se repite al procesar el resultado de una consulta (una lista de
+diccionarios, como vimos en la teoría): filtrar y/o transformar en una sola línea.
+
+```python
+requests_list = [
+    {"id": 1001, "priority": "Alta"},
+    {"id": 1002, "priority": "Media"},
+    {"id": 1003, "priority": "Alta"},
+]
+
+solo_altas = [r["id"] for r in requests_list if r["priority"] == "Alta"]
+print(solo_altas)  # [1001, 1003]
+
+mapa_prioridades = {r["id"]: r["priority"] for r in requests_list}
+print(mapa_prioridades)  # {1001: 'Alta', 1002: 'Media', 1003: 'Alta'}
+```
+
+> 💡 Es exactamente el mismo resultado que el `for` con `if` y `append()` de la teoría
+> (sección 6/7) — una comprehension no es "magia", es azúcar sintáctico para ese mismo
+> patrón, más compacto.
 
 # 💻 PARTE PRÁCTICA
 
@@ -509,7 +741,8 @@ Salida esperada:
 
 `priority: str` y `-> int` son *pistas* para quien lee el código (y para el editor) —
 Python no lanza error si en la práctica le pasas otro tipo. Sirven para claridad y para
-que herramientas como VS Code avisen antes de ejecutar, [ver Clase 1 §7](#-7-organizando-y-reutilizando-la-lógica-funciones-y-módulos).
+que herramientas como VS Code avisen antes de ejecutar, ver la sección "🧩 7. Organizando
+y reutilizando la lógica" de esta misma clase.
 
 ```python
 def calcular_prioridad_dias(nivel: str) -> int:
@@ -595,7 +828,8 @@ Solicitud 1004: Prioridad desconocida: Urgentisima
 
 `raise` "lanza" el error hacia quien llamó a la función; si esa función se llama dentro
 de un `for` envuelto en `try`/`except`, el `for` puede seguir con la siguiente vuelta en
-vez de cortar todo el programa. Es el mismo patrón que en la [parte práctica](#-parte-práctica) de esta clase, con otro caso de negocio (validar un código de país en vez de una prioridad):
+vez de cortar todo el programa. Es el mismo patrón que en la parte práctica de esta
+clase, con otro caso de negocio (validar un código de país en vez de una prioridad):
 
 ```python
 def obtener_prefijo(pais: str) -> str:

@@ -1,3 +1,7 @@
+---
+sidebar: "Clase 7 · Comunicación y seguridad"
+---
+
 # 📙 Clase 7 — Comunicación y seguridad en microservicios
 
 > Python para Backend · fecha por confirmar · Carpeta: `02-Ejercicios/Clase-07`

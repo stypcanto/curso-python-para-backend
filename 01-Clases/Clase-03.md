@@ -1,3 +1,7 @@
+---
+sidebar: "Clase 3 · FastAPI y APIs REST"
+---
+
 # 📙 Clase 3 — Introducción a FastAPI y APIs REST
 
 > Python para Backend · 2026-08-06 · Carpeta: `02-Ejercicios/Clase-03`

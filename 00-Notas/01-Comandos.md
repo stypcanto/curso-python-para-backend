@@ -1,3 +1,7 @@
+---
+sidebar: "🖥️ Comandos"
+---
+
 # 🖥️ Comandos — Python para Backend
 
 > Comandos de terminal, Python, pip, entornos virtuales, etc. que voy usando en el curso.

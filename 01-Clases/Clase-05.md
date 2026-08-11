@@ -1,3 +1,7 @@
+---
+sidebar: "Clase 5 · Arq. microservicios"
+---
+
 # 📙 Clase 5 — Fundamentos de arquitectura de microservicios
 
 > Python para Backend · fecha por confirmar · Carpeta: `02-Ejercicios/Clase-05`

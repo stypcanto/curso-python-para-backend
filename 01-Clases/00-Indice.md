@@ -1,3 +1,7 @@
+---
+sidebar: "📚 Índice de clases"
+---
+
 # 📚 Índice de clases — Python para Backend
 
 > Tabla maestra de todas las clases del curso y ruta sugerida de temas. Se actualiza al

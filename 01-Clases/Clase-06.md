@@ -1,3 +1,7 @@
+---
+sidebar: "Clase 6 · Microservicios FastAPI"
+---
+
 # 📙 Clase 6 — Construcción de microservicios con FastAPI
 
 > Python para Backend · fecha por confirmar · Carpeta: `02-Ejercicios/Clase-06`
