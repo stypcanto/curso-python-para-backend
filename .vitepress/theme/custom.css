@@ -5,6 +5,12 @@
    ───────────────────────────────────────────────────────────── */
 
 :root {
+  /* Sidebar más ancho: el título "Apuntes de Python para Backend" no entra
+     cómodo en los 272px por defecto de VitePress. Esta variable mueve junto
+     todo lo que depende del ancho del sidebar (panel, título del navbar y
+     el padding-left del contenido), así que no hace falta tocar nada más. */
+  --vp-sidebar-width: 300px;
+
   /* ▼ Color de marca del curso ▼ (Python — azul + verde oscuro, sin amarillo) */
   --vp-c-brand-1: #3776ab;
   --vp-c-brand-2: #3776ab;

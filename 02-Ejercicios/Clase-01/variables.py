@@ -1,0 +1,3 @@
+# Variables
+
+edad = 25
