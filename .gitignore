@@ -1,0 +1,9 @@
+.DS_Store
+
+# Archivos temporales/lock de Office (se crean mientras el archivo está abierto)
+~$*
+
+# Entornos virtuales de Python (si se crean dentro de 02-Ejercicios/)
+.venv/
+__pycache__/
+*.pyc

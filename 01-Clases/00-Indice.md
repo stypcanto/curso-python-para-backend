@@ -7,7 +7,7 @@
 
 | # | Clase | Fecha | Temas | Estado |
 |---|-------|-------|-------|--------|
-| 1 | [Clase 1](Clase-01.md) | 2026-07-30 | *(por documentar)* | 🔄 en curso |
+| 1 | [Clase 1](Clase-01.md) | 2026-07-30 | Entorno virtual, tipos de datos, listas/diccionarios, control de flujo, funciones, módulos, manejo de errores | ✅ hecha |
 | 2 | [Clase 2](Clase-02.md) | 2026-08-04 | *(por documentar)* | 🔄 en curso |
 | 3 | [Clase 3](Clase-03.md) | 2026-08-06 | *(por documentar)* | 🔄 en curso |
 | 4 | [Clase 4](Clase-04.md) | 2026-08-11 | *(por documentar)* | 🔄 en curso |
@@ -16,7 +16,7 @@
 
 ## 🛤️ Ruta sugerida del curso
 
-- [ ] Clase 1 — 2026-07-30 (por definir tema)
+- [x] Clase 1 — 2026-07-30 — Fundamentos de Python para Backend
 - [ ] Clase 2 — 2026-08-04 (por definir tema)
 - [ ] Clase 3 — 2026-08-06 (por definir tema)
 - [ ] Clase 4 — 2026-08-11 (por definir tema)
