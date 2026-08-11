@@ -9,7 +9,7 @@
      cómodo en los 272px por defecto de VitePress. Esta variable mueve junto
      todo lo que depende del ancho del sidebar (panel, título del navbar y
      el padding-left del contenido), así que no hace falta tocar nada más. */
-  --vp-sidebar-width: 300px;
+  --vp-sidebar-width: 320px;
 
   /* ▼ Color de marca del curso ▼ (Python — azul + verde oscuro, sin amarillo) */
   --vp-c-brand-1: #3776ab;
