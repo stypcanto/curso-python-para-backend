@@ -5,10 +5,10 @@
    ───────────────────────────────────────────────────────────── */
 
 :root {
-  /* ▼ Color de marca del curso ▼ (Python) */
+  /* ▼ Color de marca del curso ▼ (Python — azul + verde, sin amarillo) */
   --vp-c-brand-1: #3776ab;
   --vp-c-brand-2: #3776ab;
-  --vp-c-brand-3: #ffd43b;
+  --vp-c-brand-3: #22c55e;
   --vp-c-brand-soft: rgba(55, 118, 171, 0.14);
 
   /* Colores de los callouts (no hace falta tocarlos) */
