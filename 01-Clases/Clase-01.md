@@ -54,10 +54,10 @@ mkdir backend_python
 cd backend_python
 python -m venv .venv          # crea el entorno virtual en la carpeta .venv/
 
-# Activación en Windows
-.\.venv\Scripts\activate
-# Activación en macOS/Linux (no estaba en la diapositiva, pero es el equivalente)
+# Activación en macOS/Linux (mi caso)
 source .venv/bin/activate
+# Activación en Windows (como lo mostró la diapositiva, de referencia)
+.\.venv\Scripts\activate
 
 # Verificación
 python --version
@@ -73,7 +73,32 @@ backend_python/
 ```
 
 > 📝 La diapositiva solo mostraba la activación en Windows (`.\.venv\Scripts\activate`).
-> En mac/Linux (mi caso) el comando equivalente es `source .venv/bin/activate`.
+> Trabajo en macOS, así que documento primero `source .venv/bin/activate` (ver
+> `CLAUDE.md` — comandos de sistema siempre en macOS/Linux primero).
+
+### 🐍 ¿Qué versión de Python instalar?
+El profe hizo mención a instalar la **versión más estable**, no la última a secas — y
+mostró la página oficial de descargas para explicarlo. Python mantiene varias versiones
+"vivas" en paralelo, cada una en una etapa distinta de su ciclo de vida:
+
+| Etapa | Qué significa |
+|---|---|
+| 🟡 `bugfix` | Versión activa y recomendada: recibe correcciones de bugs además de parches de seguridad. |
+| 🟨 `security` | Ya no recibe nuevas funciones ni bugfixes — solo parches de seguridad críticos. |
+| 🟢 `prerelease` / `feature` | Todavía en desarrollo (alfa/beta/RC) — **no** es para producción ni para aprender recién. |
+| 🔴 `end-of-life` | Sin soporte de ningún tipo — no debería usarse. |
+
+> 📌 La "versión más estable" es la que está en etapa `bugfix` (o `security` si querés
+> algo muy probado) — **no** la última `prerelease` que aparece más a la derecha del
+> gráfico, aunque tenga el número más alto.
+
+### 🗺️ Diagrama: ciclo de vida de las versiones de Python (python.org/downloads)
+![Gráfico de python.org con las versiones activas de Python y su etapa de soporte (bugfix, security, prerelease, end-of-life)](/clase-01-python-versiones-estables.png)
+
+> 💡 Fuente: [python.org/downloads](https://www.python.org/downloads/) — captura tomada en
+> clase. Guardada también en
+> [`04-Recursos/imagenes/clase-01-python-versiones-estables.png`](../04-Recursos/imagenes/clase-01-python-versiones-estables.png)
+> por si la imagen del sitio se pierde.
 
 ## 🔢 4. Tipos de datos básicos
 Cada dato del mundo real tiene un tipo en Python, y el tipo determina qué operaciones se
