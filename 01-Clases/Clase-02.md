@@ -1,13 +1,18 @@
-# 📙 Clase 2 — *(por definir)*
+# 📙 Clase 2 — Programación orientada a objetos y arquitectura
 
-> Python para Backend · 2026-08-04 · Carpeta: `02-Ejercicios/(por definir)`
+> Python para Backend · 2026-08-04 · Carpeta: `02-Ejercicios/Clase-02`
 > ⬅️ Volver al [índice de clases](00-Indice.md)
 
-## 🎯 Qué aprendí
-- *(pendiente — pasar capturas, terminal o resumen de la clase para documentar)*
+## 🎯 Qué aprendí (según temario — por confirmar/completar al documentar la clase)
+- Clases y objetos
+- Herencia y composición
+- Encapsulamiento y abstracción
+- Principios SOLID
+- Organización de proyectos Python
+- Patrones básicos de diseño
 
 # 📖 PARTE TEÓRICA
-*(pendiente)*
+*(pendiente — pasar capturas, terminal o resumen de la clase para documentar)*
 
 # 💻 PARTE PRÁCTICA
 *(pendiente)*
