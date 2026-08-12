@@ -315,6 +315,16 @@ Primer archivo de código de la clase — los schemas de Pydantic (capa `schemas
 sección teórica "🏗️ Arquitectura del proyecto" arriba) para validar los datos de un
 ticket:
 
+> 📌 **`schemas/` no es la conexión a la base de datos** — son cosas distintas. Un
+> `schema` define la **forma de los datos que entran y salen por HTTP** (Pydantic),
+> pura validación en Python; la conexión real (`engine`, `Session`) vive en
+> `db/database.py` (sección 8). Se empieza acá y no por `db/`/`models/` porque un
+> schema no depende de nada más — se escribe y se prueba sin Postgres corriendo (mismo
+> patrón `BaseModel`/`Field` ya visto en la [Clase 3](Clase-03.md)), mientras que la
+> conexión real recién se puede verificar con la base levantada. Es ir de afuera hacia
+> adentro: primero qué forma tienen los datos en el contrato de la API, después cómo se
+> guardan.
+
 ```python
 # 02-Ejercicios/Clase-04/app/schemas/ticket.py
 from pydantic import BaseModel, ConfigDict, Field
