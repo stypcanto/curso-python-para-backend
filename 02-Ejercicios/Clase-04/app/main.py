@@ -1,4 +1,4 @@
-from time import perf_counter
+from time import perf_counter  # para medir cuánto tarda cada petición (middleware)
 
 from fastapi import FastAPI, Request
 
@@ -8,6 +8,8 @@ from models.user import User
 from models.category import Category
 from models.ticket import Ticket
 
+# El router YA TRAE sus 5 endpoints armados (routers/tickets.py) — acá
+# solo se importa para montarlo más abajo con app.include_router(...)
 from routers.tickets import router as tickets_router
 
 # Las tablas ya NO se crean acá con create_all() — las crea/actualiza
@@ -19,6 +21,9 @@ from routers.tickets import router as tickets_router
 # CREACIÓN DE LA APLICACIÓN
 # ---------------------------------------------------------
 
+# Esta ÚNICA instancia es la "app" — el objeto al que se le cuelgan
+# middleware, endpoints propios (/health) y routers enteros (Tickets).
+# title/description/version alimentan directo el Swagger de /docs.
 app = FastAPI(
     title="HelpDesk API",
     description=(
@@ -37,22 +42,22 @@ app = FastAPI(
 @app.middleware("http")
 async def add_process_time(
     request: Request,
-    call_next,
+    call_next,  # la función que sigue la cadena — el endpoint real
 ):
     """
     Mide el tiempo total utilizado para procesar
     cada solicitud HTTP.
     """
 
-    start = perf_counter()
+    start = perf_counter()  # arranca el cronómetro ANTES del endpoint
 
-    response = await call_next(request)
+    response = await call_next(request)  # acá corre el endpoint (health/tickets)
 
-    elapsed = perf_counter() - start
+    elapsed = perf_counter() - start  # cuánto tardó, en segundos
 
     response.headers[
         "X-Process-Time"
-    ] = f"{elapsed:.6f}"
+    ] = f"{elapsed:.6f}"  # se agrega a TODAS las respuestas, sin excepción
 
     return response
 
@@ -61,6 +66,8 @@ async def add_process_time(
 # HEALTH CHECK
 # ---------------------------------------------------------
 
+# Endpoint DIRECTO sobre "app" (no viene de un router) — por eso su URL
+# final es solo /health, sin el prefijo /api/v1 que sí lleva Tickets.
 @app.get(
     "/health",
     tags=["Health"],
@@ -72,7 +79,7 @@ def health_check():
 
     return {
         "status": "ok",
-        "service": "HelpDesk API",
+        "service": "El API backend de HelpDesk esta operativo",
         "version": "1.0.0",
     }
 
@@ -81,6 +88,9 @@ def health_check():
 # ROUTERS
 # ---------------------------------------------------------
 
+# La línea que "genera" los 5 endpoints finales: toma TODAS las rutas ya
+# definidas en tickets_router (con su propio prefix="/tickets") y las
+# cuelga de "app" bajo /api/v1 -> URL real = /api/v1/tickets/...
 app.include_router(
     tickets_router,
     prefix="/api/v1",
