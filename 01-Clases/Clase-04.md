@@ -1693,6 +1693,18 @@ curl -s -X POST http://127.0.0.1:8000/api/v1/tickets/ \
 201 Created
 {"id":3,"title":"No carga el dashboard","description":"El dashboard principal no carga desde ayer","priority":"Alta","requester_id":1,"category_id":1}
 ```
+> 🔍 **Por dentro:** `router.post("/")` (sección 12) recibe el body, Pydantic lo valida
+> contra `TicketCreate` (sección 8) — si falla algo acá, ni siquiera llega a tu código,
+> FastAPI corta con `422` antes. Con el body válido, el router llama a
+> `service.create_ticket(db, data)` (sección 11), que delega directo en
+> `repository.create(db, data)` (sección 10): arma un `Ticket(**data.model_dump())`,
+> `db.add(ticket)` lo agrega a la sesión, `db.commit()` dispara el `INSERT` real (acá es
+> donde podría fallar la FK, ver [[500-foreign-key-inexistente-sin-datos-previos]]), y
+> `db.refresh(ticket)` vuelve a leer el objeto para traer el `id` que generó Postgres.
+> El `201` (no `200`) sale de `status_code=status.HTTP_201_CREATED` explícito en el
+> decorador — FastAPI no lo elige solo, hay que pedirlo (Clase 3).
+> El `Content-Type: application/json` **es obligatorio**: sin ese header, FastAPI no
+> intenta parsear el body como JSON y el request falla igual aunque el texto sea válido.
 
 **2) `GET {{base_url}}/tickets/` — listar todos**
 ```bash
@@ -1702,6 +1714,13 @@ curl -s http://127.0.0.1:8000/api/v1/tickets/
 200 OK
 [{"id":1,"title":"Falla de VPN", ...}, {"id":2,"title":"Lentitud del wifi", ...}, {"id":3,"title":"No carga el dashboard", ...}]
 ```
+> 🔍 **Por dentro:** `router.get("/")` → `service.list_tickets(db)` → directo a
+> `repository.get_all(db)` (sección 10) — sin lógica de negocio en el medio, es un CRUD
+> puro. Ahí se arma `select(Ticket).order_by(Ticket.id)` (el `statement` diferido de la
+> sección 10) y `db.scalars(statement).all()` lo ejecuta contra Postgres recién en ese
+> momento. `response_model=list[TicketResponse]` (nota el `list[...]`) le dice a FastAPI
+> que la respuesta es un **array** de objetos con esa forma, no uno solo — por eso el
+> body es `[...]` y no `{...}`.
 
 **3) `GET {{base_url}}/tickets/3` — traer uno por id**
 ```bash
@@ -1711,6 +1730,11 @@ curl -s http://127.0.0.1:8000/api/v1/tickets/3
 200 OK
 {"id":3,"title":"No carga el dashboard","description":"El dashboard principal no carga desde ayer","priority":"Alta","requester_id":1,"category_id":1}
 ```
+> 🔍 **Por dentro:** el `3` de la URL llega como **path parameter** `ticket_id: int`
+> (Clase 3) — FastAPI ya lo convierte a `int` antes de que tu código lo vea (si mandaras
+> `/tickets/abc`, ni llega a `get_ticket`, responde `422` solo). `repository.get_by_id`
+> usa `db.get(Ticket, ticket_id)` (sección 10) — un atajo de SQLAlchemy para buscar por
+> **clave primaria**, más directo que armar un `select().where(Ticket.id == ticket_id)`.
 
 **4) `GET {{base_url}}/tickets/99999` — id que no existe**
 ```bash
@@ -1720,6 +1744,11 @@ curl -s http://127.0.0.1:8000/api/v1/tickets/99999
 404 Not Found
 {"detail":"Ticket no encontrado"}
 ```
+> 🔍 **Por dentro:** `db.get(...)` devuelve `None` (no lanza error — "no encontrado" no
+> es una excepción de SQLAlchemy). Es **`service.get_ticket`** (sección 11) quien
+> chequea ese `None` y recién ahí levanta `HTTPException(404, "Ticket no encontrado")`
+> (Clase 3) — el repositorio nunca decide códigos HTTP, esa decisión vive en la capa de
+> servicio. FastAPI atrapa la excepción y arma el JSON `{"detail": "..."}` solo.
 
 **5) `PATCH {{base_url}}/tickets/3` — actualizar solo `priority`**
 ```bash
@@ -1735,6 +1764,17 @@ curl -s -X PATCH http://127.0.0.1:8000/api/v1/tickets/3 \
 > `TicketUpdate` (sección 8) tiene todos los campos opcionales y el repositorio
 > (sección 10) actualiza únicamente lo que vino en el body (`exclude_unset=True`).
 
+> 🔍 **Por dentro:** `service.update_ticket` (sección 11) primero llama a
+> `self.get_ticket(db, ticket_id)` — **reutiliza** el mismo chequeo de 404 del caso
+> anterior, así que un `PATCH` a un id inexistente también da `404`, no un error
+> distinto. Con el ticket ya encontrado, `repository.update` hace
+> `data.model_dump(exclude_unset=True)`: esto arma un `dict` **solo con los campos que
+> vinieron en el JSON** (acá, únicamente `priority` — ni siquiera aparece `description`
+> con valor `None`, que sería distinto a "no lo mandaron"). Después, un `for` con
+> `setattr(ticket, field, value)` pisa esos campos uno por uno sobre el objeto ya
+> cargado en la sesión, y `db.commit()` guarda el cambio — es un `UPDATE` parcial real
+> en SQL, no un reemplazo de la fila completa.
+
 **6) `DELETE {{base_url}}/tickets/3` — borrar**
 ```bash
 curl -s -X DELETE http://127.0.0.1:8000/api/v1/tickets/3
@@ -1743,6 +1783,13 @@ curl -s -X DELETE http://127.0.0.1:8000/api/v1/tickets/3
 204 No Content
 (sin body)
 ```
+> 🔍 **Por dentro:** mismo patrón que `PATCH` — `service.delete_ticket` llama primero a
+> `self.get_ticket` (404 si no existe), y con el objeto ya encontrado,
+> `repository.delete` hace `db.delete(ticket)` + `db.commit()` (`DELETE FROM tickets
+> WHERE id = ...` real). El `204` sale de `status_code=204` en el decorador — y **por
+> especificación HTTP**, una respuesta `204 No Content` no puede llevar body, por eso
+> `delete_ticket` en el router no hace `return` de nada (a diferencia de los otros 4
+> endpoints, que sí devuelven algo).
 
 ### 🖱️ Armar la petición en Postman/Bruno (en vez de `curl`)
 
