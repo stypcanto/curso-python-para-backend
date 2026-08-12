@@ -354,6 +354,41 @@ class TicketResponse(BaseModel):
     category_id: int
 ```
 
+### 📚 Definiciones antes de leer el código
+
+| Término | Qué es |
+|---|---|
+| **Pydantic** | La librería de Python que valida datos a partir de type hints: declarás la forma que *debería* tener un dato (con una clase y tipos) y ella revisa que lo que llega cumpla esa forma — si no, avisa el error solita (ya lo vimos generar el `422` en la [Clase 3](Clase-03.md)). |
+| **`BaseModel`** | La clase base de Pydantic. Toda clase que **hereda** de ella (`class TicketCreate(BaseModel)`, herencia de la [Clase 2](Clase-02.md)) se convierte en un "molde validado" — Pydantic le agrega gratis toda la lógica de revisar tipos, campos obligatorios/opcionales, etc. |
+| **`Field(...)`** | Función de Pydantic para sumarle **reglas extra a un campo puntual**, más allá de su tipo (mínimo/máximo de caracteres, valor por defecto, que sea mayor a 0...). Se usa como el valor que se le asigna al campo. |
+| **`ConfigDict`** | Objeto de **configuración general de todo el modelo** (no de un campo suelto) — por ejemplo, decirle a Pydantic que además de JSON/dict acepte leer datos directo de un objeto (`from_attributes=True`, ver el callout más abajo). |
+| **`str`** | Uno de los tipos básicos de Python ([Clase 1](Clase-01.md)) — texto. Acá se usa como **type hint**: le dice a Pydantic "este campo tiene que ser texto". |
+| **`engine`** | *(no es de `schemas/` — vive en `db/database.py`, sección 8, se aclara acá porque suele confundirse)* El objeto de SQLAlchemy que representa la conexión "física" a Postgres — sabe *cómo* hablarle a la base (usuario, password, host, puerto), pero no ejecuta consultas por sí solo; para eso se usa a través de una `Session`. |
+
+### 🧩 Mecánica de Python: el `import` y el `nombre: tipo = valor`
+
+**El `import`** — `from pydantic import BaseModel, ConfigDict, Field` se lee "de la
+librería `pydantic`, traé estas 3 piezas". Después de esa línea, esos 3 nombres quedan
+disponibles para usar en el resto del archivo, como si estuvieran escritos ahí mismo. Es
+el mismo patrón `from módulo import función` de la Clase 1
+(`from request_utils import calculate_response_time`) — acá `pydantic` es una librería
+instalada (`pip install pydantic`) en vez de un archivo propio del proyecto.
+
+**Declarar un campo dentro de una clase** — `title: str = Field(min_length=5,
+max_length=120)` tiene 3 partes:
+```
+   title    :   str    =   Field(min_length=5, max_length=120)
+   ↑            ↑           ↑
+   nombre       tipo        valor asignado — acá no es un dato fijo
+   del campo    (type       como "Media", sino el RESULTADO de llamar
+                 hint)      a la función Field(...), que devuelve un
+                            objeto con las reglas de validación
+```
+Es la misma sintaxis `nombre: tipo = valor` que ya usaste en funciones tipadas (Clase 1,
+`estimated_hours: float`) y en `dataclass` (Clase 2) — la diferencia es que acá el
+"valor" no es un dato suelto, sino el resultado de **llamar** a `Field(...)`, que Pydantic
+sabe leer para saber qué reglas aplicarle a ese campo específico.
+
 **Línea por línea:**
 
 | Línea | Qué hace |
@@ -1144,7 +1179,9 @@ endpoints de tickets, cada uno con su formulario para probarlo sin `curl` ni Pos
 > código (agregar un campo, cambiar un tipo) se refleja solo en `/docs`, sin tocar nada
 > de documentación a mano.
 
-Los 6 endpoints ya están **verificados end-to-end** contra Postgres real:
+Los 5 endpoints ya están **verificados end-to-end** contra Postgres real (6 casos de
+prueba — `GET /tickets/{id}` se probó dos veces: con un id que existe y con uno que no,
+para confirmar también el `404`):
 
 | Endpoint | Resultado |
 |---|---|
@@ -1179,9 +1216,6 @@ Documentados en detalle en `06-Errores/`:
 > cada vez que corrés el proyecto — se puede borrar, pero vuelve a aparecer solo; ya
 > está excluido de git en `.gitignore`, así que nunca ensucia el repo aunque reaparezca
 > en el explorador de archivos.
-
-*(sigue pendiente documentar `routers/` y las migraciones de Alembic, a medida que
-avanza la clase)*
 
 # 🏋️ EJERCICIOS CON SOLUCIÓN
 *(pendiente — se documentan 10 ejercicios graduales cuando haya contenido de la clase)*
