@@ -1093,6 +1093,23 @@ router = APIRouter(prefix="/tickets")  +   app.include_router(tickets_router,
 | `PATCH /api/v1/tickets/{id}` | `@router.patch("/{ticket_id}")` | Igual que arriba |
 | `DELETE /api/v1/tickets/{id}` | `@router.delete("/{ticket_id}")` | Igual que arriba |
 
+**Un solo endpoint, desglosado pieza por pieza** — de dónde sale cada tramo de
+`/api/v1/tickets/`:
+
+```
+El resultado, concatenado por FastAPI:
+
+/api/v1  +  /tickets  +  /   =   /api/v1/tickets/
+   │            │          │
+   │            │          └─ de @router.get("/")
+   │            └─ de APIRouter(prefix="/tickets") en routers/tickets.py
+   └─ de include_router(prefix="/api/v1") en main.py
+```
+
+Ninguno de los dos archivos (`routers/tickets.py`, `main.py`) tiene escrita la ruta
+completa en ningún lado — **se arma en el momento**, cuando `main.py` corre
+`include_router()` al arrancar la app.
+
 > 💡 Por eso `/health` **no** lleva `/api/v1` — nunca pasó por `include_router`, así que
 > nunca recibió ese prefijo. Es una decisión real de diseño: los endpoints de
 > infraestructura (*health checks*, métricas) suelen quedar fuera del versionado de la
@@ -1576,7 +1593,11 @@ lugar** en vez de cada petición guardada.
 | Postman | ⚙️ *Environments* → *New Environment* → variable `base_url` = `http://127.0.0.1:8000/api/v1` | URL de la petición: `{{base_url}}/tickets` |
 | Bruno | Ícono de engranaje de la colección → *Variables* → `base_url` = `http://127.0.0.1:8000/api/v1` | Igual sintaxis: `{{base_url}}/tickets` |
 
-#### 🖱️ Cómo se hizo en Postman (capturas propias)
+#### 🖱️ Cómo se hizo en Postman (capturas propias) — recorrido completo
+
+Toda la secuencia real, en el orden en que se hizo — Environment, Collection, y los 5
+endpoints probados desde la GUI (incluido el error de FK que salió en el camino, no
+solo el camino feliz).
 
 **1) Crear el Environment** — botón `+` de la barra lateral → `Environment` (no
 `Collection`, que es para agrupar peticiones, ni `HTTP`, que es para una petición
@@ -1594,26 +1615,73 @@ suelta). Se lo nombró `Clase4`:
 > **cualquier** petición de la colección puede usar `{{base_url}}/tickets` en vez de
 > repetir la URL completa.
 
-![Postman: fila de la variable base_url con el checkbox a la izquierda marcado (activo)](/clase-04-postman-variable-checkbox-activo.png)
+**3) Armar la Collection `Clase4`** — botón `+` → `Collection` (distinta del
+`Environment` de arriba: el Environment guarda variables, la Collection guarda las
+peticiones):
 
-> ⚠️ El **checkbox** a la izquierda de cada variable (✅ en la captura) es un segundo
-> interruptor, aparte de tener el Environment seleccionado como activo: una variable
-> con el checkbox **destildado** queda guardada en la tabla pero Postman la trata como
-> si no existiera — mismo síntoma que el de abajo (`{{base_url}}` sin resolver), es un
-> segundo lugar donde revisar si algo no funciona.
+![Postman: menú "+" con la opción Collection resaltada](/clase-04-postman-crear-collection.png)
 
-> ⚠️ Con el Environment creado pero sin seleccionarlo activo (dropdown arriba a la
-> derecha de Postman, al lado del ícono del ojo), `{{base_url}}` en una petición queda
-> **sin resolver** — Postman manda literal el texto `{{base_url}}/tickets` y la API
-> responde error, no la URL real.
+**4) Agregar la primera petición** — collection `Clase4` vacía, tooltip "Add request":
 
-> 💡 **Bruno queda pendiente** — mismo procedimiento (crear el equivalente a un
-> Environment y cargar `base_url`), se agregan las capturas cuando estén.
+![Postman: colección Clase4 vacía, con el tooltip Add request visible sobre el ícono +](/clase-04-postman-add-request.png)
 
-### 📋 Los 5 endpoints — probados de verdad contra `curso-postgres`
+**5) Armar `GET Listar Tickets`** — `{{base_url}}/tickets/`, todavía sin mandar:
 
-Cada fila está **verificada con `curl` real** contra el servidor corriendo (no
-inventada) — el mismo request/response que vas a ver en Postman/Bruno:
+![Postman: petición GET Listar Tickets armada, URL {{base_url}}/tickets/, pestaña Params vacía](/clase-04-postman-get-armada.png)
+
+**6) Primer envío — la base recién migrada, sin tickets todavía:**
+
+![Postman: GET Listar Tickets enviado, respuesta 200 OK con body vacío []](/clase-04-postman-get-vacio.png)
+
+> 💡 `200` + `[]` — no es un error, ya lo vimos: significa "la consulta funcionó, no
+> hay tickets todavía".
+
+**7) El primer `POST` dio `500`** — mismo motivo documentado en
+[[500-foreign-key-inexistente-sin-datos-previos]]: `requester_id`/`category_id`
+apuntaban a un `user`/`category` que no existían. Este diagrama (hecho aparte, como
+referencia propia) ayuda a ver por qué:
+
+![Diagrama entidad-relación: tickets con FK requester_id -> users.id y category_id -> categories.id](/clase-04-diagrama-er-referencia.png)
+
+**8) `POST` exitoso, ya con el `user`/`category` de prueba creados:**
+
+![Postman: POST Enviar Ticket con status 201 Created, respuesta con id 5](/clase-04-postman-post-exitoso.png)
+
+> 📝 En el body de esta petición se probó agregar `"status": "Bueno"` (pensando que
+> faltaba ese campo) — la respuesta **no lo incluye**, confirmando lo ya explicado:
+> `status` no es un campo de `TicketCreate`, Pydantic lo ignora sin avisar.
+
+**9) Confirmar en la lista — ya con 2 tickets creados** (`id 4`, de una prueba
+anterior por `curl`, y `id 5`, el de Postman):
+
+![Postman: GET Listar Tickets con 200 OK, lista con 2 tickets (id 4 y 5)](/clase-04-postman-get-dos-tickets.png)
+
+**10) `PATCH` — actualizar solo la `priority` del ticket `4`:**
+
+![Postman: PATCH Actualizar Ticket a tickets/4, body {"priority": "Cerrado"}, respuesta 200 OK](/clase-04-postman-patch-actualizar.png)
+
+**11) Verificar el `PATCH` en la lista** — `id 4` ya con `priority: "Cerrado"`, `id 5`
+sin tocar:
+
+![Postman: GET Listar Tickets, ticket id 4 con priority Cerrado](/clase-04-postman-get-verificar-patch.png)
+
+**12) `DELETE` — borrar el ticket `4`:**
+
+![Postman: DELETE Eliminar Ticket a tickets/4, respuesta 204 No Content](/clase-04-postman-delete-ticket.png)
+
+**13) Verificar el `DELETE`** — la lista ya solo muestra el `id 5`:
+
+![Postman: GET Listar Tickets, la lista ya solo tiene el ticket id 5](/clase-04-postman-get-verificar-delete.png)
+
+> 🧪 **Tip de entrevista:** *¿por qué documentar hasta los errores (el `500` de FK) y
+> no solo lo que salió bien?* Porque es lo que de verdad pasa al desarrollar — una nota
+> que solo muestra el camino feliz no prepara para diagnosticar el error real cuando
+> aparezca en el trabajo.
+
+### 📋 Los 5 endpoints — referencia verificada con `curl`
+
+El mismo recorrido de arriba, pero como referencia rápida en texto — cada fila
+**verificada con `curl` real** contra el servidor corriendo (no inventada):
 
 **1) `POST {{base_url}}/tickets/` — crear un ticket**
 ```bash
@@ -1676,74 +1744,6 @@ curl -s -X DELETE http://127.0.0.1:8000/api/v1/tickets/3
 (sin body)
 ```
 
-### 📸 Recorrido completo en Postman (capturas propias)
-
-Todo lo de arriba, pero tal como se hizo de verdad en la GUI — colección, variable y
-los 5 endpoints, en el orden real en que se probaron (incluido el error de FK que salió
-en el camino).
-
-**1) Armar la Collection `Clase4`** — botón `+` → `Collection` (no `Environment`, que es
-para las variables, ya armado antes):
-
-![Postman: menú "+" con la opción Collection resaltada](/clase-04-postman-crear-collection.png)
-
-**2) Agregar la primera petición** — collection `Clase4` vacía, tooltip "Add request":
-
-![Postman: colección Clase4 vacía, con el tooltip Add request visible sobre el ícono +](/clase-04-postman-add-request.png)
-
-**3) Armar `GET Listar Tickets`** — `{{base_url}}/tickets/`, todavía sin mandar:
-
-![Postman: petición GET Listar Tickets armada, URL {{base_url}}/tickets/, pestaña Params vacía](/clase-04-postman-get-armada.png)
-
-**4) Primer envío — la base recién migrada, sin tickets todavía:**
-
-![Postman: GET Listar Tickets enviado, respuesta 200 OK con body vacío []](/clase-04-postman-get-vacio.png)
-
-> 💡 `200` + `[]` — no es un error, ya lo vimos: significa "la consulta funcionó, no
-> hay tickets todavía".
-
-**5) El primer `POST` dio `500`** — mismo motivo documentado en
-[[500-foreign-key-inexistente-sin-datos-previos]]: `requester_id`/`category_id`
-apuntaban a un `user`/`category` que no existían. Este diagrama (hecho aparte, como
-referencia propia) ayuda a ver por qué:
-
-![Diagrama entidad-relación: tickets con FK requester_id -> users.id y category_id -> categories.id](/clase-04-diagrama-er-referencia.png)
-
-**6) `POST` exitoso, ya con el `user`/`category` de prueba creados:**
-
-![Postman: POST Enviar Ticket con status 201 Created, respuesta con id 5](/clase-04-postman-post-exitoso.png)
-
-> 📝 En el body de esta petición se probó agregar `"status": "Bueno"` (pensando que
-> faltaba ese campo) — la respuesta **no lo incluye**, confirmando lo ya explicado:
-> `status` no es un campo de `TicketCreate`, Pydantic lo ignora sin avisar.
-
-**7) Confirmar en la lista — ya con 2 tickets creados** (`id 4`, de una prueba anterior
-por `curl`, y `id 5`, el de Postman):
-
-![Postman: GET Listar Tickets con 200 OK, lista con 2 tickets (id 4 y 5)](/clase-04-postman-get-dos-tickets.png)
-
-**8) `PATCH` — actualizar solo la `priority` del ticket `4`:**
-
-![Postman: PATCH Actualizar Ticket a tickets/4, body {"priority": "Cerrado"}, respuesta 200 OK](/clase-04-postman-patch-actualizar.png)
-
-**9) Verificar el `PATCH` en la lista** — `id 4` ya con `priority: "Cerrado"`, `id 5`
-sin tocar:
-
-![Postman: GET Listar Tickets, ticket id 4 con priority Cerrado](/clase-04-postman-get-verificar-patch.png)
-
-**10) `DELETE` — borrar el ticket `4`:**
-
-![Postman: DELETE Eliminar Ticket a tickets/4, respuesta 204 No Content](/clase-04-postman-delete-ticket.png)
-
-**11) Verificar el `DELETE`** — la lista ya solo muestra el `id 5`:
-
-![Postman: GET Listar Tickets, la lista ya solo tiene el ticket id 5](/clase-04-postman-get-verificar-delete.png)
-
-> 🧪 **Tip de entrevista:** *¿por qué documentar hasta los errores (el `500` de FK) y
-> no solo lo que salió bien?* Porque es lo que de verdad pasa al desarrollar — una nota
-> que solo muestra el camino feliz no prepara para diagnosticar el error real cuando
-> aparezca en el trabajo.
-
 ### 🖱️ Armar la petición en Postman/Bruno (en vez de `curl`)
 
 Cada `curl` de arriba se arma en la GUI así — mismos 4 datos en los dos clientes:
@@ -1763,7 +1763,6 @@ Cada `curl` de arriba se arma en la GUI así — mismos 4 datos en los dos clien
 > el código?* Así cualquiera que clona el repo (o un futuro yo) tiene **de una** las
 > peticiones ya armadas y probadas, sin tener que reconstruirlas leyendo `routers/` —
 > mismo espíritu que documentar los 5 endpoints acá, en la nota de la clase.
-
 ## 🐞 Errores de esta clase (con solución)
 
 Documentados en detalle en `06-Errores/`:
