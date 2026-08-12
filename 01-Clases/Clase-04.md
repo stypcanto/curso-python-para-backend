@@ -1501,6 +1501,14 @@ encadenar peticiones (usar el `id` que devolvió un `POST` en el siguiente `GET`
 
 ### ⚙️ Configuración común a los dos: la variable `base_url`
 
+> 📌 **Qué es Postman, con precisión:** una aplicación de escritorio (también hay
+> versión web) que funciona como **cliente HTTP con memoria** — arma la misma petición
+> que haría `curl` (método, URL, headers, body), pero la **guarda** organizada en
+> *Collections* (carpetas de peticiones relacionadas, como la `REST API basics: CRUD,
+> test & variables` de las capturas) y en *Environments* (juegos de variables, como
+> `{{base_url}}`, que cambian según dónde corra la API — local, staging, producción —
+> sin tocar las peticiones guardadas).
+
 En vez de escribir `http://127.0.0.1:8000/api/v1` en cada petición, se crea **una
 variable de entorno** (`base_url`) y las peticiones usan `{{base_url}}/tickets`. Si el
 día de mañana cambia el puerto o se despliega en un servidor real, se edita **un solo
@@ -1510,6 +1518,31 @@ lugar** en vez de cada petición guardada.
 |---|---|---|
 | Postman | ⚙️ *Environments* → *New Environment* → variable `base_url` = `http://127.0.0.1:8000/api/v1` | URL de la petición: `{{base_url}}/tickets` |
 | Bruno | Ícono de engranaje de la colección → *Variables* → `base_url` = `http://127.0.0.1:8000/api/v1` | Igual sintaxis: `{{base_url}}/tickets` |
+
+#### 🖱️ Cómo se hizo en Postman (capturas propias)
+
+**1) Crear el Environment** — botón `+` de la barra lateral → `Environment` (no
+`Collection`, que es para agrupar peticiones, ni `HTTP`, que es para una petición
+suelta). Se lo nombró `Clase4`:
+
+![Postman: menú "+" de la barra lateral con la opción Environment resaltada, y a la izquierda la colección "REST API basics" con la petición GET Get data, y el Environment "Clase4" ya creado](/clase-04-postman-nuevo-environment.png)
+
+**2) Cargar la variable `base_url`** — adentro del Environment `Clase4`, en la tabla
+`Variable` / `Value`:
+
+![Postman: editor del Environment "Clase4" con la tabla Variable/Value todavía vacía, lista para cargar base_url](/clase-04-postman-environment-variables.png)
+
+> 📝 En esta captura la tabla todavía está **vacía** (`Add variable` de placeholder) —
+> falta cargar la fila `base_url = http://127.0.0.1:8000/api/v1` y guardar. Se
+> actualiza esta sección con la captura ya completa cuando esté lista.
+
+> ⚠️ Con el Environment creado pero sin seleccionarlo activo (dropdown arriba a la
+> derecha de Postman, al lado del ícono del ojo), `{{base_url}}` en una petición queda
+> **sin resolver** — Postman manda literal el texto `{{base_url}}/tickets` y la API
+> responde error, no la URL real.
+
+> 💡 **Bruno queda pendiente** — mismo procedimiento (crear el equivalente a un
+> Environment y cargar `base_url`), se agregan las capturas cuando estén.
 
 ### 📋 Los 5 endpoints — probados de verdad contra `curso-postgres`
 
@@ -1622,7 +1655,7 @@ Documentados en detalle en `06-Errores/`:
 > está excluido de git en `.gitignore`, así que nunca ensucia el repo aunque reaparezca
 > en el explorador de archivos.
 
-# 🏋️ EJERCICIOS CON SOLUCIÓN
+## 🏋️ Ejercicios con solución
 
 > Reutilizan el laboratorio real de esta clase (`02-Ejercicios/Clase-04/app/`: modelos
 > `User`/`Category`/`Ticket`, `TicketRepository`, `TicketService`, `routers/tickets.py`)
