@@ -7,7 +7,7 @@
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview",
-    "deploy": "npm run docs:build && rsync -avz --delete -e 'ssh -p 65002' .vitepress/dist/ u543828652@167.88.34.84:domains/stypcanto.com/public_html/NOMBRE_SUBDOMINIO/ && echo '\\n✅ Publicado'"
+    "deploy": "npm run docs:build && rsync -avz --delete -e 'ssh -p 65002' .vitepress/dist/ u543828652@167.88.34.84:domains/stypcanto.com/public_html/python-backend/ && echo '\\n✅ Publicado'"
   },
   "devDependencies": {
     "vitepress": "^1.6.3"
