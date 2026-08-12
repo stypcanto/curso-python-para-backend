@@ -17,7 +17,7 @@ sidebar: "📚 Índice de clases"
 | 1 | [Clase 1](Clase-01.md) | 2026-07-30 | Fundamentos de Python para Backend — entorno, tipos de datos, control de flujo, funciones/módulos, excepciones, buenas prácticas | ✅ hecha |
 | 2 | [Clase 2](Clase-02.md) | 2026-08-04 | Programación orientada a objetos y arquitectura — clases y objetos, herencia y composición, encapsulamiento y abstracción, SOLID, organización de proyectos, patrones básicos | 🔄 en curso |
 | 3 | [Clase 3](Clase-03.md) | 2026-08-06 | Introducción a FastAPI y APIs REST — primer proyecto, endpoints y rutas, métodos HTTP, Pydantic, Request/Response, Swagger/OpenAPI, diseño RESTful, query strings, manejo de errores, middleware, versionamiento | 🔄 en curso |
-| 4 | [Clase 4](Clase-04.md) | 2026-08-11 | PostgreSQL y persistencia de datos — modelado de datos, relaciones entre tablas, SQL esencial, integración con FastAPI, ORM con SQLAlchemy, CRUD completo, Repository Pattern, migraciones con Alembic | 🔄 en curso |
+| 4 | [Clase 4](Clase-04.md) | 2026-08-11 | Integración a base de datos y arquitectura de persistencia de datos — modelado de datos, relaciones entre tablas, SQL esencial, integración con FastAPI, ORM con SQLAlchemy, CRUD completo, Repository Pattern, migraciones con Alembic | 🔄 en curso |
 | 5 | [Clase 5](Clase-05.md) | — | Fundamentos de arquitectura de microservicios — monolito vs microservicios, DDD básico, Bounded Contexts, desacoplamiento, Database per Service, diseño del proyecto final | 🔜 siguiente |
 | 6 | [Clase 6](Clase-06.md) | — | Construcción de microservicios con FastAPI — microservicio de usuarios, microservicio de productos, configuración y variables de entorno por servicio, documentación, ejecución y pruebas | — |
 | 7 | [Clase 7](Clase-07.md) | — | Comunicación y seguridad en microservicios — REST síncrono, API Gateway Pattern, errores distribuidos, autenticación/autorización, JWT, login, roles y permisos | — |
@@ -34,7 +34,7 @@ sidebar: "📚 Índice de clases"
 - [x] Clase 1 — 2026-07-30 — Fundamentos de Python para Backend
 - [ ] Clase 2 — 2026-08-04 — Programación orientada a objetos y arquitectura
 - [ ] Clase 3 — 2026-08-06 — Introducción a FastAPI y APIs REST
-- [ ] Clase 4 — 2026-08-11 — PostgreSQL y persistencia de datos
+- [ ] Clase 4 — 2026-08-11 — Integración a base de datos y arquitectura de persistencia de datos
 - [ ] Clase 5 — Fundamentos de arquitectura de microservicios
 - [ ] Clase 6 — Construcción de microservicios con FastAPI
 - [ ] Clase 7 — Comunicación y seguridad en microservicios

@@ -34,7 +34,7 @@ ve pero que hace posible que todo funcione. Con mis palabras, se encarga de:
 - Gestionar usuarios y permisos (quién puede hacer qué).
 - Responder a otras aplicaciones (no solo a personas — también a otros sistemas).
 
-> 💡 Ejemplo del profe: al registrar una solicitud de soporte, el Backend verifica los
+> 💡 Ejemplo visto en clase: al registrar una solicitud de soporte, el Backend verifica los
 > datos, determina la prioridad, registra la solicitud y genera una respuesta. Todo eso
 > pasa "detrás" sin que el usuario lo vea — solo ve el resultado final.
 
@@ -72,7 +72,7 @@ python --version
 python -m pip --version
 ```
 
-Estructura inicial sugerida por el profe:
+Estructura inicial sugerida en clase:
 ```
 backend_python/
 ├── .venv/
@@ -84,7 +84,7 @@ backend_python/
 > Trabajo en macOS, así que documento primero `source .venv/bin/activate` (ver
 > `CLAUDE.md` — comandos de sistema siempre en macOS/Linux primero).
 
-### 🧩 Extensiones de VS Code recomendadas por el profe
+### 🧩 Extensiones de VS Code recomendadas en clase
 | Extensión | Publisher (id) | Para qué sirve |
 |---|---|---|
 | [Python Indent](https://marketplace.visualstudio.com/items?itemName=KevinRose.vsc-python-indent) | Kevin Rose (`KevinRose.vsc-python-indent`) | Corrige la indentación automática al presionar Enter — analiza el código hasta el cursor para calcular el nivel correcto (la indentación por defecto de VS Code para Python falla seguido en `if`, `for`, listas multilínea, etc.). |
@@ -95,7 +95,7 @@ backend_python/
 > `code --install-extension ms-python.debugpy` desde la terminal).
 
 ### 🐍 ¿Qué versión de Python instalar?
-El profe hizo mención a instalar la **versión más estable**, no la última a secas — y
+En clase se recomendó instalar la **versión más estable**, no la última a secas — se
 mostró la página oficial de descargas para explicarlo. Python mantiene varias versiones
 "vivas" en paralelo, cada una en una etapa distinta de su ciclo de vida:
 
@@ -233,8 +233,8 @@ def calculate_response_time(priority):
 from request_utils import calculate_response_time
 ```
 
-> 📌 Buen criterio (regla del profe): una función debe tener **un propósito definido**,
-> recibir **solo los datos necesarios** y retornar **un resultado claro**.
+> 📌 Buen criterio (regla vista en clase): una función debe tener **un propósito
+> definido**, recibir **solo los datos necesarios** y retornar **un resultado claro**.
 
 ## 🚨 8. Evitar que un error detenga todo el programa
 Una **excepción** es una situación que impide que el programa siga normalmente (por
@@ -264,7 +264,7 @@ if estimated_hours <= 0:
 
 # 🔬 PARA IR MÁS ALLÁ — profundizando rumbo a Backend
 
-> 📌 Esto **no lo dio el profe en esta clase** — lo agrego por mi cuenta sobre la misma
+> 📌 Esto **no se vio en esta clase** — lo agrego por mi cuenta sobre la misma
 > base de la Clase 1, porque son los primeros huecos que aparecen apenas se empieza a
 > pensar en construir un backend de verdad (una API, una base de datos, un servicio en
 > producción). Todo el código está verificado en terminal.
@@ -508,7 +508,7 @@ Solicitud 1003 (Duda de uso): responder en 24h
 Solicitud 1004: Prioridad desconocida: Urgentisima</span></code></pre>
 </div>
 
-> 💡 Reflexión final del profe: ¿qué parte de este programa se podría reutilizar dentro de
+> 💡 Reflexión de cierre: ¿qué parte de este programa se podría reutilizar dentro de
 > una API? **La función que valida la prioridad y calcula el tiempo de respuesta** — la
 > lógica de negocio no cambia, solo cambia cómo se recibe y se entrega el resultado
 > (consola vs. una respuesta HTTP).

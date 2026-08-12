@@ -23,13 +23,13 @@ sidebar: "Clase 3 · FastAPI y APIs REST"
 
 # 📖 PARTE TEÓRICA
 
-> 📌 **Esta teoría no viene de la clase real dictada por el profe** (todavía no pasé
-> capturas ni grabación de la Clase 3) — es **teoría estándar de referencia**, armada solo
-> a partir de los 12 puntos del temario (ver "Qué aprendí" arriba), verificada con
-> fuentes externas y con `TestClient` en terminal (mismo criterio que usé para la
-> [Clase 2](Clase-02.md)). Cuando tenga el material real de la clase, esta sección se
-> revisa y se completa con los ejemplos/orden que haya dado el profe — no se descarta,
-> se enriquece.
+> 📌 **Esta teoría no viene de la clase real dictada** (todavía no pasé capturas ni
+> grabación de la Clase 3) — es **teoría estándar de referencia**, armada solo a partir
+> de los 12 puntos del temario (ver "Qué aprendí" arriba), verificada con fuentes
+> externas y con `TestClient` en terminal (mismo criterio que usé para la
+> [Clase 2](Clase-02.md)). Cuando llegue el material real de la clase, esta sección se
+> revisa y se completa con los ejemplos/orden que se hayan dado — no se descarta, se
+> enriquece.
 
 ## 🚀 1. Qué es FastAPI y primer proyecto
 **FastAPI** es un framework para construir APIs con Python, pensado sobre dos ideas

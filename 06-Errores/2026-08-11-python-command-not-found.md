@@ -20,8 +20,8 @@ En **macOS** (con Python instalado vía Homebrew, como en tu caso — `3.14.6`),
 se llama **`python3`**, no `python`. El comando `python` a secas no existe por defecto.
 Además había un segundo error suelto: `.ven` en vez de `.venv` (faltaba la "v" final).
 
-> 📝 El profe mostró el comando genérico `python -m venv .venv`, que sí funciona en
-> Windows (ahí `python` sí existe). En macOS/Linux hay que usar `python3`.
+> 📝 El material del curso mostró el comando genérico `python -m venv .venv`, que sí
+> funciona en Windows (ahí `python` sí existe). En macOS/Linux hay que usar `python3`.
 
 ## ✅ Solución
 

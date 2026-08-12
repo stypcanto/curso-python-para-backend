@@ -1,6 +1,6 @@
 # 🏗️ Estructura de un proyecto FastAPI (arquitectura por capas)
 
-> Anatomía de carpetas que usa el profe desde la **Clase 4** (PostgreSQL + SQLAlchemy) en
+> Anatomía de carpetas usada desde la **Clase 4** (PostgreSQL + SQLAlchemy) en
 > adelante. Cada capa tiene una sola responsabilidad — así se puede cambiar una sin romper
 > las demás (p. ej. cambiar de Postgres a MySQL solo toca `db/` y `repositories/`).
 
@@ -54,6 +54,6 @@ Cliente HTTP
 > `db/`, el resto del código no se entera.
 
 ## 📎 Apuntes relacionados
-- [Clase 4 — PostgreSQL y persistencia de datos](../01-Clases/Clase-04.md) — incluye la
+- [Clase 4 — Integración a base de datos y arquitectura de persistencia de datos](../01-Clases/Clase-04.md) — incluye la
   versión de este mismo diagrama con los nombres reales del código
   (`TicketRepository`, `curso-postgres`, etc.)

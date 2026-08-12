@@ -20,17 +20,17 @@ ModuleNotFoundError: No module named 'app'
 ```
 
 Pasó (o casi pasa) **3 veces** en la misma clase: en `repositories/ticket_repository.py`,
-en `services/ticket_service.py`, y de nuevo cuando el profe compartió cómo le quedó su
-`migrations/env.py` (`from app.db.database import Base`, etc.) — viene de que **el
-profe corre su propio proyecto desde otra carpeta** (ver causa).
+en `services/ticket_service.py`, y de nuevo con el `migrations/env.py` mostrado en el
+material del curso (`from app.db.database import Base`, etc.) — viene de que **ese
+material corre el proyecto desde otra carpeta** (ver causa).
 
 ## 🔍 Causa
 
-El profe corre su proyecto desde **un nivel más arriba** de `app/` (fuera de esa
-carpeta), y ahí sí `app` es un paquete importable (`from app.models...`). En este
-proyecto, la convención que se viene usando desde el principio es correr **desde
-adentro** de `app/` (ahí vive el `.venv`, ahí se activa), así que acá no existe ningún
-paquete llamado `app` — los paquetes son directamente `models`, `schemas`,
+El material de referencia corre el proyecto desde **un nivel más arriba** de `app/`
+(fuera de esa carpeta), y ahí sí `app` es un paquete importable (`from app.models...`).
+En este proyecto, la convención que se viene usando desde el principio es correr
+**desde adentro** de `app/` (ahí vive el `.venv`, ahí se activa), así que acá no existe
+ningún paquete llamado `app` — los paquetes son directamente `models`, `schemas`,
 `repositories`, `services`, etc.
 
 ## ✅ Solución
