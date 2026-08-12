@@ -1530,11 +1530,12 @@ suelta). Se lo nombró `Clase4`:
 **2) Cargar la variable `base_url`** — adentro del Environment `Clase4`, en la tabla
 `Variable` / `Value`:
 
-![Postman: editor del Environment "Clase4" con la tabla Variable/Value todavía vacía, lista para cargar base_url](/clase-04-postman-environment-variables.png)
+![Postman: editor del Environment "Clase4" con la variable base_url cargada, valor http://127.0.0.1:8000/api/v1](/clase-04-postman-environment-variables.png)
 
-> 📝 En esta captura la tabla todavía está **vacía** (`Add variable` de placeholder) —
-> falta cargar la fila `base_url = http://127.0.0.1:8000/api/v1` y guardar. Se
-> actualiza esta sección con la captura ya completa cuando esté lista.
+> ✅ `base_url` = `http://127.0.0.1:8000/api/v1` — exactamente la URL base verificada
+> con `curl` en la sección anterior (sección 13, `main.py`). De acá en adelante,
+> **cualquier** petición de la colección puede usar `{{base_url}}/tickets` en vez de
+> repetir la URL completa.
 
 > ⚠️ Con el Environment creado pero sin seleccionarlo activo (dropdown arriba a la
 > derecha de Postman, al lado del ícono del ojo), `{{base_url}}` en una petición queda
