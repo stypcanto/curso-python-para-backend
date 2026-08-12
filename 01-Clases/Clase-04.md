@@ -75,7 +75,7 @@ la petición, y recién después siga ejecutando el `finally` que la cierra — 
 | **Docker** | Herramienta para correr programas dentro de **contenedores**: un entorno aislado y reproducible que empaqueta la app (acá, Postgres) con todo lo que necesita para funcionar, sin instalarla directo en el sistema operativo. | sección 6 |
 | **Contenedor** | Una instancia en ejecución de una **imagen** de Docker (`postgres:16-alpine`) — como una mini-máquina virtual liviana, aislada del resto del Mac. | sección 6 |
 | **Driver (`psycopg2-binary`)** | El traductor de bajo nivel que sabe hablar el protocolo real de Postgres — SQLAlchemy es agnóstico al motor, pero necesita un driver específico por cada uno (`psycopg2` para Postgres, `pymysql` para MySQL...). | sección 7 |
-| **Postman / Bruno** | Clientes API: guardan peticiones HTTP en **colecciones** reutilizables (con variables como `{{base_url}}`) para probar una API sin escribir `curl` cada vez. Bruno es la alternativa *open source* que guarda la colección como archivos de texto versionables en git. | sección 14 |
+| **Postman / Bruno** | Clientes API: guardan peticiones HTTP en **colecciones** reutilizables (con variables como `{{base_url}}`) para probar una API sin escribir `curl` cada vez. Bruno es la alternativa *open source* que guarda la colección como archivos de texto versionables en git. | sección 15 |
 
 ### 🏛️ Persistencia y arquitectura
 
@@ -87,7 +87,7 @@ la petición, y recién después siga ejecutando el `finally` que la cierra — 
 | **Capa de servicios** | La capa que aplica las reglas de negocio (qué hacer, en qué orden) — no sabe nada de HTTP ni de SQL. | sección 11 |
 | **Repository Pattern** | Patrón de diseño que separa la lógica de acceso a datos (leer/guardar) del resto de la app, detrás de una interfaz simple (`get_all`, `create`, ...). | sección 10 |
 | **Inyección de dependencias** | En vez de que una clase/función cree lo que necesita, se lo pasan de afuera (`repository: TicketRepository` en el `__init__`) — facilita testear con versiones falsas (*mocks*). | secciones 10 y 12 |
-| **Migración (de esquema)** | Un cambio versionado a la estructura de la base de datos (crear una tabla, agregar una columna) — se aplica y se puede revertir, como un commit de git. | sección 13 |
+| **Migración (de esquema)** | Un cambio versionado a la estructura de la base de datos (crear una tabla, agregar una columna) — se aplica y se puede revertir, como un commit de git. | sección 14 |
 
 ### 🗄️ SQLAlchemy (ORM)
 
@@ -119,11 +119,11 @@ la petición, y recién después siga ejecutando el `finally` que la cierra — 
 
 | Término | Qué es | Se profundiza en |
 |---|---|---|
-| **Alembic** | "git, pero para el esquema de la base de datos" — cada cambio de estructura queda guardado como un archivo de migración encadenado al anterior. | sección 13 |
-| **`target_metadata` / `Base.metadata`** | El catálogo en memoria de lo que el esquema *debería* ser, según los modelos Python ya importados — lo que Alembic compara contra la base real. | sección 13 |
-| **`alembic revision --autogenerate`** | Compara `target_metadata` contra la base real y **escribe** (en Python, no en SQL) el archivo de migración con la diferencia. | sección 13 |
-| **`alembic upgrade head` / `downgrade`** | Aplica (o revierte) las migraciones pendientes contra la base real — acá es donde el SQL de verdad se ejecuta. | sección 13 |
-| **`alembic_version`** | Tabla que crea el propio Alembic (no un modelo del proyecto) — guarda el id de la última migración aplicada. | sección 13 |
+| **Alembic** | "git, pero para el esquema de la base de datos" — cada cambio de estructura queda guardado como un archivo de migración encadenado al anterior. | sección 14 |
+| **`target_metadata` / `Base.metadata`** | El catálogo en memoria de lo que el esquema *debería* ser, según los modelos Python ya importados — lo que Alembic compara contra la base real. | sección 14 |
+| **`alembic revision --autogenerate`** | Compara `target_metadata` contra la base real y **escribe** (en Python, no en SQL) el archivo de migración con la diferencia. | sección 14 |
+| **`alembic upgrade head` / `downgrade`** | Aplica (o revierte) las migraciones pendientes contra la base real — acá es donde el SQL de verdad se ejecuta. | sección 14 |
+| **`alembic_version`** | Tabla que crea el propio Alembic (no un modelo del proyecto) — guarda el id de la última migración aplicada. | sección 14 |
 
 ### 🌐 FastAPI (capa API)
 
@@ -135,6 +135,8 @@ la petición, y recién después siga ejecutando el `finally` que la cierra — 
 | **`Depends(...)`** | Le dice a FastAPI que resuelva algo **antes** de correr el endpoint (abrir una sesión de BD, armar un servicio) — inyección de dependencias a nivel de framework. | sección 12 |
 | **`response_model`** | El schema Pydantic que define la forma de lo que devuelve un endpoint — FastAPI convierte el resultado real a esa forma. | Clase 3 / sección 12 |
 | **`HTTPException`** | Excepción que FastAPI convierte automáticamente en una respuesta HTTP de error, con el código de estado correcto (`404`, `400`, ...). | Clase 3 / sección 11 |
+| **Middleware** | Código que envuelve **cada** petición, corriendo antes y después del endpoint (medir tiempos, agregar headers) — se define una vez y aplica a toda la app. | Clase 3 / sección 13 |
+| **`app.include_router(...)`** | La línea que "monta" un `APIRouter` entero (con todos sus endpoints) sobre la `app`, sumando el prefijo que se le pase acá al del propio router. | sección 13 |
 
 
 ## 💾 2. ¿Qué es la persistencia de datos?
@@ -187,7 +189,7 @@ que pasa un dato hasta quedar persistido, y cada una tiene su propia responsabil
 | **API (FastAPI)** | Recibe la petición HTTP, la valida y arma la respuesta | Rutas (endpoints), validaciones, autenticación/autorización, serialización (Pydantic), respuestas | [Clase 3](Clase-03.md) (teoría de FastAPI) + [sección 12 — Router](#🌐-12-router-routers-tickets-py) de esta clase |
 | **Capa de servicios** | Traduce la petición en reglas de negocio — no sabe nada de HTTP ni de SQL | Reglas de negocio, cálculo de indicadores, orquestación, gestión de sesiones de trabajo | [sección 11 — Capa de servicios: `TicketService`](#🧠-11-capa-de-servicios-ticketservice) |
 | **Capa de persistencia → ORM (SQLAlchemy)** | Traduce objetos Python ↔ filas de la base de datos | Modelos (entidades), relaciones, sesión (`Session`), consultas (`select`), *Unit of Work*, eventos ORM | [sección 3 — ¿Qué es un ORM?](#🗄️-3-¿que-es-un-orm) + [sección 9 — Modelos SQLAlchemy](#🗄️-9-modelos-sqlalchemy-orm-user-category-ticket) + [sección 10 — Repository Pattern](#🧩-10-repository-pattern-ticketrepository) |
-| **Capa de persistencia → Migraciones (Alembic)** | Versiona los *cambios* al esquema de la base de datos | Entorno de migraciones (`env.py`), versionado de esquema, scripts de migración, historial, upgrade/downgrade | [sección 13 — Crear las tablas con Alembic](#🐘-13-crear-las-tablas-con-alembic-migraciones-versionadas) |
+| **Capa de persistencia → Migraciones (Alembic)** | Versiona los *cambios* al esquema de la base de datos | Entorno de migraciones (`env.py`), versionado de esquema, scripts de migración, historial, upgrade/downgrade | [sección 14 — Crear las tablas con Alembic](#🐘-14-crear-las-tablas-con-alembic-migraciones-versionadas) |
 | **Base de datos** | El almacenamiento persistente final | PostgreSQL — datos persistentes | [sección 6 — PostgreSQL corriendo en Docker](#🐘-6-postgresql-corriendo-en-docker) |
 
 **Características de la persistencia** (franja inferior del diagrama) — lo que un motor
@@ -201,7 +203,7 @@ como PostgreSQL garantiza y un archivo suelto no:
 | **Consultas optimizadas** | Índices y planificador de consultas de Postgres — por eso "ORM no significa dejar de saber SQL" (sección 4). |
 | **Auditoría y trazabilidad** | Poder saber *qué* cambió, *cuándo* y *quién* lo hizo — típicamente con columnas `created_at`/`updated_at` o una tabla de logs (no cubierto todavía en este proyecto). |
 | **Backups y recuperación** | Copias de la base para poder restaurarla ante un desastre — responsabilidad de PostgreSQL/infraestructura, no del código de la app. |
-| **Migraciones controladas** | Lo que hace Alembic (sección 13): cada cambio de esquema queda versionado y es reversible, en vez de editar la base a mano. |
+| **Migraciones controladas** | Lo que hace Alembic (sección 14): cada cambio de esquema queda versionado y es reversible, en vez de editar la base a mano. |
 
 > 🔗 Fuente: [¿Qué es ACID en bases de datos? — KeepCoding](https://keepcoding.io/blog/que-es-acid-bases-datos/)
 
@@ -290,7 +292,7 @@ JOIN categories c ON t.category_id = c.id;
 **¿Con qué técnica genera ese SQL?** SQLAlchemy no arma el texto SQL a mano
 concatenando strings — usa un **compilador de expresiones** (*SQL Expression
 Language*): la consulta se arma primero como un objeto Python abstracto
-(`select(Ticket).where(...)`, `op.create_table(...)` — ver [sección 13](#🐘-13-crear-las-tablas-con-alembic-migraciones-versionadas)),
+(`select(Ticket).where(...)`, `op.create_table(...)` — ver [sección 14](#🐘-14-crear-las-tablas-con-alembic-migraciones-versionadas)),
 y recién al ejecutarla un **compilador específico del motor** (el *dialect*: `postgresql`,
 `mysql`, `sqlite`...) lo traduce al SQL real de ese motor. Por eso el mismo código Python
 puede apuntar a Postgres, MySQL o SQLite sin tocar una sola consulta — solo cambia la
@@ -944,7 +946,187 @@ def delete_ticket(
 > `model_config = ConfigDict(from_attributes=True)` — sin eso, Pydantic no sabe leer
 > atributos de un objeto ORM (solo sabía leer de un `dict`).
 
-## 🐘 13. Crear las tablas con Alembic (migraciones versionadas)
+## 🚀 13. `main.py`: cómo se arma la aplicación final
+
+Hasta acá cada capa se armó por separado: `schemas/`, `models/`, `repositories/`,
+`services/`, `routers/`. **`main.py` es donde todo eso se junta en UNA sola aplicación
+en ejecución** — es literalmente el archivo que corre `uvicorn main:app` (el `app` de
+`main:app` es la variable que se crea acá, sección 12/`--reload`).
+
+```python
+# 02-Ejercicios/Clase-04/app/main.py
+from time import perf_counter  # para medir cuánto tarda cada petición (middleware)
+
+from fastapi import FastAPI, Request
+
+# Importar los 3 modelos ACÁ (antes de que se use cualquier Ticket de
+# verdad) — si no, sale InvalidRequestError al crear el primer ticket
+from models.user import User
+from models.category import Category
+from models.ticket import Ticket
+
+# El router YA TRAE sus 5 endpoints armados (routers/tickets.py) — acá
+# solo se importa para montarlo más abajo con app.include_router(...)
+from routers.tickets import router as tickets_router
+
+# Las tablas ya NO se crean acá con create_all() — las crea/actualiza
+# Alembic (migrations/), corriendo "alembic upgrade head" a mano antes
+# de levantar la app. Es la forma versionada de mantener el esquema.
+
+
+# ---------------------------------------------------------
+# CREACIÓN DE LA APLICACIÓN
+# ---------------------------------------------------------
+
+# Esta ÚNICA instancia es la "app" — el objeto al que se le cuelgan
+# middleware, endpoints propios (/health) y routers enteros (Tickets).
+# title/description/version alimentan directo el Swagger de /docs.
+app = FastAPI(
+    title="HelpDesk API",
+    description=(
+        "API REST para la gestión de solicitudes "
+        "de soporte técnico utilizando FastAPI, "
+        "SQLAlchemy y PostgreSQL."
+    ),
+    version="1.0.0",
+)
+
+
+# ---------------------------------------------------------
+# MIDDLEWARE
+# ---------------------------------------------------------
+
+@app.middleware("http")
+async def add_process_time(
+    request: Request,
+    call_next,  # la función que sigue la cadena — el endpoint real
+):
+    """
+    Mide el tiempo total utilizado para procesar
+    cada solicitud HTTP.
+    """
+
+    start = perf_counter()  # arranca el cronómetro ANTES del endpoint
+
+    response = await call_next(request)  # acá corre el endpoint (health/tickets)
+
+    elapsed = perf_counter() - start  # cuánto tardó, en segundos
+
+    response.headers[
+        "X-Process-Time"
+    ] = f"{elapsed:.6f}"  # se agrega a TODAS las respuestas, sin excepción
+
+    return response
+
+
+# ---------------------------------------------------------
+# HEALTH CHECK
+# ---------------------------------------------------------
+
+# Endpoint DIRECTO sobre "app" (no viene de un router) — por eso su URL
+# final es solo /health, sin el prefijo /api/v1 que sí lleva Tickets.
+@app.get(
+    "/health",
+    tags=["Health"],
+)
+def health_check():
+    """
+    Permite verificar que la API se encuentre funcionando.
+    """
+
+    return {
+        "status": "ok",
+        "service": "El API backend de HelpDesk esta operativo",
+        "version": "1.0.0",
+    }
+
+
+# ---------------------------------------------------------
+# ROUTERS
+# ---------------------------------------------------------
+
+# La línea que "genera" los 5 endpoints finales: toma TODAS las rutas ya
+# definidas en tickets_router (con su propio prefix="/tickets") y las
+# cuelga de "app" bajo /api/v1 -> URL real = /api/v1/tickets/...
+app.include_router(
+    tickets_router,
+    prefix="/api/v1",
+)
+```
+
+### 🧱 Bloque por bloque
+
+| Bloque | Qué hace | Por qué está ahí |
+|---|---|---|
+| **Imports** | Trae `FastAPI`/`Request` (el framework), los 3 modelos (`User`, `Category`, `Ticket`) y el `router` de tickets. | Los modelos se importan acá aunque `main.py` nunca los use directo — es el mismo motivo que en `migrations/env.py` (sección 14): si la clase nunca se ejecuta, no queda registrada en `Base.metadata`. |
+| **Creación de la aplicación** | `app = FastAPI(...)` — una sola vez, en todo el archivo. | Todo lo demás (middleware, endpoints, routers) se cuelga de esta misma variable `app`. |
+| **Middleware** | `add_process_time` — corre **alrededor de cada petición**, sin excepción (Clase 3, sección de middleware). | Mide cuánto tarda la API en responder, sin tener que agregar ese código en cada endpoint por separado. |
+| **Health check** | `@app.get("/health")` — un endpoint mínimo que solo confirma "estoy viva". | Estándar en cualquier API real: permite que un balanceador de carga o un monitoreo verifique que el servicio responde, sin depender de la base de datos. |
+| **Routers** | `app.include_router(tickets_router, prefix="/api/v1")` — una sola línea. | Es la que **conecta** los 5 endpoints ya definidos en `routers/tickets.py` (sección 12) con la aplicación real. |
+
+### 🛣️ Cómo se generan los endpoints finales — la cadena de prefijos
+
+Ningún endpoint se "define" en `main.py` (salvo `/health`) — los de tickets ya estaban
+completos en `routers/tickets.py`. Lo que hace `main.py` es **montarlos**, y en ese
+montaje se concatenan dos prefijos distintos:
+
+```
+routers/tickets.py                         main.py
+──────────────────                         ───────
+router = APIRouter(prefix="/tickets")  +   app.include_router(tickets_router,
+                                                                prefix="/api/v1")
+@router.get("/")            ──────────────────────────────►  GET  /api/v1/tickets/
+@router.get("/{ticket_id}") ──────────────────────────────►  GET  /api/v1/tickets/{ticket_id}
+@router.post("/")           ──────────────────────────────►  POST /api/v1/tickets/
+@router.patch("/{ticket_id}")──────────────────────────────►  PATCH /api/v1/tickets/{ticket_id}
+@router.delete("/{ticket_id}")───────────────────────────────►  DELETE /api/v1/tickets/{ticket_id}
+
+@app.get("/health")  (definido DIRECTO en main.py, sin router) ───►  GET /health
+```
+
+| Endpoint final | De dónde sale la ruta | De dónde sale el prefijo |
+|---|---|---|
+| `GET /health` | `@app.get("/health")` en `main.py` | Ninguno — está colgado directo de `app`, nunca pasa por un `router` |
+| `GET /api/v1/tickets/` | `@router.get("/")` en `routers/tickets.py` | `/tickets` (del `router`) + `/api/v1` (de `include_router` en `main.py`) |
+| `GET /api/v1/tickets/{id}` | `@router.get("/{ticket_id}")` | Igual que arriba |
+| `POST /api/v1/tickets/` | `@router.post("/")` | Igual que arriba |
+| `PATCH /api/v1/tickets/{id}` | `@router.patch("/{ticket_id}")` | Igual que arriba |
+| `DELETE /api/v1/tickets/{id}` | `@router.delete("/{ticket_id}")` | Igual que arriba |
+
+> 💡 Por eso `/health` **no** lleva `/api/v1` — nunca pasó por `include_router`, así que
+> nunca recibió ese prefijo. Es una decisión real de diseño: los endpoints de
+> infraestructura (*health checks*, métricas) suelen quedar fuera del versionado de la
+> API de negocio, porque no son parte del "contrato" que consumen los clientes.
+
+### ✅ Verificado: `/health` responde con el middleware activo
+
+```bash
+curl -s -D - http://127.0.0.1:8000/health -o /dev/null
+```
+```
+HTTP/1.1 200 OK
+x-process-time: 0.002160
+content-type: application/json
+```
+```bash
+curl -s http://127.0.0.1:8000/health
+```
+```json
+{"status":"ok","service":"El API backend de HelpDesk esta operativo","version":"1.0.0"}
+```
+
+> 💡 El header `x-process-time` (minúsculas — HTTP no distingue mayúsculas en los
+> nombres de header) confirma que el `add_process_time` de arriba corrió — está
+> presente en **esta** respuesta y en las 6 de la sección siguiente (Postman/Bruno),
+> aunque ninguna de esas capturas lo mencione explícitamente: siempre está.
+
+> 🧪 **Tip de entrevista:** *¿en qué orden corren el middleware y el endpoint?* El
+> middleware envuelve al endpoint por los dos lados: todo lo que está **antes** de
+> `call_next(request)` corre antes que el endpoint (acá, arrancar el cronómetro), y
+> todo lo que está **después** corre una vez que el endpoint ya respondió (agregar el
+> header) — mismo mecanismo explicado en la [Clase 3](Clase-03.md).
+
+## 🐘 14. Crear las tablas con Alembic (migraciones versionadas)
 
 ### 🧭 ¿Qué es Alembic?
 
@@ -1298,7 +1480,7 @@ que no, para confirmar también el `404`):
 | `PATCH /api/v1/tickets/{id}` | `200` — actualiza solo `priority` |
 | `DELETE /api/v1/tickets/{id}` | `204` |
 
-## 🧪 14. Probar los endpoints con Postman o Bruno
+## 🧪 15. Probar los endpoints con Postman o Bruno
 
 Swagger UI (sección anterior) alcanza para probar rápido, pero **Postman** y **Bruno**
 son clientes API dedicados: guardan las peticiones en una **colección** reutilizable
@@ -1441,13 +1623,515 @@ Documentados en detalle en `06-Errores/`:
 > en el explorador de archivos.
 
 # 🏋️ EJERCICIOS CON SOLUCIÓN
-*(pendiente — se documentan 10 ejercicios graduales cuando haya contenido de la clase)*
+
+> Reutilizan el laboratorio real de esta clase (`02-Ejercicios/Clase-04/app/`: modelos
+> `User`/`Category`/`Ticket`, `TicketRepository`, `TicketService`, `routers/tickets.py`)
+> — cada solución se verificó corriendo de verdad contra `curso-postgres`.
+
+### Ejercicio 1 — Schema de Pydantic para `Category`
+
+`schemas/ticket.py` ya tiene `TicketCreate`/`TicketResponse`. Escribí el mismo patrón
+pero para categorías: un schema `CategoryCreate` con un único campo `name` (obligatorio,
+entre 3 y 100 caracteres) y un schema `CategoryResponse` que devuelva `id` y `name`,
+preparado para leer directo de un objeto ORM (no solo de un `dict`).
+
+<details><summary>💡 ¿Sabías que…? — Field(min_length=...) y ConfigDict(from_attributes=True)</summary>
+
+`Field(min_length=..., max_length=...)` valida la longitud de un `str` sin escribir un
+`if` a mano — si no se cumple, Pydantic responde error 422 solo. Y `model_config =
+ConfigDict(from_attributes=True)` es lo que le permite a un schema de respuesta leer
+atributos de un objeto ORM (`producto.nombre`), no solo claves de un `dict`
+(`producto["nombre"]`) — sin eso, Pydantic v2 no sabe convertir un objeto SQLAlchemy.
+
+```python
+# Ejemplo de referencia — otro dominio, misma idea
+from pydantic import BaseModel, ConfigDict, Field
+
+class ProductCreate(BaseModel):
+    sku: str = Field(min_length=4, max_length=20)
+
+class ProductResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    sku: str
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class CategoryCreate(BaseModel):
+    name: str = Field(min_length=3, max_length=100)
+
+
+class CategoryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+```
+</details>
+
+### Ejercicio 2 — Campo opcional en un modelo SQLAlchemy
+
+Al modelo `Ticket` (`models/ticket.py`) le falta un campo para registrar **cuándo se
+cerró** el ticket. Agregale una columna `closed_at`, de tipo fecha/hora, que **puede
+quedar vacía** (un ticket recién creado todavía no se cerró) — sin usar `Field` de
+Pydantic, esto es SQLAlchemy puro, en el modelo.
+
+<details><summary>💡 ¿Sabías que…? — Mapped[X | None] y default=None</summary>
+
+En el estilo tipado de SQLAlchemy 2.0, un campo que puede ser `NULL` en la base de
+datos se anota como `Mapped[tipo | None]` (el mismo `str | None` que ya viste en
+`TicketUpdate`, aplicado ahora a una columna real). `default=None` es el valor que toma
+en Python antes de guardarse; `nullable=True` es lo que le dice a **Postgres** que
+acepte `NULL` en esa columna — son dos cosas relacionadas pero distintas (una es de
+Python/SQLAlchemy, la otra es la restricción real en la base).
+
+```python
+# Ejemplo de referencia — otro campo opcional, distinto dominio
+from datetime import date
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Date
+
+class Employee(Base):
+    __tablename__ = "employees"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    hired_on: Mapped[date] = mapped_column(Date, nullable=False)
+    left_on: Mapped[date | None] = mapped_column(Date, nullable=True, default=None)
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from datetime import datetime
+from sqlalchemy import DateTime
+
+# ... en la clase Ticket, junto al resto de columnas:
+    closed_at: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True,
+        default=None
+    )
+```
+</details>
+
+### Ejercicio 3 — Filtrar tickets por prioridad con `select().where()`
+
+Escribí una función `get_by_priority(db, priority)` que devuelva **solo** los tickets
+que tengan la prioridad exacta que se le pasa (ej. `"Alta"`), usando `select()` — el
+mismo estilo que ya usa `TicketRepository.get_all`, pero con un filtro.
+
+<details><summary>💡 ¿Sabías que…? — .where() se encadena igual que .order_by()</summary>
+
+`select(Modelo)` devuelve un objeto `Select` que se puede seguir encadenando con más
+métodos (`.where(...)`, `.order_by(...)`, `.limit(...)`) antes de ejecutarlo — ninguno
+dispara la consulta por sí solo (evaluación diferida, ya visto con `statement`). Recién
+`db.scalars(...)` lo ejecuta de verdad.
+
+```python
+# Ejemplo de referencia — filtrar por otro campo, distinto dominio
+def get_active_employees(db: Session) -> list[Employee]:
+    statement = select(Employee).where(Employee.left_on.is_(None))
+    return list(db.scalars(statement).all())
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def get_by_priority(self, db: Session, priority: str) -> list[Ticket]:
+    statement = select(Ticket).where(Ticket.priority == priority)
+    return list(db.scalars(statement).all())
+```
+</details>
+
+### Ejercicio 4 — `CategoryRepository`
+
+`repositories/ticket_repository.py` ya existe. Escribí `CategoryRepository` con el
+mismo patrón: `get_all` (todas las categorías, ordenadas por id), `get_by_id`, `create`
+(recibe solo el `name`) y `delete`.
+
+<details><summary>💡 ¿Sabías que…? — el repository no sabe nada de HTTP ni de reglas de negocio</summary>
+
+El repository es **CRUD puro**: abre/usa la sesión, ejecuta la consulta, devuelve el
+objeto. No valida nada de negocio (eso es trabajo del `service`, ejercicio 6) ni sabe
+qué es un `HTTPException` (eso es trabajo del `router`). Cuanto más "aburrido" y
+predecible sea un repository, mejor diseñado está.
+
+```python
+# Ejemplo de referencia — mismo patrón, otro dominio
+class ProductRepository:
+    def get_all(self, db: Session) -> list[Product]:
+        return list(db.scalars(select(Product).order_by(Product.id)).all())
+
+    def create(self, db: Session, sku: str) -> Product:
+        product = Product(sku=sku)
+        db.add(product); db.commit(); db.refresh(product)
+        return product
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class CategoryRepository:
+    def get_all(self, db: Session) -> list[Category]:
+        statement = select(Category).order_by(Category.id)
+        return list(db.scalars(statement).all())
+
+    def get_by_id(self, db: Session, category_id: int) -> Category | None:
+        return db.get(Category, category_id)
+
+    def create(self, db: Session, name: str) -> Category:
+        category = Category(name=name)
+        db.add(category)
+        db.commit()
+        db.refresh(category)
+        return category
+
+    def delete(self, db: Session, category: Category) -> None:
+        db.delete(category)
+        db.commit()
+```
+</details>
+
+### Ejercicio 5 — Tickets junto con el nombre de su categoría (`JOIN`)
+
+Escribí una función que traiga, para cada ticket, su `title` **y** el `name` de la
+categoría a la que pertenece — en una sola consulta, con `JOIN`, sin usar la
+`relationship()` (`ticket.category.name`); esta vez a mano, con `select(...).join(...)`.
+
+<details><summary>💡 ¿Sabías que…? — seleccionar columnas puntuales, no el objeto entero</summary>
+
+`select(Ticket)` trae objetos `Ticket` completos. `select(Ticket.title, Category.name)`
+trae solo esas 2 columnas, como tuplas — más liviano cuando no hace falta el objeto
+entero. `.join(Otro, condición)` es exactamente el `ON` del `JOIN` de SQL, escrito en
+Python.
+
+```python
+# Ejemplo de referencia — otro JOIN, distinto dominio
+statement = (
+    select(Order.id, Customer.name)
+    .join(Customer, Order.customer_id == Customer.id)
+)
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def tickets_con_categoria(db: Session) -> list[tuple[str, str]]:
+    statement = (
+        select(Ticket.title, Category.name)
+        .join(Category, Ticket.category_id == Category.id)
+        .order_by(Ticket.id)
+    )
+    return list(db.execute(statement).all())
+```
+</details>
+
+### Ejercicio 6 — `CategoryService` que evita nombres duplicados
+
+Antes de crear una categoría, el `service` tiene que revisar si ya existe una con ese
+mismo `name` — si existe, corta con un error (código HTTP 409, "Conflict") en vez de
+guardar un duplicado.
+
+<details><summary>💡 ¿Sabías que…? — 409 es el código correcto para un duplicado</summary>
+
+`404` es "no encontrado", `422` es "la validación de los campos falló" (eso ya lo hace
+Pydantic solo). Para "esto ya existe y no se puede repetir" el código HTTP correcto es
+**409 Conflict** — distinto tipo de problema, distinto código, para que el cliente de
+la API pueda reaccionar distinto ante cada uno.
+
+```python
+# Ejemplo de referencia — misma idea, otro dominio
+class ProductService:
+    def __init__(self, repository: ProductRepository):
+        self.repository = repository
+
+    def create_product(self, db: Session, sku: str) -> Product:
+        if self.repository.get_by_sku(db, sku) is not None:
+            raise HTTPException(status.HTTP_409_CONFLICT, f"SKU {sku!r} ya existe")
+        return self.repository.create(db, sku)
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+# En CategoryRepository, agregar:
+def get_by_name(self, db: Session, name: str) -> Category | None:
+    statement = select(Category).where(Category.name == name)
+    return db.scalars(statement).first()
+
+# CategoryService:
+class CategoryService:
+    def __init__(self, repository: CategoryRepository):
+        self.repository = repository
+
+    def create_category(self, db: Session, name: str) -> Category:
+        existente = self.repository.get_by_name(db, name)
+        if existente is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Ya existe una categoría llamada {name!r}",
+            )
+        return self.repository.create(db, name)
+```
+</details>
+
+### Ejercicio 7 — Router de categorías
+
+Montá un `APIRouter` con prefijo `/categories` y 2 endpoints: `GET /categories/` (lista
+todas) y `POST /categories/` (crea una) — mismo patrón que `routers/tickets.py`, con
+`Depends(get_db)` para la sesión.
+
+<details><summary>💡 ¿Sabías que…? — response_model filtra lo que se devuelve, aunque el objeto tenga más</summary>
+
+Si el `Category` del ORM tuviera, hipotéticamente, un campo interno que no querés
+exponer, `response_model=CategoryResponse` lo filtraría solo — FastAPI arma la
+respuesta a partir de los campos que **el schema** declara, no de todos los que tiene
+el objeto que le pasaste.
+
+```python
+# Ejemplo de referencia — mismo patrón, otro dominio
+router = APIRouter(prefix="/products", tags=["Products"])
+
+@router.get("/", response_model=list[ProductResponse])
+def list_products(db: Session = Depends(get_db)):
+    return ProductRepository().get_all(db)
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+router = APIRouter(prefix="/categories", tags=["Categories"])
+
+def get_category_repository() -> CategoryRepository:
+    return CategoryRepository()
+
+@router.get("/", response_model=list[CategoryResponse])
+def list_categories(
+    db: Session = Depends(get_db),
+    repo: CategoryRepository = Depends(get_category_repository),
+):
+    return repo.get_all(db)
+
+@router.post("/", response_model=CategoryResponse, status_code=201)
+def create_category(
+    data: CategoryCreate,
+    db: Session = Depends(get_db),
+    repo: CategoryRepository = Depends(get_category_repository),
+):
+    return repo.create(db, data.name)
+```
+</details>
+
+### Ejercicio 8 — Migración de Alembic para `closed_at`
+
+Con el campo del ejercicio 2 ya agregado al modelo, generá la migración con
+`--autogenerate` y aplicala contra Postgres. Indicá los 2 comandos, en orden.
+
+<details><summary>💡 ¿Sabías que…? — autogenerate compara, no adivina</summary>
+
+`--autogenerate` no "inventa" el cambio — compara `target_metadata` (lo que los
+modelos dicen que debería existir) contra lo que Postgres tiene ahora mismo, columna
+por columna, y escribe el script con la diferencia exacta. Si el modelo no se
+modificó, no genera nada nuevo.
+
+```bash
+# Ejemplo de referencia — mismo comando, otro cambio (agregar una columna a users)
+alembic revision --autogenerate -m "agrega phone a users"
+alembic upgrade head
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```bash
+alembic revision --autogenerate -m "agrega closed_at a tickets"
+alembic upgrade head
+```
+
+Verificado: `alembic revision --autogenerate` detectó `Detected added column
+'tickets.closed_at'` solo, y `alembic upgrade head` la aplicó de verdad contra
+`curso-postgres` (columna confirmada con `\d tickets` en `psql`, después revertida con
+`alembic downgrade -1` para no dejarla en el proyecto real).
+</details>
+
+### Ejercicio 9 — Filtrar tickets por prioridad desde la URL (query param)
+
+Modificá `GET /tickets/` para que acepte un parámetro opcional en la URL,
+`?priority=Alta`, y devuelva solo los tickets de esa prioridad — si no se manda el
+parámetro, devuelve todos, como hasta ahora.
+
+<details><summary>💡 ¿Sabías que…? — un parámetro con default es automáticamente un query param</summary>
+
+En FastAPI, un parámetro de la función que **no** aparece en la ruta (`"/tickets2/"`,
+sin `{algo}`) y tiene un valor por defecto se toma solo como *query parameter* — no
+hace falta ningún decorador extra. `priority: str | None = None` ya alcanza para que
+FastAPI lo lea de `?priority=...`.
+
+```python
+# Ejemplo de referencia — mismo patrón, otro campo
+@router.get("/", response_model=list[ProductResponse])
+def list_products(category: str | None = None, db: Session = Depends(get_db)):
+    statement = select(Product)
+    if category is not None:
+        statement = statement.where(Product.category == category)
+    return list(db.scalars(statement).all())
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+@router.get("/", response_model=list[TicketResponse])
+def list_tickets(
+    priority: str | None = None,
+    db: Session = Depends(get_db),
+    service: TicketService = Depends(get_ticket_service),
+):
+    statement = select(Ticket)
+    if priority is not None:
+        statement = statement.where(Ticket.priority == priority)
+    return list(db.scalars(statement.order_by(Ticket.id)).all())
+```
+</details>
+
+### Ejercicio 10 — Flujo completo: crear, actualizar y confirmar un ticket
+
+Usando `TestClient` (sin abrir el navegador), escribí un script que: 1) cree un ticket
+nuevo con `POST`, 2) le cambie la `priority` con `PATCH`, 3) lo vuelva a pedir con `GET`
+y confirme que el cambio quedó guardado de verdad.
+
+<details><summary>💡 ¿Sabías que…? — TestClient no necesita uvicorn corriendo</summary>
+
+`TestClient(app)` simula peticiones HTTP directo contra tu app de FastAPI, en el mismo
+proceso de Python — no hace falta tener `uvicorn main:app` corriendo aparte. Es lo que
+se usa para escribir tests automatizados de una API.
+
+```python
+# Ejemplo de referencia — mismo patrón, otro flujo
+client = TestClient(app)
+r1 = client.post("/products/", json={"sku": "ABC-123"})
+r2 = client.get(f"/products/{r1.json()['id']}")
+assert r2.json()["sku"] == "ABC-123"
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from fastapi.testclient import TestClient
+
+client = TestClient(app)
+
+# 1. Crear
+r1 = client.post("/tickets/", json={
+    "title": "Impresora atascada",
+    "description": "La impresora del piso 2 no imprime",
+    "requester_id": 1,
+    "category_id": 1,
+})
+ticket_id = r1.json()["id"]
+
+# 2. Actualizar
+r2 = client.patch(f"/tickets/{ticket_id}", json={"priority": "Baja"})
+
+# 3. Confirmar
+r3 = client.get(f"/tickets/{ticket_id}")
+assert r3.json()["priority"] == "Baja"
+```
+
+Verificado end-to-end contra `curso-postgres`: `POST` → `201`, `PATCH` → `200` con
+`priority: "Baja"`, `GET` final confirma el mismo valor guardado.
+</details>
 
 ## ❓ Preguntas y respuestas (autoevaluación)
-*(pendiente — 10 preguntas graduales)*
+
+**1. ¿Qué es la persistencia de datos, y por qué una lista de Python no alcanza?**
+> Es la capacidad de un dato de sobrevivir a la ejecución del programa que lo creó. Una
+> variable en RAM desaparece apenas termina el proceso; un backend real necesita que
+> los datos sigan existiendo después de reiniciar el servidor o entre distintas
+> instancias — para eso hace falta un medio persistente y compartido, como PostgreSQL.
+
+**2. ¿Qué es un ORM, en una frase?**
+> La capa que traduce entre dos mundos: clases/objetos de Python y tablas/filas de una
+> base de datos relacional — permite modelar los datos como clases y manipularlos como
+> objetos, mientras el ORM genera el SQL correspondiente por debajo.
+
+**3. ¿Por qué `schemas/ticket.py` tiene 3 clases (`TicketCreate`, `TicketUpdate`,
+`TicketResponse`) en vez de una sola?**
+> Porque cada una valida un contrato distinto de la API: `Create` es lo que el cliente
+> manda al crear (sin `id`), `Update` tiene todos los campos opcionales (actualización
+> parcial), y `Response` es lo que la API devuelve (sí trae `id`, sin las validaciones
+> de longitud que ya se aplicaron al crear).
+
+**4. ¿Cuál es la diferencia entre `ForeignKey(...)` y `relationship(...)` en un modelo?**
+> `ForeignKey` es una restricción real que impone Postgres a nivel de base de datos
+> (esta columna solo puede apuntar a una fila que exista en la otra tabla).
+> `relationship()` es una comodidad de Python/SQLAlchemy: le permite navegar el objeto
+> relacionado (`ticket.requester.name`) sin escribir el `JOIN` a mano.
+
+**5. ¿Por qué los modelos usan `if TYPE_CHECKING:` para importar entre sí?**
+> Porque `User` y `Ticket` (y `Category` y `Ticket`) se referencian mutuamente — si se
+> importaran de forma normal se armaría un import circular y Python no arrancaría.
+> `TYPE_CHECKING` vale `False` en tiempo real (ese import nunca se ejecuta), pero
+> Pylance/mypy sí lo leen para entender los tipos.
+
+**6. ¿Para qué sirve el Repository Pattern si ya existe el ORM?**
+> Para aislar el resto de la app (`services/`, `routers/`) de los detalles de
+> SQLAlchemy — si mañana cambia el ORM o el motor de base de datos, solo hay que tocar
+> `repositories/`, el resto del código no se entera.
+
+**7. ¿Qué diferencia hay entre `TicketRepository` y `TicketService`?**
+> El repository es CRUD puro (lee/escribe, sin opinión). El service es la capa de
+> arriba: aplica reglas de negocio (por ejemplo, lanzar un `404` si el ticket no
+> existe) y es lo único que el router debería llamar directamente.
+
+**8. ¿Cuándo se ejecuta de verdad un `statement` de SQLAlchemy?**
+> `select(Ticket).where(...)` solo arma un objeto que describe la consulta — no toca la
+> base de datos. Recién cuando ese `statement` se le pasa a `db.scalars(...)` o
+> `db.execute(...)`, la sesión lo traduce a SQL real y lo ejecuta contra Postgres
+> (evaluación diferida).
+
+**9. ¿Por qué usar Alembic en vez de `Base.metadata.create_all()`?**
+> `create_all()` crea las tablas que falten de una sola vez, sin historial — si después
+> cambia una columna, no se entera. Alembic versiona cada cambio de esquema por
+> separado (como commits de git): se puede aplicar (`upgrade`) o revertir
+> (`downgrade`) de a uno, y siempre se sabe en qué versión de esquema está la base.
+
+**10. ¿Por qué aparece Swagger UI en `/docs` sin haberlo configurado?**
+> FastAPI genera automáticamente un documento OpenAPI (`/openapi.json`) a partir de los
+> type hints y los modelos Pydantic del proyecto — Swagger UI es solo una página que lee
+> ese JSON y dibuja la interfaz. Por eso cualquier cambio en el código se refleja solo
+> en `/docs`, sin tocar documentación a mano.
 
 ## 📎 Apuntes relacionados
-*(pendiente)*
+
+- [00-Notas/02-Conceptos.md](../00-Notas/02-Conceptos.md) — concepto "Import de
+  librería vs. nombre de tu archivo" (por qué `Session` no depende de cómo se llame
+  `db/database.py`).
+- [00-Notas/01-Comandos.md](../00-Notas/01-Comandos.md) — comandos de `pip`, Docker y
+  `python3 -m pip install`, usados en toda esta clase.
+- [00-Notas/05-Estructura-Proyecto-FastAPI.md](../00-Notas/05-Estructura-Proyecto-FastAPI.md)
+  — versión genérica y reutilizable de la arquitectura por capas de esta clase.
+- `06-Errores/` — los 9 errores documentados en esta clase (`python`/`pip` no
+  encontrados, imports con `app.`, Pylance con referencias diferidas, `SyntaxError`,
+  `ImportError` de `create_engine`, `pydantic-settings`/`.env` faltantes,
+  `InvalidRequestError` de relaciones no resueltas).
+- [Clase 3](Clase-03.md) — teoría de FastAPI, Pydantic y Swagger/OpenAPI, base para la
+  capa API de esta clase.
+- [Clase 1 — mutabilidad y aliasing](Clase-01.md#🧬-9-mutabilidad-y-aliasing-el-bug-mas-comun-en-backend)
+  — mismo concepto de identidad de objetos que aparece con `self` y las instancias de
+  `TicketRepository`.
 
 ## ➡️ Siguiente
 [Clase 5](Clase-05.md)
