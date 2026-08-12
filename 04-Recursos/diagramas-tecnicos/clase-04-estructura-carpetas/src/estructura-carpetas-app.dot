@@ -1,0 +1,67 @@
+digraph EstructuraCarpetas {
+  rankdir=LR;
+  splines=ortho;
+  graph [
+    label="📐 DIAGRAMA DE ARQUITECTURA (estructura de carpetas)\lQué hay adentro de app/ — Clase 4\l",
+    bgcolor="#FFFFFF", pad=0.4, margin=0.2, nodesep=0.45, ranksep=0.9,
+    fontname="Arial", fontsize=20, labelloc="t", labeljust="l"
+  ];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=10,
+        margin="0.18,0.12", penwidth=1.4];
+  edge [color="#94A3B8", penwidth=1.2, arrowsize=0.7];
+
+  // ── Leyenda (franja horizontal arriba) ──────────────────────────
+  subgraph cluster_legend {
+    label="Leyenda"; style="rounded,dashed"; color="#CBD5E1"; fontname="Arial"; fontsize=11;
+    legend_api    [label="Capa API",        fillcolor="#EEF2FF", color="#4338CA", fontcolor="#312E81"];
+    legend_logica [label="Capa de negocio", fillcolor="#F3E8FF", color="#7E22CE", fontcolor="#581C87"];
+    legend_datos  [label="Capa de datos",   fillcolor="#DCFCE7", color="#15803D", fontcolor="#14532D"];
+    legend_herr   [label="Herramientas",    fillcolor="#E0F2FE", color="#0369A1", fontcolor="#075985"];
+    legend_doc    [label="Archivo",         fillcolor="#F1F5F9", color="#475569", fontcolor="#334155"];
+    legend_api -> legend_logica -> legend_datos -> legend_herr -> legend_doc [style=invis];
+  }
+
+  root [label="app/", shape=folder, fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
+
+  // ── Capa API ─────────────────────────────────────────────────────
+  subgraph cluster_api {
+    label="Capa API"; style="rounded,filled"; fillcolor="#F8FAFC"; color="#CBD5E1";
+    routers [label="routers/\nendpoints de FastAPI", fillcolor="#EEF2FF", color="#4338CA", fontcolor="#312E81"];
+    schemas [label="schemas/\nesquemas Pydantic\n(validación)", fillcolor="#EEF2FF", color="#4338CA", fontcolor="#312E81"];
+  }
+
+  // ── Capa de negocio ──────────────────────────────────────────────
+  subgraph cluster_logica {
+    label="Capa de negocio"; style="rounded,filled"; fillcolor="#F8FAFC"; color="#CBD5E1";
+    services [label="services/\nlógica de negocio", fillcolor="#F3E8FF", color="#7E22CE", fontcolor="#581C87"];
+  }
+
+  // ── Capa de datos ─────────────────────────────────────────────────
+  subgraph cluster_datos {
+    label="Capa de datos"; style="rounded,filled"; fillcolor="#F8FAFC"; color="#CBD5E1";
+    repositories [label="repositories/\nRepository Pattern\n(acceso a datos)", fillcolor="#DCFCE7", color="#15803D", fontcolor="#14532D"];
+    models [label="models/\ntablas (User, Category,\nTicket)", fillcolor="#DCFCE7", color="#15803D", fontcolor="#14532D"];
+    db [label="db/\nengine, sesión,\nBase de SQLAlchemy", fillcolor="#DCFCE7", color="#15803D", fontcolor="#14532D"];
+    core [label="core/\nsettings, variables\nde entorno", fillcolor="#DCFCE7", color="#15803D", fontcolor="#14532D"];
+  }
+
+  // ── Herramientas / configuración ──────────────────────────────────
+  subgraph cluster_herramientas {
+    label="Herramientas y configuración"; style="rounded,filled"; fillcolor="#F8FAFC"; color="#CBD5E1";
+    migrations [label="migrations/\nhistorial de Alembic", fillcolor="#E0F2FE", color="#0369A1", fontcolor="#075985"];
+    requirements [label="requirements.txt\ndependencias del\nproyecto", shape=note, fillcolor="#F1F5F9", color="#475569", fontcolor="#334155"];
+  }
+
+  root -> routers;
+  root -> schemas;
+  root -> services;
+  root -> repositories;
+  root -> models;
+  root -> db;
+  root -> core;
+  root -> migrations;
+  root -> requirements;
+
+  // Ancla la leyenda arriba, sin afectar el layout del árbol
+  legend_doc -> root [style=invis, constraint=false];
+}

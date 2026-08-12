@@ -23,7 +23,75 @@ sidebar: "Clase 4 · PostgreSQL"
 
 # 📖 PARTE TEÓRICA
 
-## 🗄️ 1. ¿Qué es un ORM?
+## 💾 1. ¿Qué es la persistencia de datos?
+
+**Persistencia de datos** es la capacidad de un dato de sobrevivir a la ejecución del
+programa que lo creó — que siga existiendo después de cerrar la terminal, apagar el
+servidor o reiniciar la app.
+
+```python
+tickets_en_memoria = []
+tickets_en_memoria.append("Ticket 1001")
+print(tickets_en_memoria)
+```
+```
+$ python3 memoria.py
+['Ticket 1001']
+$ python3 memoria.py    # segunda corrida: no recuerda nada de la anterior
+['Ticket 1001']
+```
+
+Todo lo trabajado en listas/diccionarios desde la Clase 1 vive en **RAM**: rápido de
+leer y escribir, pero **volátil** — desaparece apenas termina el proceso. Para que un
+dato persista, tiene que quedar escrito en algún medio que sobreviva al proceso: un
+archivo en disco, o una base de datos.
+
+| Medio | Sobrevive al cierre del programa | Estructura / consultas | Concurrencia (varios procesos a la vez) |
+|---|---|---|---|
+| Variable en RAM | ❌ No | La que le dé el código | No aplica — vive en un solo proceso |
+| Archivo (`.txt`, `.json`) | ✅ Sí | Ninguna — hay que parsear todo a mano | Riesgo de corromper el archivo si dos procesos escriben a la vez |
+| Base de datos relacional (PostgreSQL) | ✅ Sí | Tablas, tipos, relaciones, índices — impuestos por el motor | Maneja el acceso concurrente de forma segura (transacciones) |
+
+> 💡 Esta es la razón de fondo de toda la clase: un servidor backend puede reiniciarse,
+> escalar a varias instancias o recibir miles de peticiones a la vez — los datos de
+> negocio (tickets, usuarios, categorías) no pueden vivir solo en una lista de Python,
+> necesitan un medio persistente y compartido. **PostgreSQL** es ese medio; el **ORM**
+> (sección siguiente) es la capa que lo hace manejable desde Python.
+
+> 🔗 Fuente: [Persistencia (informática) — Wikipedia](https://es.wikipedia.org/wiki/Persistencia_(inform%C3%A1tica))
+
+### 🗺️ Diagrama: arquitectura de persistencia de datos (Python + ORM + Alembic)
+
+![Diagrama de arquitectura: Cliente → API FastAPI → Capa de Servicios → Capa de Persistencia (ORM SQLAlchemy + Migraciones Alembic) → Base de datos PostgreSQL, con las características de la persistencia (ACID, sesiones, integridad, consultas, auditoría, backups, migraciones)](/clase-04-arquitectura-persistencia-datos.png)
+
+El diagrama de arriba es el mapa completo de esta clase: cada caja es una capa por la
+que pasa un dato hasta quedar persistido, y cada una tiene su propia responsabilidad.
+
+| Capa | Qué hace | Piezas | Dónde se ve en esta clase |
+|---|---|---|---|
+| **Cliente** | Consume la API (web, móvil) — no es parte del backend, pero es quien dispara todo | Web / Móvil (React, HTML, etc.) | Fuera del alcance de este curso de backend |
+| **API (FastAPI)** | Recibe la petición HTTP, la valida y arma la respuesta | Rutas (endpoints), validaciones, autenticación/autorización, serialización (Pydantic), respuestas | [Clase 3](Clase-03.md) (teoría de FastAPI) + [sección 11 — Router](#🌐-11-router-routers-tickets-py) de esta clase |
+| **Capa de servicios** | Traduce la petición en reglas de negocio — no sabe nada de HTTP ni de SQL | Reglas de negocio, cálculo de indicadores, orquestación, gestión de sesiones de trabajo | [sección 10 — Capa de servicios: `TicketService`](#🧠-10-capa-de-servicios-ticketservice) |
+| **Capa de persistencia → ORM (SQLAlchemy)** | Traduce objetos Python ↔ filas de la base de datos | Modelos (entidades), relaciones, sesión (`Session`), consultas (`select`), *Unit of Work*, eventos ORM | [sección 2 — ¿Qué es un ORM?](#🗄️-2-¿que-es-un-orm) + [sección 8 — Modelos SQLAlchemy](#🗄️-8-modelos-sqlalchemy-orm-user-category-ticket) + [sección 9 — Repository Pattern](#🧩-9-repository-pattern-ticketrepository) |
+| **Capa de persistencia → Migraciones (Alembic)** | Versiona los *cambios* al esquema de la base de datos | Entorno de migraciones (`env.py`), versionado de esquema, scripts de migración, historial, upgrade/downgrade | [sección 12 — Crear las tablas con Alembic](#🐘-12-crear-las-tablas-con-alembic-migraciones-versionadas) |
+| **Base de datos** | El almacenamiento persistente final | PostgreSQL — datos persistentes | [sección 5 — PostgreSQL corriendo en Docker](#🐘-5-postgresql-corriendo-en-docker) |
+
+**Características de la persistencia** (franja inferior del diagrama) — lo que un motor
+como PostgreSQL garantiza y un archivo suelto no:
+
+| Característica | Definición |
+|---|---|
+| **Transacciones (ACID)** | 4 garantías sobre cada operación: **A**tomicidad (todo o nada — si algo falla a mitad de camino, se deshace por completo), **C**onsistencia (nunca deja la base en un estado inválido), **I**solamiento (una transacción no ve los cambios a medias de otra que corre al mismo tiempo), **D**urabilidad (una vez confirmado con `commit()`, sobrevive incluso a una caída del servidor). |
+| **Manejo de sesiones y conexiones** | La `Session`/`SessionLocal` de SQLAlchemy (`get_db()`) reutiliza conexiones de un *pool* en vez de abrir una nueva por cada consulta — ver `db/database.py`. |
+| **Integridad y consistencia** | Las `ForeignKeyConstraint`, `UniqueConstraint` y `nullable=False` de los modelos (sección 8) las impone la base — no hace falta validarlas a mano en Python. |
+| **Consultas optimizadas** | Índices y planificador de consultas de Postgres — por eso "ORM no significa dejar de saber SQL" (sección 3). |
+| **Auditoría y trazabilidad** | Poder saber *qué* cambió, *cuándo* y *quién* lo hizo — típicamente con columnas `created_at`/`updated_at` o una tabla de logs (no cubierto todavía en este proyecto). |
+| **Backups y recuperación** | Copias de la base para poder restaurarla ante un desastre — responsabilidad de PostgreSQL/infraestructura, no del código de la app. |
+| **Migraciones controladas** | Lo que hace Alembic (sección 12): cada cambio de esquema queda versionado y es reversible, en vez de editar la base a mano. |
+
+> 🔗 Fuente: [¿Qué es ACID en bases de datos? — KeepCoding](https://keepcoding.io/blog/que-es-acid-bases-datos/)
+
+## 🗄️ 2. ¿Qué es un ORM?
 
 **ORM (Object-Relational Mapping / Mapeo Objeto-Relacional)**: la capa que **traduce
 información entre dos mundos que hablan distinto**:
@@ -72,7 +140,7 @@ filas de ese tipo; la clase Python/entidad conceptual sí va en singular (`User`
 > 📌 Convención: el campo de la FK se nombra `<entidad>_id` (`requester_id`,
 > `category_id`) — así se lee directo qué tabla referencia.
 
-## 🐘 2. SQL esencial — lo que SQLAlchemy hará por nosotros
+## 🐘 3. SQL esencial — lo que SQLAlchemy hará por nosotros
 
 > Aunque usemos ORM, **comprender SQL es imprescindible** para depurar, optimizar y
 > tomar decisiones informadas.
@@ -101,12 +169,39 @@ FROM tickets t
 JOIN categories c ON t.category_id = c.id;
 ```
 
-> ⚠️ **Clave del profe:** *"ORM no significa «no necesito saber SQL»."* El ORM te
-> ahorra escribir el SQL a mano en el día a día, pero cuando algo va lento, una
-> consulta no trae lo esperado, o hay que optimizar un `JOIN` complejo, necesitás
-> entender qué SQL está generando el ORM por debajo.
+> ⚠️ **ORM no significa dejar de saber SQL.** Ahorra escribir el SQL a mano en el día a
+> día, pero cuando algo va lento, una consulta no trae lo esperado, o hay que optimizar
+> un `JOIN` complejo, hace falta entender qué SQL está generando por debajo.
 
-## 🏗️ 3. Arquitectura del proyecto (estructura de carpetas)
+**¿Con qué técnica genera ese SQL?** SQLAlchemy no arma el texto SQL a mano
+concatenando strings — usa un **compilador de expresiones** (*SQL Expression
+Language*): la consulta se arma primero como un objeto Python abstracto
+(`select(Ticket).where(...)`, `op.create_table(...)` — ver [sección 12](#🐘-12-crear-las-tablas-con-alembic-migraciones-versionadas)),
+y recién al ejecutarla un **compilador específico del motor** (el *dialect*: `postgresql`,
+`mysql`, `sqlite`...) lo traduce al SQL real de ese motor. Por eso el mismo código Python
+puede apuntar a Postgres, MySQL o SQLite sin tocar una sola consulta — solo cambia la
+URL de conexión y el dialecto que SQLAlchemy elige solo a partir de ella.
+
+**¿Es exclusivo de Python?** No — el patrón ORM (traducir objetos ↔ tablas) existe en
+prácticamente todos los lenguajes de backend, cada uno con su propia librería:
+
+| Lenguaje | ORM más usado |
+|---|---|
+| Python | SQLAlchemy, Django ORM |
+| Java / Kotlin | Hibernate (JPA) |
+| C# / .NET | Entity Framework |
+| Ruby | Active Record (Ruby on Rails) |
+| JavaScript / TypeScript | Prisma, TypeORM, Sequelize |
+| PHP | Doctrine, Eloquent (Laravel) |
+
+> 🧪 Tip de entrevista: si todos los ORM resuelven lo mismo (Python/Java/JS ↔ SQL), ¿qué
+> cambia entre ellos? Sobre todo el **estilo de API** (*Active Record*, donde el propio
+> modelo sabe guardarse a sí mismo, vs *Data Mapper*, como SQLAlchemy — el patrón que
+> ya se ve en el [Repository Pattern](#🧩-9-repository-pattern-ticketrepository) de esta
+> clase, donde el modelo no sabe nada de cómo persistirse) y qué tan explícito o
+> "mágico" es cada uno — pero el problema de fondo es el mismo en cualquier lenguaje.
+
+## 🏗️ 4. Arquitectura del proyecto (estructura de carpetas)
 
 Estructura por capas del proyecto, en uso de acá en adelante para FastAPI + SQLAlchemy +
 Alembic:
@@ -126,6 +221,15 @@ app/
 
 Ya quedó creada igual en `02-Ejercicios/Clase-04/app/` (sin `__init__.py` — Python 3.3+
 no los exige, ver el callout en "Errores de esta clase" más abajo).
+
+### 🗺️ Diagrama: la estructura de carpetas, diferenciada por capa
+
+![Diagrama de arquitectura: la carpeta app/ con sus 9 subcarpetas/archivos agrupados y diferenciados por color según su capa — Capa API (routers/, schemas/) en índigo, Capa de negocio (services/) en morado, Capa de datos (core/, db/, models/, repositories/) en verde, Herramientas (migrations/, requirements.txt) en celeste/gris](/clase-04-estructura-carpetas.png)
+
+Mismo contenido que el árbol ASCII de arriba, pero agrupado y **diferenciado por
+color** según la capa a la que pertenece cada carpeta — a diferencia del diagrama
+siguiente (que muestra el *flujo* de una petición), este es un mapa estático de
+"qué hay adentro de `app/` y a qué grupo pertenece cada cosa".
 
 ### 🗺️ Diagrama: cómo se conectan las capas (con el código real)
 
@@ -149,7 +253,7 @@ Con los nombres reales de `02-Ejercicios/Clase-04/app/` (no genéricos): `router
 
 Carpeta de trabajo: `02-Ejercicios/Clase-04/app/`
 
-## 🐘 4. PostgreSQL corriendo en Docker
+## 🐘 5. PostgreSQL corriendo en Docker
 
 Para no instalar Postgres directo en el Mac, se levantó en un contenedor:
 
@@ -175,7 +279,7 @@ Datos de conexión para usar desde SQLAlchemy:
 
 > ⚠️ Password de **desarrollo local únicamente** — no usar en algo expuesto a internet.
 
-## 🐍 5. Entorno virtual y dependencias
+## 🐍 6. Entorno virtual y dependencias
 
 ```bash
 # Crear y activar el entorno virtual (macOS/Linux — en Mac es python3, no python)
@@ -205,7 +309,7 @@ pip freeze > requirements.txt
 > `psycopg2-binary` para Postgres, `pymysql`/`mysqlclient` para MySQL, etc. El ORM
 > habla con el driver, y el driver habla con la base de datos real.
 
-## 📄 6. Primer schema: `schemas/ticket.py`
+## 📄 7. Primer schema: `schemas/ticket.py`
 
 Primer archivo de código de la clase — los schemas de Pydantic (capa `schemas/`, ver la
 sección teórica "🏗️ Arquitectura del proyecto" arriba) para validar los datos de un
@@ -273,7 +377,7 @@ class TicketResponse(BaseModel):
 > 💡 `gt=0` en `requester_id`/`category_id` evita un id inválido como `0` o negativo —
 > son las FK del diagrama ER de la teoría.
 
-## 🗄️ 7. Modelos SQLAlchemy (ORM): `User`, `Category`, `Ticket`
+## 🗄️ 8. Modelos SQLAlchemy (ORM): `User`, `Category`, `Ticket`
 
 Las 3 tablas del diagrama de la teoría, ya como clases Python en `models/`. Usan el
 estilo **moderno de SQLAlchemy 2.0** (`Mapped[...]` + `mapped_column(...)`, tipado con
@@ -457,7 +561,7 @@ print('OK')
 "
 ```
 
-## 🧩 8. Repository Pattern: `TicketRepository`
+## 🧩 9. Repository Pattern: `TicketRepository`
 
 **Modelos vs. Repositorio — dos capas con roles distintos:**
 
@@ -544,7 +648,7 @@ Los otros 3 métodos usan `Session` directo, sin pasar por `select()`:
 > `Depends(get_db)`) decide qué sesión usar. Facilita testear el repositorio con una
 > sesión de prueba, sin tocar la base de datos real.
 
-## 🧠 9. Capa de servicios: `TicketService`
+## 🧠 10. Capa de servicios: `TicketService`
 
 **Repositorio vs. Servicio — no hacen lo mismo:** `TicketRepository` solo sabe **leer y
 escribir** en la base de datos (CRUD puro, sin opinión). `TicketService` es la capa de
@@ -610,7 +714,7 @@ class TicketService:
 > carpeta), así que el import correcto es `from models.ticket import Ticket`, sin
 > prefijo. Detalle completo en la tabla de errores, abajo.
 
-## 🌐 10. Router: `routers/tickets.py`
+## 🌐 11. Router: `routers/tickets.py`
 
 Última capa — los endpoints HTTP reales. El `router` llama al `service` (nunca directo
 al `repository`, respetando el orden de capas del diagrama de arriba):
@@ -689,7 +793,7 @@ def delete_ticket(
 > `model_config = ConfigDict(from_attributes=True)` — sin eso, Pydantic no sabe leer
 > atributos de un objeto ORM (solo sabía leer de un `dict`).
 
-## 🐘 11. Crear las tablas con Alembic (migraciones versionadas)
+## 🐘 12. Crear las tablas con Alembic (migraciones versionadas)
 
 ### 🧭 ¿Qué es Alembic?
 
@@ -912,7 +1016,7 @@ op.create_table('tickets',
 > en memoria, en el momento, a partir de `op.create_table(...)` + el dialecto de Postgres.
 
 > 📌 Es exactamente la misma idea de "ORM = traductor Python↔SQL" de la
-> [sección 1 de esta clase](#🗄️-1-¿que-es-un-orm) (`class Ticket` → `CREATE TABLE`,
+> [sección 2 de esta clase](#🗄️-2-¿que-es-un-orm) (`class Ticket` → `CREATE TABLE`,
 > `Ticket(...)` → `INSERT`), aplicada esta vez al **esquema** (la estructura de las
 > tablas) en vez de a los **datos** (las filas). Mismo traductor, dos capas distintas.
 
