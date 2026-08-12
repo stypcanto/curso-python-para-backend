@@ -6,12 +6,25 @@ sidebar: "🖥️ Comandos"
 
 > Comandos de terminal, Python, pip, entornos virtuales, etc. que voy usando en el curso.
 
+Comandos que **cambian según el sistema operativo** (crear/activar el venv). Styp usa
+macOS — esa es la columna que realmente corre en su terminal:
+
+| Qué hace | 🍎 macOS/Linux (el que usa Styp) | 🪟 Windows (referencia) |
+|---|---|---|
+| Crear el entorno virtual | `python3 -m venv .venv` | `python -m venv .venv` |
+| Activarlo | `source .venv/bin/activate` | `.\.venv\Scripts\activate` |
+| Ver la versión de Python | `python3 --version` | `python --version` |
+
+> 📝 En macOS el binario se llama **`python3`**, no `python` a secas (no viene instalado
+> por defecto) — ver [[python-command-not-found]]. En Windows sí existe `python` sin el
+> "3". Una vez con el venv **activado**, en ambos sistemas ya se puede usar `python` (a
+> secas) y `pip` sin el "3" — el venv se encarga de apuntar al binario correcto.
+
+El resto de comandos de `pip` son **iguales en cualquier sistema operativo** (una vez con
+el venv activado):
+
 | Comando | Qué hace | Ejemplo |
 |---|---|---|
-| `python3 -m venv .venv` | Crea un entorno virtual en la carpeta `.venv/` para aislar las dependencias del proyecto (en macOS es `python3`, no `python` — ver [[python-command-not-found]]) | `python3 -m venv .venv` |
-| `source .venv/bin/activate` | Activa el entorno virtual en macOS/Linux | `source .venv/bin/activate` |
-| `.\.venv\Scripts\activate` | Activa el entorno virtual en Windows (referencia — no aplica en tu Mac) | `.\.venv\Scripts\activate` |
-| `python3 --version` | Muestra la versión de Python instalada | `python3 --version` |
 | `pip --version` | Muestra la versión de pip **del entorno virtual activo** (falla con "command not found" si el venv no está activado — ver [[pip-command-not-found-venv-inactivo]]) | `pip --version` |
 | `pip install <paquete>` | Instala una librería en el venv activo | `pip install fastapi "uvicorn[standard]"` |
 | `pip show <paquete>` | Muestra la versión instalada de una librería (para no reinstalar de más) | `pip show fastapi` |
