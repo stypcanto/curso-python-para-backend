@@ -1654,6 +1654,7 @@ Documentados en detalle en `06-Errores/`:
 | `Settings()` no encuentra `database_url` | Faltaba instalar `pydantic-settings` (paquete aparte de `pydantic`) y crear el `.env` | [ver](../06-Errores/2026-08-11-pydantic-settings-y-env-faltantes.md) |
 | `ModuleNotFoundError: No module named 'app'` | Imports con prefijo `app.` (`from app.models...`) que no existe en este proyecto — se corre desde adentro de `app/` | [ver](../06-Errores/2026-08-11-modulenotfounderror-app-prefix.md) |
 | `InvalidRequestError: expression 'User' failed to locate a name` | `User`/`Category` nunca se habían importado de verdad (el `TYPE_CHECKING` no cuenta) antes de crear un `Ticket` | [ver](../06-Errores/2026-08-11-invalidrequesterror-relationship-no-resuelve.md) |
+| `500 Internal Server Error` en `POST /tickets/` (Postman) | `requester_id`/`category_id` apuntaban a un `user`/`category` que no existía — tablas vacías recién migradas, y nadie captura el `IntegrityError` de la FK | [ver](../06-Errores/2026-08-12-500-foreign-key-inexistente-sin-datos-previos.md) |
 
 > 📝 **Sobre `__init__.py` y `__pycache__`:** terminamos borrando **todos** los
 > `__init__.py` del proyecto (`core/`, `db/`, `models/`, `repositories/`, `routers/`,
