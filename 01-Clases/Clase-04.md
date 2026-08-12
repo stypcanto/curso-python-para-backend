@@ -23,7 +23,103 @@ sidebar: "Clase 4 · PostgreSQL"
 
 # 📖 PARTE TEÓRICA
 
-## 💾 1. ¿Qué es la persistencia de datos?
+## 📚 1. Definiciones clave
+
+Antes de entrar capa por capa, un **glosario** de los términos que se usan a lo largo de
+esta clase, agrupados por tema. Cada fila enlaza a la sección donde ese concepto se ve
+en profundidad (código real, diagramas, verificado en terminal) — acá va solo la
+definición corta, para no repetirla cada vez que aparece.
+
+### 🐍 Mecánica de Python: `import` y `nombre: tipo = valor`
+
+Estas dos construcciones aparecen en **todos** los archivos de esta clase — conviene
+tenerlas claras antes de leer cualquier código de acá en adelante.
+
+**El `import`** — `from pydantic import BaseModel, ConfigDict, Field` se lee "de la
+librería `pydantic`, traé estas 3 piezas". Después de esa línea, esos 3 nombres quedan
+disponibles para usar en el resto del archivo, como si estuvieran escritos ahí mismo. Es
+el mismo patrón `from módulo import función` de la Clase 1
+(`from request_utils import calculate_response_time`) — la única diferencia es de dónde
+viene lo importado: `pydantic`/`sqlalchemy`/`alembic` son **librerías instaladas**
+(`pip install ...`), mientras que `models.ticket` o `core.config` son **archivos propios
+del proyecto**. La sintaxis del `import` es la misma en los dos casos.
+
+**Declarar una variable/campo con tipo** — `title: str = Field(min_length=5,
+max_length=120)` tiene 3 partes:
+```
+   title    :   str    =   Field(min_length=5, max_length=120)
+   ↑            ↑           ↑
+   nombre       tipo        valor asignado — acá no es un dato fijo
+   del campo    (type       como "Media", sino el RESULTADO de llamar
+                 hint)      a la función Field(...), que devuelve un
+                            objeto con las reglas de validación
+```
+Es la misma sintaxis `nombre: tipo = valor` que ya se usó en funciones tipadas (Clase 1,
+`estimated_hours: float`) y en `dataclass` (Clase 2). Reaparece con otra cara en
+`id: Mapped[int] = mapped_column(primary_key=True)` (sección 9) — mismas 3 partes,
+distinta función del lado derecho.
+
+### 🏛️ Persistencia y arquitectura
+
+| Término | Qué es | Se profundiza en |
+|---|---|---|
+| **Persistencia de datos** | Capacidad de un dato de sobrevivir a la ejecución del programa que lo creó — que siga existiendo después de cerrar la terminal o reiniciar el servidor. | sección 2 |
+| **ACID / Transacción** | Las 4 garantías que da una base de datos relacional sobre cada operación: Atomicidad, Consistencia, Isolamiento, Durabilidad. | sección 2 |
+| **ORM** (*Object-Relational Mapping*) | La capa que traduce información entre dos mundos que hablan distinto: clases/objetos de Python ↔ tablas/filas de la base de datos. | sección 3 |
+| **Capa de servicios** | La capa que aplica las reglas de negocio (qué hacer, en qué orden) — no sabe nada de HTTP ni de SQL. | sección 11 |
+| **Repository Pattern** | Patrón de diseño que separa la lógica de acceso a datos (leer/guardar) del resto de la app, detrás de una interfaz simple (`get_all`, `create`, ...). | sección 10 |
+| **Inyección de dependencias** | En vez de que una clase/función cree lo que necesita, se lo pasan de afuera (`repository: TicketRepository` en el `__init__`) — facilita testear con versiones falsas (*mocks*). | secciones 10 y 12 |
+| **Migración (de esquema)** | Un cambio versionado a la estructura de la base de datos (crear una tabla, agregar una columna) — se aplica y se puede revertir, como un commit de git. | sección 13 |
+
+### 🗄️ SQLAlchemy (ORM)
+
+| Término | Qué es | Se profundiza en |
+|---|---|---|
+| **`engine`** | El objeto de SQLAlchemy que representa la conexión "física" a Postgres — sabe *cómo* hablarle a la base (usuario, password, host, puerto), pero no ejecuta consultas por sí solo. | sección 9 |
+| **`Session` / `SessionLocal`** | La "conversación" activa con la base de datos — por ella pasan todas las consultas, inserciones y `commit()`. Se abre una por petición (`get_db()`) y se cierra al terminar. | sección 9 |
+| **`pool_pre_ping`** | Antes de reusar una conexión reciclada del *pool*, SQLAlchemy le manda un ping para confirmar que sigue viva — evita fallar con una conexión muerta. | sección 9 |
+| **`Base` / `DeclarativeBase`** | La clase de la que heredan todos los modelos (`class User(Base)`) — es lo que conecta una clase Python con una tabla real. | sección 9 |
+| **`Mapped[...]` / `mapped_column(...)`** | Sintaxis moderna (SQLAlchemy 2.0) para declarar una columna: `Mapped[int]` es el tipo, `mapped_column(...)` las reglas (`primary_key`, `nullable`, etc.) — mismo patrón `nombre: tipo = valor` de arriba. | sección 9 |
+| **`relationship(...)` / `back_populates`** | Comodidad de Python para navegar una relación como atributo (`ticket.requester.name`) en vez de escribir el `JOIN` a mano; `back_populates` conecta las dos puntas de esa relación. | sección 9 |
+| **`ForeignKey(...)`** | Le dice a Postgres que una columna solo puede tener un valor que exista en otra tabla — la FK real, a nivel de base de datos. | sección 9 |
+| **`statement` (`select(...)`)** | Un objeto Python que *describe* una consulta sin ejecutarla todavía (evaluación diferida/*lazy*) — recién se convierte en SQL real cuando una `Session` lo ejecuta. | sección 10 |
+| **Dialecto (*dialect*)** | El "traductor" específico de un motor (`postgresql`, `mysql`, `sqlite`...) que SQLAlchemy usa para compilar un `statement` al SQL real de ese motor. | sección 4 |
+| **`TYPE_CHECKING`** | Bloque que solo se ejecuta para el editor/type-checker, nunca en tiempo real — evita imports circulares entre modelos que se referencian entre sí. | sección 9 |
+
+### ✅ Pydantic (validación)
+
+| Término | Qué es | Se profundiza en |
+|---|---|---|
+| **Pydantic** | La librería de Python que valida datos a partir de type hints: declarás la forma que *debería* tener un dato y ella revisa que lo que llega cumpla esa forma (o avisa el error, como el `422` de la [Clase 3](Clase-03.md)). | sección 8 |
+| **`BaseModel`** | La clase base de Pydantic. Toda clase que **hereda** de ella (herencia, [Clase 2](Clase-02.md)) se convierte en un "molde validado". | sección 8 |
+| **`Field(...)`** | Función de Pydantic para sumarle reglas extra a **un campo puntual** (mínimo/máximo de caracteres, valor por defecto, mayor a 0...). | sección 8 |
+| **`ConfigDict`** | Configuración **general de todo el modelo** (no de un campo) — por ejemplo, que acepte leer datos directo de un objeto ORM (`from_attributes=True`). | sección 8 |
+| **`str`** | Tipo básico de Python ([Clase 1](Clase-01.md)) — texto. Como *type hint* le dice a Pydantic "este campo tiene que ser texto". | Clase 1 |
+| **`pydantic-settings` / `BaseSettings`** | Paquete aparte de Pydantic pensado para configuración: lee variables desde un archivo `.env` y las valida igual que un `BaseModel` normal. | sección 9 |
+
+### 🐘 Alembic (migraciones)
+
+| Término | Qué es | Se profundiza en |
+|---|---|---|
+| **Alembic** | "git, pero para el esquema de la base de datos" — cada cambio de estructura queda guardado como un archivo de migración encadenado al anterior. | sección 13 |
+| **`target_metadata` / `Base.metadata`** | El catálogo en memoria de lo que el esquema *debería* ser, según los modelos Python ya importados — lo que Alembic compara contra la base real. | sección 13 |
+| **`alembic revision --autogenerate`** | Compara `target_metadata` contra la base real y **escribe** (en Python, no en SQL) el archivo de migración con la diferencia. | sección 13 |
+| **`alembic upgrade head` / `downgrade`** | Aplica (o revierte) las migraciones pendientes contra la base real — acá es donde el SQL de verdad se ejecuta. | sección 13 |
+| **`alembic_version`** | Tabla que crea el propio Alembic (no un modelo del proyecto) — guarda el id de la última migración aplicada. | sección 13 |
+
+### 🌐 FastAPI (capa API)
+
+*(ya se vio en profundidad en la [Clase 3](Clase-03.md) — acá solo referencia rápida)*
+
+| Término | Qué es | Se profundiza en |
+|---|---|---|
+| **`APIRouter`** | Agrupa un conjunto de endpoints relacionados (acá, todos los de `/tickets`) para incluirlos en la app con `app.include_router(...)`. | sección 12 |
+| **`Depends(...)`** | Le dice a FastAPI que resuelva algo **antes** de correr el endpoint (abrir una sesión de BD, armar un servicio) — inyección de dependencias a nivel de framework. | sección 12 |
+| **`response_model`** | El schema Pydantic que define la forma de lo que devuelve un endpoint — FastAPI convierte el resultado real a esa forma. | Clase 3 / sección 12 |
+| **`HTTPException`** | Excepción que FastAPI convierte automáticamente en una respuesta HTTP de error, con el código de estado correcto (`404`, `400`, ...). | Clase 3 / sección 11 |
+
+
+## 💾 2. ¿Qué es la persistencia de datos?
 
 **Persistencia de datos** es la capacidad de un dato de sobrevivir a la ejecución del
 programa que lo creó — que siga existiendo después de cerrar la terminal, apagar el
@@ -70,11 +166,11 @@ que pasa un dato hasta quedar persistido, y cada una tiene su propia responsabil
 | Capa | Qué hace | Piezas | Dónde se ve en esta clase |
 |---|---|---|---|
 | **Cliente** | Consume la API (web, móvil) — no es parte del backend, pero es quien dispara todo | Web / Móvil (React, HTML, etc.) | Fuera del alcance de este curso de backend |
-| **API (FastAPI)** | Recibe la petición HTTP, la valida y arma la respuesta | Rutas (endpoints), validaciones, autenticación/autorización, serialización (Pydantic), respuestas | [Clase 3](Clase-03.md) (teoría de FastAPI) + [sección 11 — Router](#🌐-11-router-routers-tickets-py) de esta clase |
-| **Capa de servicios** | Traduce la petición en reglas de negocio — no sabe nada de HTTP ni de SQL | Reglas de negocio, cálculo de indicadores, orquestación, gestión de sesiones de trabajo | [sección 10 — Capa de servicios: `TicketService`](#🧠-10-capa-de-servicios-ticketservice) |
-| **Capa de persistencia → ORM (SQLAlchemy)** | Traduce objetos Python ↔ filas de la base de datos | Modelos (entidades), relaciones, sesión (`Session`), consultas (`select`), *Unit of Work*, eventos ORM | [sección 2 — ¿Qué es un ORM?](#🗄️-2-¿que-es-un-orm) + [sección 8 — Modelos SQLAlchemy](#🗄️-8-modelos-sqlalchemy-orm-user-category-ticket) + [sección 9 — Repository Pattern](#🧩-9-repository-pattern-ticketrepository) |
-| **Capa de persistencia → Migraciones (Alembic)** | Versiona los *cambios* al esquema de la base de datos | Entorno de migraciones (`env.py`), versionado de esquema, scripts de migración, historial, upgrade/downgrade | [sección 12 — Crear las tablas con Alembic](#🐘-12-crear-las-tablas-con-alembic-migraciones-versionadas) |
-| **Base de datos** | El almacenamiento persistente final | PostgreSQL — datos persistentes | [sección 5 — PostgreSQL corriendo en Docker](#🐘-5-postgresql-corriendo-en-docker) |
+| **API (FastAPI)** | Recibe la petición HTTP, la valida y arma la respuesta | Rutas (endpoints), validaciones, autenticación/autorización, serialización (Pydantic), respuestas | [Clase 3](Clase-03.md) (teoría de FastAPI) + [sección 12 — Router](#🌐-12-router-routers-tickets-py) de esta clase |
+| **Capa de servicios** | Traduce la petición en reglas de negocio — no sabe nada de HTTP ni de SQL | Reglas de negocio, cálculo de indicadores, orquestación, gestión de sesiones de trabajo | [sección 11 — Capa de servicios: `TicketService`](#🧠-11-capa-de-servicios-ticketservice) |
+| **Capa de persistencia → ORM (SQLAlchemy)** | Traduce objetos Python ↔ filas de la base de datos | Modelos (entidades), relaciones, sesión (`Session`), consultas (`select`), *Unit of Work*, eventos ORM | [sección 3 — ¿Qué es un ORM?](#🗄️-3-¿que-es-un-orm) + [sección 9 — Modelos SQLAlchemy](#🗄️-9-modelos-sqlalchemy-orm-user-category-ticket) + [sección 10 — Repository Pattern](#🧩-10-repository-pattern-ticketrepository) |
+| **Capa de persistencia → Migraciones (Alembic)** | Versiona los *cambios* al esquema de la base de datos | Entorno de migraciones (`env.py`), versionado de esquema, scripts de migración, historial, upgrade/downgrade | [sección 13 — Crear las tablas con Alembic](#🐘-13-crear-las-tablas-con-alembic-migraciones-versionadas) |
+| **Base de datos** | El almacenamiento persistente final | PostgreSQL — datos persistentes | [sección 6 — PostgreSQL corriendo en Docker](#🐘-6-postgresql-corriendo-en-docker) |
 
 **Características de la persistencia** (franja inferior del diagrama) — lo que un motor
 como PostgreSQL garantiza y un archivo suelto no:
@@ -83,15 +179,15 @@ como PostgreSQL garantiza y un archivo suelto no:
 |---|---|
 | **Transacciones (ACID)** | 4 garantías sobre cada operación: **A**tomicidad (todo o nada — si algo falla a mitad de camino, se deshace por completo), **C**onsistencia (nunca deja la base en un estado inválido), **I**solamiento (una transacción no ve los cambios a medias de otra que corre al mismo tiempo), **D**urabilidad (una vez confirmado con `commit()`, sobrevive incluso a una caída del servidor). |
 | **Manejo de sesiones y conexiones** | La `Session`/`SessionLocal` de SQLAlchemy (`get_db()`) reutiliza conexiones de un *pool* en vez de abrir una nueva por cada consulta — ver `db/database.py`. |
-| **Integridad y consistencia** | Las `ForeignKeyConstraint`, `UniqueConstraint` y `nullable=False` de los modelos (sección 8) las impone la base — no hace falta validarlas a mano en Python. |
-| **Consultas optimizadas** | Índices y planificador de consultas de Postgres — por eso "ORM no significa dejar de saber SQL" (sección 3). |
+| **Integridad y consistencia** | Las `ForeignKeyConstraint`, `UniqueConstraint` y `nullable=False` de los modelos (sección 9) las impone la base — no hace falta validarlas a mano en Python. |
+| **Consultas optimizadas** | Índices y planificador de consultas de Postgres — por eso "ORM no significa dejar de saber SQL" (sección 4). |
 | **Auditoría y trazabilidad** | Poder saber *qué* cambió, *cuándo* y *quién* lo hizo — típicamente con columnas `created_at`/`updated_at` o una tabla de logs (no cubierto todavía en este proyecto). |
 | **Backups y recuperación** | Copias de la base para poder restaurarla ante un desastre — responsabilidad de PostgreSQL/infraestructura, no del código de la app. |
-| **Migraciones controladas** | Lo que hace Alembic (sección 12): cada cambio de esquema queda versionado y es reversible, en vez de editar la base a mano. |
+| **Migraciones controladas** | Lo que hace Alembic (sección 13): cada cambio de esquema queda versionado y es reversible, en vez de editar la base a mano. |
 
 > 🔗 Fuente: [¿Qué es ACID en bases de datos? — KeepCoding](https://keepcoding.io/blog/que-es-acid-bases-datos/)
 
-## 🗄️ 2. ¿Qué es un ORM?
+## 🗄️ 3. ¿Qué es un ORM?
 
 **ORM (Object-Relational Mapping / Mapeo Objeto-Relacional)**: la capa que **traduce
 información entre dos mundos que hablan distinto**:
@@ -140,7 +236,7 @@ filas de ese tipo; la clase Python/entidad conceptual sí va en singular (`User`
 > 📌 Convención: el campo de la FK se nombra `<entidad>_id` (`requester_id`,
 > `category_id`) — así se lee directo qué tabla referencia.
 
-## 🐘 3. SQL esencial — lo que SQLAlchemy hará por nosotros
+## 🐘 4. SQL esencial — lo que SQLAlchemy hará por nosotros
 
 > Aunque usemos ORM, **comprender SQL es imprescindible** para depurar, optimizar y
 > tomar decisiones informadas.
@@ -176,7 +272,7 @@ JOIN categories c ON t.category_id = c.id;
 **¿Con qué técnica genera ese SQL?** SQLAlchemy no arma el texto SQL a mano
 concatenando strings — usa un **compilador de expresiones** (*SQL Expression
 Language*): la consulta se arma primero como un objeto Python abstracto
-(`select(Ticket).where(...)`, `op.create_table(...)` — ver [sección 12](#🐘-12-crear-las-tablas-con-alembic-migraciones-versionadas)),
+(`select(Ticket).where(...)`, `op.create_table(...)` — ver [sección 13](#🐘-13-crear-las-tablas-con-alembic-migraciones-versionadas)),
 y recién al ejecutarla un **compilador específico del motor** (el *dialect*: `postgresql`,
 `mysql`, `sqlite`...) lo traduce al SQL real de ese motor. Por eso el mismo código Python
 puede apuntar a Postgres, MySQL o SQLite sin tocar una sola consulta — solo cambia la
@@ -197,11 +293,11 @@ prácticamente todos los lenguajes de backend, cada uno con su propia librería:
 > 🧪 Tip de entrevista: si todos los ORM resuelven lo mismo (Python/Java/JS ↔ SQL), ¿qué
 > cambia entre ellos? Sobre todo el **estilo de API** (*Active Record*, donde el propio
 > modelo sabe guardarse a sí mismo, vs *Data Mapper*, como SQLAlchemy — el patrón que
-> ya se ve en el [Repository Pattern](#🧩-9-repository-pattern-ticketrepository) de esta
+> ya se ve en el [Repository Pattern](#🧩-10-repository-pattern-ticketrepository) de esta
 > clase, donde el modelo no sabe nada de cómo persistirse) y qué tan explícito o
 > "mágico" es cada uno — pero el problema de fondo es el mismo en cualquier lenguaje.
 
-## 🏗️ 4. Arquitectura del proyecto (estructura de carpetas)
+## 🏗️ 5. Arquitectura del proyecto (estructura de carpetas)
 
 Estructura por capas del proyecto, en uso de acá en adelante para FastAPI + SQLAlchemy +
 Alembic:
@@ -253,7 +349,7 @@ Con los nombres reales de `02-Ejercicios/Clase-04/app/` (no genéricos): `router
 
 Carpeta de trabajo: `02-Ejercicios/Clase-04/app/`
 
-## 🐘 5. PostgreSQL corriendo en Docker
+## 🐘 6. PostgreSQL corriendo en Docker
 
 Para no instalar Postgres directo en el Mac, se levantó en un contenedor:
 
@@ -279,7 +375,7 @@ Datos de conexión para usar desde SQLAlchemy:
 
 > ⚠️ Password de **desarrollo local únicamente** — no usar en algo expuesto a internet.
 
-## 🐍 6. Entorno virtual y dependencias
+## 🐍 7. Entorno virtual y dependencias
 
 ```bash
 # Crear y activar el entorno virtual (macOS/Linux — en Mac es python3, no python)
@@ -309,7 +405,7 @@ pip freeze > requirements.txt
 > `psycopg2-binary` para Postgres, `pymysql`/`mysqlclient` para MySQL, etc. El ORM
 > habla con el driver, y el driver habla con la base de datos real.
 
-## 📄 7. Primer schema: `schemas/ticket.py`
+## 📄 8. Primer schema: `schemas/ticket.py`
 
 Primer archivo de código de la clase — los schemas de Pydantic (capa `schemas/`, ver la
 sección teórica "🏗️ Arquitectura del proyecto" arriba) para validar los datos de un
@@ -318,7 +414,7 @@ ticket:
 > 📌 **`schemas/` no es la conexión a la base de datos** — son cosas distintas. Un
 > `schema` define la **forma de los datos que entran y salen por HTTP** (Pydantic),
 > pura validación en Python; la conexión real (`engine`, `Session`) vive en
-> `db/database.py` (sección 8). Se empieza acá y no por `db/`/`models/` porque un
+> `db/database.py` (sección 9). Se empieza acá y no por `db/`/`models/` porque un
 > schema no depende de nada más — se escribe y se prueba sin Postgres corriendo (mismo
 > patrón `BaseModel`/`Field` ya visto en la [Clase 3](Clase-03.md)), mientras que la
 > conexión real recién se puede verificar con la base levantada. Es ir de afuera hacia
@@ -330,64 +426,46 @@ ticket:
 from pydantic import BaseModel, ConfigDict, Field
 
 
+# Lo que el CLIENTE manda para crear un ticket (entrada de la API)
 class TicketCreate(BaseModel):
+    # Título corto del problema — entre 5 y 120 caracteres
     title: str = Field(min_length=5, max_length=120)
+    # Detalle completo del problema — entre 10 y 500 caracteres
     description: str = Field(min_length=10, max_length=500)
+    # Urgencia del ticket — si no la mandan, queda "Media" por defecto
     priority: str = Field(default="Media")
 
+    # FK: quién reporta el ticket (id de un user que ya existe, > 0)
     requester_id: int = Field(gt=0)
+    # FK: a qué categoría pertenece (id de una category que ya existe, > 0)
     category_id: int = Field(gt=0)
 
 
+# Lo que el CLIENTE manda para actualizar un ticket (todo opcional)
 class TicketUpdate(BaseModel):
+    # Opcional: cambiar solo la prioridad, sin tocar el resto
     priority: str | None = None
+    # Opcional: cambiar solo la descripción, sin tocar el resto
     description: str | None = None
 
 
+# Lo que la API le DEVUELVE al cliente (salida de la API)
 class TicketResponse(BaseModel):
+    # El id que le asignó Postgres al crear el registro
     id: int
     title: str
     description: str
     priority: str
 
+    # Las mismas FK, ya guardadas en la base de datos
     requester_id: int
     category_id: int
 ```
 
-### 📚 Definiciones antes de leer el código
-
-| Término | Qué es |
-|---|---|
-| **Pydantic** | La librería de Python que valida datos a partir de type hints: declarás la forma que *debería* tener un dato (con una clase y tipos) y ella revisa que lo que llega cumpla esa forma — si no, avisa el error solita (ya lo vimos generar el `422` en la [Clase 3](Clase-03.md)). |
-| **`BaseModel`** | La clase base de Pydantic. Toda clase que **hereda** de ella (`class TicketCreate(BaseModel)`, herencia de la [Clase 2](Clase-02.md)) se convierte en un "molde validado" — Pydantic le agrega gratis toda la lógica de revisar tipos, campos obligatorios/opcionales, etc. |
-| **`Field(...)`** | Función de Pydantic para sumarle **reglas extra a un campo puntual**, más allá de su tipo (mínimo/máximo de caracteres, valor por defecto, que sea mayor a 0...). Se usa como el valor que se le asigna al campo. |
-| **`ConfigDict`** | Objeto de **configuración general de todo el modelo** (no de un campo suelto) — por ejemplo, decirle a Pydantic que además de JSON/dict acepte leer datos directo de un objeto (`from_attributes=True`, ver el callout más abajo). |
-| **`str`** | Uno de los tipos básicos de Python ([Clase 1](Clase-01.md)) — texto. Acá se usa como **type hint**: le dice a Pydantic "este campo tiene que ser texto". |
-| **`engine`** | *(no es de `schemas/` — vive en `db/database.py`, sección 8, se aclara acá porque suele confundirse)* El objeto de SQLAlchemy que representa la conexión "física" a Postgres — sabe *cómo* hablarle a la base (usuario, password, host, puerto), pero no ejecuta consultas por sí solo; para eso se usa a través de una `Session`. |
-
-### 🧩 Mecánica de Python: el `import` y el `nombre: tipo = valor`
-
-**El `import`** — `from pydantic import BaseModel, ConfigDict, Field` se lee "de la
-librería `pydantic`, traé estas 3 piezas". Después de esa línea, esos 3 nombres quedan
-disponibles para usar en el resto del archivo, como si estuvieran escritos ahí mismo. Es
-el mismo patrón `from módulo import función` de la Clase 1
-(`from request_utils import calculate_response_time`) — acá `pydantic` es una librería
-instalada (`pip install pydantic`) en vez de un archivo propio del proyecto.
-
-**Declarar un campo dentro de una clase** — `title: str = Field(min_length=5,
-max_length=120)` tiene 3 partes:
-```
-   title    :   str    =   Field(min_length=5, max_length=120)
-   ↑            ↑           ↑
-   nombre       tipo        valor asignado — acá no es un dato fijo
-   del campo    (type       como "Media", sino el RESULTADO de llamar
-                 hint)      a la función Field(...), que devuelve un
-                            objeto con las reglas de validación
-```
-Es la misma sintaxis `nombre: tipo = valor` que ya usaste en funciones tipadas (Clase 1,
-`estimated_hours: float`) y en `dataclass` (Clase 2) — la diferencia es que acá el
-"valor" no es un dato suelto, sino el resultado de **llamar** a `Field(...)`, que Pydantic
-sabe leer para saber qué reglas aplicarle a ese campo específico.
+> 📌 Definiciones de `Pydantic`/`BaseModel`/`Field`/`ConfigDict`/`str`, y la mecánica de
+> `import` y `nombre: tipo = valor`, están en el
+> [glosario de la sección 1](#📚-1-definiciones-clave) — acá va directo el detalle
+> línea por línea aplicado a este archivo puntual:
 
 **Línea por línea:**
 
@@ -408,7 +486,7 @@ sabe leer para saber qué reglas aplicarle a ese campo específico.
 | `requester_id: int` / `category_id: int` | Se devuelven tal cual, también sin `gt=0` — mismo motivo: ya se validaron al entrar. |
 
 > 📝 `ConfigDict` está importado pero no se usa todavía en ninguna de las 3 clases — no es
-> un error, probablemente el profe lo deja preparado para más adelante, cuando
+> un error, probablemente quedó preparado para más adelante, cuando
 > `TicketResponse` necesite leer datos directo de un objeto ORM de SQLAlchemy (no de un
 > `dict`). Ahí se usa así: `model_config = ConfigDict(from_attributes=True)` — sin eso,
 > Pydantic v2 no sabe convertir un objeto `Ticket` del ORM en un `TicketResponse`.
@@ -422,7 +500,7 @@ sabe leer para saber qué reglas aplicarle a ese campo específico.
 > 💡 `gt=0` en `requester_id`/`category_id` evita un id inválido como `0` o negativo —
 > son las FK del diagrama ER de la teoría.
 
-## 🗄️ 8. Modelos SQLAlchemy (ORM): `User`, `Category`, `Ticket`
+## 🗄️ 9. Modelos SQLAlchemy (ORM): `User`, `Category`, `Ticket`
 
 Las 3 tablas del diagrama de la teoría, ya como clases Python en `models/`. Usan el
 estilo **moderno de SQLAlchemy 2.0** (`Mapped[...]` + `mapped_column(...)`, tipado con
@@ -606,7 +684,7 @@ print('OK')
 "
 ```
 
-## 🧩 9. Repository Pattern: `TicketRepository`
+## 🧩 10. Repository Pattern: `TicketRepository`
 
 **Modelos vs. Repositorio — dos capas con roles distintos:**
 
@@ -619,10 +697,10 @@ Los modelos son **pasivos**: describen la estructura pero no hacen nada por sí 
 repositorio es **activo**: cada vez que la app necesita leer o escribir tickets, pasa
 por acá.
 
-> 💡 `db: Session` (abajo) no tiene nada que ver con cómo se llame tu archivo de
-> conexión (`db/database.py` vs. `db/session.py` del profe) — `Session` sale siempre de
-> la librería `sqlalchemy.orm`. Ver "Import de librería vs. nombre de tu archivo" en
-> [00-Notas/02-Conceptos.md](../00-Notas/02-Conceptos.md).
+> 💡 `db: Session` (abajo) no tiene nada que ver con cómo se llame el archivo de
+> conexión (`db/database.py` vs. otro nombre como `db/session.py`) — `Session` sale
+> siempre de la librería `sqlalchemy.orm`. Ver "Import de librería vs. nombre de tu
+> archivo" en [00-Notas/02-Conceptos.md](../00-Notas/02-Conceptos.md).
 
 ```python
 # 02-Ejercicios/Clase-04/app/repositories/ticket_repository.py
@@ -693,7 +771,7 @@ Los otros 3 métodos usan `Session` directo, sin pasar por `select()`:
 > `Depends(get_db)`) decide qué sesión usar. Facilita testear el repositorio con una
 > sesión de prueba, sin tocar la base de datos real.
 
-## 🧠 10. Capa de servicios: `TicketService`
+## 🧠 11. Capa de servicios: `TicketService`
 
 **Repositorio vs. Servicio — no hacen lo mismo:** `TicketRepository` solo sabe **leer y
 escribir** en la base de datos (CRUD puro, sin opinión). `TicketService` es la capa de
@@ -759,7 +837,7 @@ class TicketService:
 > carpeta), así que el import correcto es `from models.ticket import Ticket`, sin
 > prefijo. Detalle completo en la tabla de errores, abajo.
 
-## 🌐 11. Router: `routers/tickets.py`
+## 🌐 12. Router: `routers/tickets.py`
 
 Última capa — los endpoints HTTP reales. El `router` llama al `service` (nunca directo
 al `repository`, respetando el orden de capas del diagrama de arriba):
@@ -838,7 +916,7 @@ def delete_ticket(
 > `model_config = ConfigDict(from_attributes=True)` — sin eso, Pydantic no sabe leer
 > atributos de un objeto ORM (solo sabía leer de un `dict`).
 
-## 🐘 12. Crear las tablas con Alembic (migraciones versionadas)
+## 🐘 13. Crear las tablas con Alembic (migraciones versionadas)
 
 ### 🧭 ¿Qué es Alembic?
 
@@ -973,8 +1051,8 @@ else:
     run_migrations_online()
 ```
 
-> ⚠️ **Ojo con copiar el `env.py` de otra persona/entorno:** si el profe (u otro
-> tutorial) tiene su proyecto armado con `app` como paquete real, su versión va a decir
+> ⚠️ **Ojo con copiar el `env.py` de otra persona/entorno:** si el material del curso (u
+> otro tutorial) tiene su proyecto armado con `app` como paquete real, esa versión va a decir
 > `from app.db.database import Base`, `from app.models.user import User`, etc. Pegar
 > eso tal cual en este proyecto tira `ModuleNotFoundError: No module named 'app'` —
 > mismo error que ya vimos en `repositories/`, `services/` y acá también. Usá siempre
@@ -1061,7 +1139,7 @@ op.create_table('tickets',
 > en memoria, en el momento, a partir de `op.create_table(...)` + el dialecto de Postgres.
 
 > 📌 Es exactamente la misma idea de "ORM = traductor Python↔SQL" de la
-> [sección 2 de esta clase](#🗄️-2-¿que-es-un-orm) (`class Ticket` → `CREATE TABLE`,
+> [sección 3 de esta clase](#🗄️-3-¿que-es-un-orm) (`class Ticket` → `CREATE TABLE`,
 > `Ticket(...)` → `INSERT`), aplicada esta vez al **esquema** (la estructura de las
 > tablas) en vez de a los **datos** (las filas). Mismo traductor, dos capas distintas.
 
