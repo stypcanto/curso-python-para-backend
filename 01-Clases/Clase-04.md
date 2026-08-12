@@ -1537,6 +1537,14 @@ suelta). Se lo nombró `Clase4`:
 > **cualquier** petición de la colección puede usar `{{base_url}}/tickets` en vez de
 > repetir la URL completa.
 
+![Postman: fila de la variable base_url con el checkbox a la izquierda marcado (activo)](/clase-04-postman-variable-checkbox-activo.png)
+
+> ⚠️ El **checkbox** a la izquierda de cada variable (✅ en la captura) es un segundo
+> interruptor, aparte de tener el Environment seleccionado como activo: una variable
+> con el checkbox **destildado** queda guardada en la tabla pero Postman la trata como
+> si no existiera — mismo síntoma que el de abajo (`{{base_url}}` sin resolver), es un
+> segundo lugar donde revisar si algo no funciona.
+
 > ⚠️ Con el Environment creado pero sin seleccionarlo activo (dropdown arriba a la
 > derecha de Postman, al lado del ícono del ojo), `{{base_url}}` en una petición queda
 > **sin resolver** — Postman manda literal el texto `{{base_url}}/tickets` y la API
