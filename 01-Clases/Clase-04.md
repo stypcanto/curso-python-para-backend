@@ -1067,6 +1067,24 @@ INFO  [alembic.runtime.migration] Will assume transactional DDL.
 > `alembic upgrade head` es **idempotente**: si ya estás en la última migración
 > (`head`), no hace nada, solo confirma que no hay pendientes.
 
+Para confirmar que las tablas están de verdad, sin fiarse solo de lo que imprime la
+terminal, se consulta Postgres directo:
+```bash
+docker exec -it curso-postgres psql -U postgres -d curso_backend -c "\dt"
+```
+```
+             List of relations
+ Schema |      Name       | Type  |  Owner
+--------+------------------+-------+----------
+ public | alembic_version  | table | postgres
+ public | categories       | table | postgres
+ public | tickets          | table | postgres
+ public | users            | table | postgres
+```
+> 💡 `alembic_version` es la tabla que crea el propio Alembic (no un modelo del
+> proyecto) — guarda una sola fila con el id de la última migración aplicada, para
+> saber la próxima vez si hay algo pendiente o no.
+
 **`uvicorn main:app --reload`:**
 ```
 INFO:     Will watch for changes in these directories: ['.../app']
@@ -1089,6 +1107,13 @@ INFO:     Application startup complete.
 > 💡 **`main:app`** — mismo patrón que `alembic.ini`: `main` es el archivo `main.py`,
 > `:app` es la variable `app = FastAPI(...)` que vive adentro. Uvicorn importa ese
 > módulo y usa esa variable como la aplicación a correr.
+
+> 📌 **¿Dónde se define el puerto `8000`?** En ningún archivo del proyecto — ni
+> `main.py`, ni `core/config.py`, ni `.env` fijan un puerto. Como el comando no lleva
+> `--port`, uvicorn usa **su propio valor por defecto** (confirmado con
+> `uvicorn --help` en el `.venv` del proyecto): `--host 127.0.0.1` y `--port 8000`. Para
+> usar otro: `uvicorn main:app --reload --port 8001`; para exponerlo a otras máquinas de
+> la red (no solo tu Mac): sumar `--host 0.0.0.0`.
 
 Y andá a `http://127.0.0.1:8000/docs` — ahí aparece **Swagger UI**, con los 5
 endpoints de tickets, cada uno con su formulario para probarlo sin `curl` ni Postman.
