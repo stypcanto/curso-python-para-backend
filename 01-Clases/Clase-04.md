@@ -1615,6 +1615,36 @@ suelta). Se lo nombró `Clase4`:
 > **cualquier** petición de la colección puede usar `{{base_url}}/tickets` en vez de
 > repetir la URL completa.
 
+> 📌 **Qué es una variable, en concreto:** un par `nombre = valor` que Postman guarda
+> **una sola vez** (en el Environment) y que cualquier petición puede referenciar
+> escribiendo `{{nombre}}` en vez del valor real — Postman hace el reemplazo justo
+> antes de mandar la petición, en cualquier parte donde aparezca (URL, headers, body).
+> Es el mismo problema que resuelve una variable de entorno en `.env` (Clase 4, sección
+> "PostgreSQL") o una variable de Python: **un solo lugar para editar**, en vez de
+> buscar y reemplazar en 20 peticiones guardadas si el valor cambia.
+
+> 💡 **Por qué se creó justo acá, en el paso 2:** porque `base_url` es lo primero que
+> **toda** petición de la colección va a necesitar — tenerla cargada desde el principio
+> evita escribir `http://127.0.0.1:8000/api/v1` a mano en cada una de las peticiones que
+> vienen después (pasos 5 en adelante).
+
+> 🔑 **No es solo para URLs** — el mismo mecanismo sirve para cualquier dato que se
+> repite entre peticiones o que no debería quedar escrito en texto plano dentro de la
+> colección (que sí se puede subir a git/compartir). Casos típicos que vas a encontrar
+> más adelante en el curso:
+>
+> | Variable | Para qué | Ejemplo de valor |
+> |---|---|---|
+> | `token` / `access_token` | Login: se guarda **una vez**, tras loguearse, y las demás peticiones la usan en el header `Authorization: Bearer {{token}}` sin volver a pedir usuario/contraseña en cada una | `eyJhbGciOiJIUzI1NiIs...` |
+> | `password` / `api_key` | Credenciales que no querés que queden **visibles** en cada petición guardada — Postman permite marcarlas como tipo `secret`, que las oculta en pantalla | `••••••••` |
+> | `user_id` | El id del usuario logueado, para armar URLs tipo `{{base_url}}/users/{{user_id}}/tickets` | `1` |
+> | `env` (dev/prod) | Tener **dos Environments** (`Clase4-local`, `Clase4-prod`) con la misma variable `base_url` pero distinto valor — cambiás de uno a otro con el mismo dropdown que activaste en el paso 1, sin tocar ninguna petición | `http://127.0.0.1:8000/api/v1` vs. `https://api.miempresa.com/api/v1` |
+>
+> El flujo típico de login sería: `POST {{base_url}}/auth/login` con `email`/`password`
+> → la respuesta trae un `token` → un **script** de Postman lo guarda solo en la
+> variable `token` (`pm.environment.set("token", ...)`, no cubierto todavía en esta
+> clase) → el resto de las peticiones ya salen autenticadas usando `{{token}}`.
+
 **3) Armar la Collection `Clase4`** — botón `+` → `Collection` (distinta del
 `Environment` de arriba: el Environment guarda variables, la Collection guarda las
 peticiones):
