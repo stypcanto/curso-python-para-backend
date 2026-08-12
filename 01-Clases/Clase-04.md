@@ -20,6 +20,7 @@ sidebar: "Clase 4 · Integración Base de Datos"
 - Repository Pattern
 - Migraciones con Alembic
 - Buenas prácticas de persistencia
+- *(profundización propia)* Probar los endpoints con Postman/Bruno en vez de solo Swagger
 
 # 📖 PARTE TEÓRICA
 
@@ -74,6 +75,7 @@ la petición, y recién después siga ejecutando el `finally` que la cierra — 
 | **Docker** | Herramienta para correr programas dentro de **contenedores**: un entorno aislado y reproducible que empaqueta la app (acá, Postgres) con todo lo que necesita para funcionar, sin instalarla directo en el sistema operativo. | sección 6 |
 | **Contenedor** | Una instancia en ejecución de una **imagen** de Docker (`postgres:16-alpine`) — como una mini-máquina virtual liviana, aislada del resto del Mac. | sección 6 |
 | **Driver (`psycopg2-binary`)** | El traductor de bajo nivel que sabe hablar el protocolo real de Postgres — SQLAlchemy es agnóstico al motor, pero necesita un driver específico por cada uno (`psycopg2` para Postgres, `pymysql` para MySQL...). | sección 7 |
+| **Postman / Bruno** | Clientes API: guardan peticiones HTTP en **colecciones** reutilizables (con variables como `{{base_url}}`) para probar una API sin escribir `curl` cada vez. Bruno es la alternativa *open source* que guarda la colección como archivos de texto versionables en git. | sección 14 |
 
 ### 🏛️ Persistencia y arquitectura
 
@@ -920,6 +922,16 @@ def delete_ticket(
     service.delete_ticket(db, ticket_id)
 ```
 
+> 📌 **La ruta completa no es `/tickets` — es `/api/v1/tickets`.** El `prefix="/tickets"`
+> de acá es del `router` solo; `main.py` lo monta con un prefijo **adicional**:
+> ```python
+> app.include_router(tickets_router, prefix="/api/v1")
+> ```
+> Los dos prefijos se **concatenan**: `/api/v1` (de `main.py`) + `/tickets` (de este
+> `router`) = `/api/v1/tickets`. Es la convención de **versionado de APIs** ya vista en
+> la [Clase 3](Clase-03.md) — reservar `/api/v1/...` desde el día 1 deja lugar para un
+> `/api/v2/...` el día que haya un cambio que rompa compatibilidad, sin tocar `/v1`.
+
 > 💡 **`Depends(get_db)` y `Depends(get_ticket_service)`**: FastAPI resuelve estas
 > dependencias **antes** de correr la función del endpoint — abre la sesión de BD y
 > arma el `TicketService` automáticamente, sin que cada función tenga que hacerlo a
@@ -1261,7 +1273,7 @@ endpoints de tickets, cada uno con su formulario para probarlo sin `curl` ni Pos
 | De dónde sale cada cosa en `/docs` | En el código |
 |---|---|
 | El título "HelpDesk API" y la descripción | `FastAPI(title=..., description=..., version=...)` en `main.py` |
-| Cada endpoint listado (`GET /tickets/`, `POST /tickets/`, ...) | Los `@router.get(...)`, `@router.post(...)` de `routers/tickets.py` |
+| Cada endpoint listado (`GET /api/v1/tickets/`, `POST /api/v1/tickets/`, ...) | Los `@router.get(...)`, `@router.post(...)` de `routers/tickets.py` |
 | Los campos del formulario para "Try it out" (`title`, `priority`, ...) | Los campos de `TicketCreate`/`TicketUpdate` en `schemas/ticket.py` |
 | La forma de la respuesta que muestra como ejemplo | `response_model=TicketResponse` de cada endpoint |
 | El grupo "Tickets" en el menú | `tags=["Tickets"]` del `APIRouter(...)` |
@@ -1274,17 +1286,134 @@ endpoints de tickets, cada uno con su formulario para probarlo sin `curl` ni Pos
 > de documentación a mano.
 
 Los 5 endpoints ya están **verificados end-to-end** contra Postgres real (6 casos de
-prueba — `GET /tickets/{id}` se probó dos veces: con un id que existe y con uno que no,
-para confirmar también el `404`):
+prueba — `GET /api/v1/tickets/{id}` se probó dos veces: con un id que existe y con uno
+que no, para confirmar también el `404`):
 
 | Endpoint | Resultado |
 |---|---|
-| `POST /tickets/` | `201` — crea el ticket |
-| `GET /tickets/` | `200` — lista todos |
-| `GET /tickets/{id}` | `200` — trae uno |
-| `GET /tickets/99999` (no existe) | `404 {"detail": "Ticket no encontrado"}` |
-| `PATCH /tickets/{id}` | `200` — actualiza solo `priority` |
-| `DELETE /tickets/{id}` | `204` |
+| `POST /api/v1/tickets/` | `201` — crea el ticket |
+| `GET /api/v1/tickets/` | `200` — lista todos |
+| `GET /api/v1/tickets/{id}` | `200` — trae uno |
+| `GET /api/v1/tickets/99999` (no existe) | `404 {"detail": "Ticket no encontrado"}` |
+| `PATCH /api/v1/tickets/{id}` | `200` — actualiza solo `priority` |
+| `DELETE /api/v1/tickets/{id}` | `204` |
+
+## 🧪 14. Probar los endpoints con Postman o Bruno
+
+Swagger UI (sección anterior) alcanza para probar rápido, pero **Postman** y **Bruno**
+son clientes API dedicados: guardan las peticiones en una **colección** reutilizable
+(no hay que reescribir el body cada vez), permiten variables (`{{base_url}}`) y
+encadenar peticiones (usar el `id` que devolvió un `POST` en el siguiente `GET`).
+
+### 🆚 Postman vs. Bruno — cuál usar
+
+| | Postman | Bruno |
+|---|---|---|
+| Qué es | El cliente API más usado — cuenta con GUI, cloud, equipos | Alternativa **open source** (MIT), más nueva |
+| Dónde guarda la colección | En la nube (workspace de Postman) | **Archivos de texto plano** (`.bru`) en tu propio disco |
+| Se puede subir a git | No directo (formato propio en la nube) | **Sí** — es la razón por la que muchos devs lo eligen: la colección versiona junto al código, como cualquier `.py` |
+| Cuenta obligatoria | Sí, para sincronizar | No — funciona 100% local y offline |
+| Para este curso | Sirve igual, más conocido | Encaja mejor con el espíritu del repo (todo versionado en git) |
+
+> 🔗 Fuente: [Bruno vs Postman 2026 — QASkills](https://qaskills.sh/blog/bruno-vs-postman-api-testing-2026)
+
+### ⚙️ Configuración común a los dos: la variable `base_url`
+
+En vez de escribir `http://127.0.0.1:8000/api/v1` en cada petición, se crea **una
+variable de entorno** (`base_url`) y las peticiones usan `{{base_url}}/tickets`. Si el
+día de mañana cambia el puerto o se despliega en un servidor real, se edita **un solo
+lugar** en vez de cada petición guardada.
+
+| Cliente | Dónde se crea | Cómo se usa en una petición |
+|---|---|---|
+| Postman | ⚙️ *Environments* → *New Environment* → variable `base_url` = `http://127.0.0.1:8000/api/v1` | URL de la petición: `{{base_url}}/tickets` |
+| Bruno | Ícono de engranaje de la colección → *Variables* → `base_url` = `http://127.0.0.1:8000/api/v1` | Igual sintaxis: `{{base_url}}/tickets` |
+
+### 📋 Los 5 endpoints — probados de verdad contra `curso-postgres`
+
+Cada fila está **verificada con `curl` real** contra el servidor corriendo (no
+inventada) — el mismo request/response que vas a ver en Postman/Bruno:
+
+**1) `POST {{base_url}}/tickets/` — crear un ticket**
+```bash
+curl -s -X POST http://127.0.0.1:8000/api/v1/tickets/ \
+  -H "Content-Type: application/json" \
+  -d '{"title":"No carga el dashboard","description":"El dashboard principal no carga desde ayer","priority":"Alta","requester_id":1,"category_id":1}'
+```
+```
+201 Created
+{"id":3,"title":"No carga el dashboard","description":"El dashboard principal no carga desde ayer","priority":"Alta","requester_id":1,"category_id":1}
+```
+
+**2) `GET {{base_url}}/tickets/` — listar todos**
+```bash
+curl -s http://127.0.0.1:8000/api/v1/tickets/
+```
+```
+200 OK
+[{"id":1,"title":"Falla de VPN", ...}, {"id":2,"title":"Lentitud del wifi", ...}, {"id":3,"title":"No carga el dashboard", ...}]
+```
+
+**3) `GET {{base_url}}/tickets/3` — traer uno por id**
+```bash
+curl -s http://127.0.0.1:8000/api/v1/tickets/3
+```
+```
+200 OK
+{"id":3,"title":"No carga el dashboard","description":"El dashboard principal no carga desde ayer","priority":"Alta","requester_id":1,"category_id":1}
+```
+
+**4) `GET {{base_url}}/tickets/99999` — id que no existe**
+```bash
+curl -s http://127.0.0.1:8000/api/v1/tickets/99999
+```
+```
+404 Not Found
+{"detail":"Ticket no encontrado"}
+```
+
+**5) `PATCH {{base_url}}/tickets/3` — actualizar solo `priority`**
+```bash
+curl -s -X PATCH http://127.0.0.1:8000/api/v1/tickets/3 \
+  -H "Content-Type: application/json" \
+  -d '{"priority":"Cerrado"}'
+```
+```
+200 OK
+{"id":3,"title":"No carga el dashboard","description":"El dashboard principal no carga desde ayer","priority":"Cerrado","requester_id":1,"category_id":1}
+```
+> 💡 Solo cambió `priority` — `title`/`description` quedaron intactos, porque
+> `TicketUpdate` (sección 8) tiene todos los campos opcionales y el repositorio
+> (sección 10) actualiza únicamente lo que vino en el body (`exclude_unset=True`).
+
+**6) `DELETE {{base_url}}/tickets/3` — borrar**
+```bash
+curl -s -X DELETE http://127.0.0.1:8000/api/v1/tickets/3
+```
+```
+204 No Content
+(sin body)
+```
+
+### 🖱️ Armar la petición en Postman/Bruno (en vez de `curl`)
+
+Cada `curl` de arriba se arma en la GUI así — mismos 4 datos en los dos clientes:
+
+| Dato del `curl` | Dónde va en Postman/Bruno |
+|---|---|
+| `-X POST` / `-X PATCH` / `-X DELETE` (o nada = `GET`) | El selector de **método** al lado de la URL |
+| La URL (`http://127.0.0.1:8000/api/v1/tickets/...`) | La barra de **URL** — usando `{{base_url}}/tickets/...` |
+| `-H "Content-Type: application/json"` | Pestaña **Headers** (Postman/Bruno lo agregan solos al elegir body tipo JSON) |
+| `-d '{...}'` | Pestaña **Body** → tipo `JSON` (Postman) / `Json` (Bruno) → pegar el mismo objeto |
+
+> ⚠️ Error común: mandar el body como texto plano sin marcar el tipo `JSON` en la
+> pestaña Body — ahí FastAPI no lo reconoce como JSON válido y responde `422`, aunque el
+> texto tenga la forma correcta.
+
+> 🧪 **Tip de entrevista:** *¿por qué versionar la colección de Postman/Bruno junto con
+> el código?* Así cualquiera que clona el repo (o un futuro yo) tiene **de una** las
+> peticiones ya armadas y probadas, sin tener que reconstruirlas leyendo `routers/` —
+> mismo espíritu que documentar los 5 endpoints acá, en la nota de la clase.
 
 ## 🐞 Errores de esta clase (con solución)
 
