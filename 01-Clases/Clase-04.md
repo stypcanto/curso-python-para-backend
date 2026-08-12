@@ -1126,6 +1126,63 @@ curl -s http://127.0.0.1:8000/health
 > todo lo que está **después** corre una vez que el endpoint ya respondió (agregar el
 > header) — mismo mecanismo explicado en la [Clase 3](Clase-03.md).
 
+### 🌐 Verificado en el navegador: `GET /api/v1/tickets/`
+
+Con la app corriendo (`uvicorn main:app --reload`), entrar directo a
+`http://127.0.0.1:8000/api/v1/tickets/` en el navegador — sin Postman, sin `curl` —
+también funciona: un `GET` es lo que hace el navegador solo con cualquier URL.
+
+![Navegador en 127.0.0.1:8000/api/v1/tickets/ mostrando la respuesta JSON: una lista con un ticket, con id, title, description, priority, requester_id y category_id](/clase-04-json-tickets-navegador.png)
+
+**¿Qué es ese `[ { ... } ]` que se ve?** Es **JSON** (*JavaScript Object Notation*): un
+formato de texto para representar datos, que cualquier lenguaje sabe leer — no es
+exclusivo de JavaScript, es el formato estándar en el que hablan casi todas las APIs
+web. Se arma con las mismas piezas que ya se vienen usando en Python:
+
+| Símbolo JSON | Equivalente en Python | En este ejemplo |
+|---|---|---|
+| `[ ]` | `list` | La respuesta completa: una **lista** de tickets |
+| `{ }` | `dict` | Cada ticket es un **objeto** (par clave-valor) |
+| `"clave": valor` | `clave: valor` de un dict | `"title": "No carga el dashboard"` |
+| `123` (sin comillas) | `int` | `"id": 5`, `"requester_id": 1` |
+| `"texto"` (con comillas) | `str` | `"priority": "Alta"` |
+
+**¿Cómo se generó ese JSON exacto?** No lo escribió nadie a mano — es el resultado de
+toda la cadena de capas de esta clase, en orden, para esa única petición:
+
+```
+1. Navegador → GET /api/v1/tickets/
+2.   main.py → el middleware add_process_time arranca el cronómetro
+3.   main.py → include_router() ya había conectado esa URL con
+                routers/tickets.py → list_tickets()
+4.   routers/tickets.py → Depends(get_db) abre una Session
+                          Depends(get_ticket_service) arma el TicketService
+5.   TicketService.list_tickets() → llama a TicketRepository.get_all()
+6.   TicketRepository.get_all() → arma un statement (select(Ticket)...)
+                                   y lo ejecuta contra Postgres (db.scalars(...))
+7.   PostgreSQL → devuelve las filas reales de la tabla tickets
+8.   SQLAlchemy → traduce esas filas a objetos Python (Ticket, Ticket, ...)
+9.   FastAPI → como el endpoint dice response_model=list[TicketResponse],
+               convierte cada Ticket a un TicketResponse (Pydantic)
+10.  FastAPI → serializa esos TicketResponse a JSON (el paso final)
+11.  main.py → el middleware agrega el header x-process-time y responde
+12. Navegador → recibe el JSON y lo muestra (con colores, si tiene una
+                extensión de formateo — el navegador solo, sin extensión,
+                lo muestra como texto plano)
+```
+
+> 💡 Ni `main.py`, ni el `router`, ni el `service`, ni el `repository` "escriben" JSON
+> en ningún lado — **FastAPI lo arma en el último paso** (10), automáticamente, a
+> partir del `TicketResponse` que definió `schemas/ticket.py`. Por eso cambiar un campo
+> del schema cambia el JSON de salida sin tocar el resto de las capas.
+
+> 🧪 **Tip de entrevista:** *¿por qué la API responde JSON y no, por ejemplo, HTML?*
+> Porque el objetivo de una API REST es que la **consuma código** (otro backend, una
+> app móvil, un frontend en React), no una persona leyendo directo en el navegador —
+> JSON es liviano, sin ambigüedad de tipos, y todos los lenguajes de programación
+> tienen una forma nativa de convertirlo a sus propias estructuras de datos (acá,
+> `dict`/`list`).
+
 ## 🐘 14. Crear las tablas con Alembic (migraciones versionadas)
 
 ### 🧭 ¿Qué es Alembic?
@@ -1618,6 +1675,74 @@ curl -s -X DELETE http://127.0.0.1:8000/api/v1/tickets/3
 204 No Content
 (sin body)
 ```
+
+### 📸 Recorrido completo en Postman (capturas propias)
+
+Todo lo de arriba, pero tal como se hizo de verdad en la GUI — colección, variable y
+los 5 endpoints, en el orden real en que se probaron (incluido el error de FK que salió
+en el camino).
+
+**1) Armar la Collection `Clase4`** — botón `+` → `Collection` (no `Environment`, que es
+para las variables, ya armado antes):
+
+![Postman: menú "+" con la opción Collection resaltada](/clase-04-postman-crear-collection.png)
+
+**2) Agregar la primera petición** — collection `Clase4` vacía, tooltip "Add request":
+
+![Postman: colección Clase4 vacía, con el tooltip Add request visible sobre el ícono +](/clase-04-postman-add-request.png)
+
+**3) Armar `GET Listar Tickets`** — `{{base_url}}/tickets/`, todavía sin mandar:
+
+![Postman: petición GET Listar Tickets armada, URL {{base_url}}/tickets/, pestaña Params vacía](/clase-04-postman-get-armada.png)
+
+**4) Primer envío — la base recién migrada, sin tickets todavía:**
+
+![Postman: GET Listar Tickets enviado, respuesta 200 OK con body vacío []](/clase-04-postman-get-vacio.png)
+
+> 💡 `200` + `[]` — no es un error, ya lo vimos: significa "la consulta funcionó, no
+> hay tickets todavía".
+
+**5) El primer `POST` dio `500`** — mismo motivo documentado en
+[[500-foreign-key-inexistente-sin-datos-previos]]: `requester_id`/`category_id`
+apuntaban a un `user`/`category` que no existían. Este diagrama (hecho aparte, como
+referencia propia) ayuda a ver por qué:
+
+![Diagrama entidad-relación: tickets con FK requester_id -> users.id y category_id -> categories.id](/clase-04-diagrama-er-referencia.png)
+
+**6) `POST` exitoso, ya con el `user`/`category` de prueba creados:**
+
+![Postman: POST Enviar Ticket con status 201 Created, respuesta con id 5](/clase-04-postman-post-exitoso.png)
+
+> 📝 En el body de esta petición se probó agregar `"status": "Bueno"` (pensando que
+> faltaba ese campo) — la respuesta **no lo incluye**, confirmando lo ya explicado:
+> `status` no es un campo de `TicketCreate`, Pydantic lo ignora sin avisar.
+
+**7) Confirmar en la lista — ya con 2 tickets creados** (`id 4`, de una prueba anterior
+por `curl`, y `id 5`, el de Postman):
+
+![Postman: GET Listar Tickets con 200 OK, lista con 2 tickets (id 4 y 5)](/clase-04-postman-get-dos-tickets.png)
+
+**8) `PATCH` — actualizar solo la `priority` del ticket `4`:**
+
+![Postman: PATCH Actualizar Ticket a tickets/4, body {"priority": "Cerrado"}, respuesta 200 OK](/clase-04-postman-patch-actualizar.png)
+
+**9) Verificar el `PATCH` en la lista** — `id 4` ya con `priority: "Cerrado"`, `id 5`
+sin tocar:
+
+![Postman: GET Listar Tickets, ticket id 4 con priority Cerrado](/clase-04-postman-get-verificar-patch.png)
+
+**10) `DELETE` — borrar el ticket `4`:**
+
+![Postman: DELETE Eliminar Ticket a tickets/4, respuesta 204 No Content](/clase-04-postman-delete-ticket.png)
+
+**11) Verificar el `DELETE`** — la lista ya solo muestra el `id 5`:
+
+![Postman: GET Listar Tickets, la lista ya solo tiene el ticket id 5](/clase-04-postman-get-verificar-delete.png)
+
+> 🧪 **Tip de entrevista:** *¿por qué documentar hasta los errores (el `500` de FK) y
+> no solo lo que salió bien?* Porque es lo que de verdad pasa al desarrollar — una nota
+> que solo muestra el camino feliz no prepara para diagnosticar el error real cuando
+> aparezca en el trabajo.
 
 ### 🖱️ Armar la petición en Postman/Bruno (en vez de `curl`)
 
