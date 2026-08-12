@@ -1,8 +1,8 @@
 ---
-sidebar: "Clase 4 · PostgreSQL"
+sidebar: "Clase 4 · Integración Base de Datos"
 ---
 
-# 📙 Clase 4 — PostgreSQL y persistencia de datos
+# 📙 Clase 4 — Integración a base de datos y arquitectura de persistencia de datos
 
 > Python para Backend · 2026-08-11 · Carpeta: `02-Ejercicios/Clase-04`
 > ⬅️ Volver al [índice de clases](00-Indice.md)
@@ -58,6 +58,22 @@ Es la misma sintaxis `nombre: tipo = valor` que ya se usó en funciones tipadas 
 `estimated_hours: float`) y en `dataclass` (Clase 2). Reaparece con otra cara en
 `id: Mapped[int] = mapped_column(primary_key=True)` (sección 9) — mismas 3 partes,
 distinta función del lado derecho.
+
+**`Generator` y `yield`** — `def get_db() -> Generator[Session, None, None]:` con
+`yield db` adentro es una **función generadora**: en vez de terminar y devolver un
+único valor (`return`), *pausa* en el `yield`, entrega ese valor a quien la llamó, y
+quien la llamó decide cuándo "reanudarla" (acá lo hace FastAPI, al terminar la
+petición). Es lo que permite que `get_db()` abra la sesión, la "preste" mientras dura
+la petición, y recién después siga ejecutando el `finally` que la cierra — ver sección
+9. `Generator` (de `collections.abc`) es solo el *type hint* que describe esa forma.
+
+### 🐳 Herramientas externas (no son librerías de Python)
+
+| Término | Qué es | Se profundiza en |
+|---|---|---|
+| **Docker** | Herramienta para correr programas dentro de **contenedores**: un entorno aislado y reproducible que empaqueta la app (acá, Postgres) con todo lo que necesita para funcionar, sin instalarla directo en el sistema operativo. | sección 6 |
+| **Contenedor** | Una instancia en ejecución de una **imagen** de Docker (`postgres:16-alpine`) — como una mini-máquina virtual liviana, aislada del resto del Mac. | sección 6 |
+| **Driver (`psycopg2-binary`)** | El traductor de bajo nivel que sabe hablar el protocolo real de Postgres — SQLAlchemy es agnóstico al motor, pero necesita un driver específico por cada uno (`psycopg2` para Postgres, `pymysql` para MySQL...). | sección 7 |
 
 ### 🏛️ Persistencia y arquitectura
 
