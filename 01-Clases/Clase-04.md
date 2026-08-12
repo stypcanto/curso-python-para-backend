@@ -1643,6 +1643,19 @@ referencia propia) ayuda a ver por qué:
 
 ![Diagrama entidad-relación: tickets con FK requester_id -> users.id y category_id -> categories.id](/clase-04-diagrama-er-referencia.png)
 
+> ⚠️ **Para que el `POST` de acá abajo funcione, hace falta este paso previo, fuera de
+> Postman:** como todavía no hay endpoints `/users` ni `/categories` (solo existe
+> `routers/tickets.py`, sección 12), el `user` y la `category` que pide la FK se
+> cargaron **a mano, directo en Postgres**, con los comandos ya documentados en
+> [00-Notas/01-Comandos.md](../00-Notas/01-Comandos.md):
+> ```bash
+> docker exec curso-postgres psql -U postgres -d curso_backend -c \
+>   "INSERT INTO users (name, email) VALUES ('Styp Canto', 'styp@example.com');" \
+>   -c "INSERT INTO categories (name) VALUES ('Infraestructura');"
+> ```
+> Recién con `id=1` existiendo en `users` y en `categories`, el `requester_id: 1` /
+> `category_id: 1` del body del `POST` dejan de ser referencias a filas fantasma.
+
 **8) `POST` exitoso, ya con el `user`/`category` de prueba creados:**
 
 ![Postman: POST Enviar Ticket con status 201 Created, respuesta con id 5](/clase-04-postman-post-exitoso.png)
