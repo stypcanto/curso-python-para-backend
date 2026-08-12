@@ -868,6 +868,68 @@ aplicada — así sabe si hay que aplicar algo nuevo o no la próxima vez.
 `main.py` ya **no** llama a `create_all()` — las tablas se crean/actualizan corriendo
 `alembic upgrade head` antes de levantar el server.
 
+### 🔍 Cómo se genera el `CREATE TABLE` sin escribir SQL (los 3 momentos)
+
+Es la parte que más parece magia la primera vez: **nadie tipea `CREATE TABLE tickets
+(...)` en ningún lado**, y sin embargo la tabla aparece en Postgres. En realidad pasan
+**3 momentos separados**, cada uno con una responsabilidad distinta:
+
+```
+① MODELOS (Python, en memoria)      ② AUTOGENERATE (compara y ESCRIBE código)      ③ UPGRADE (EJECUTA de verdad)
+──────────────────────────────      ────────────────────────────────────────      ──────────────────────────────
+models/ticket.py                    alembic revision --autogenerate               alembic upgrade head
+class Ticket(Base):                          │                                              │
+    id: Mapped[int] = ...           Compara Base.metadata (①)                     env.py abre una conexión
+    title: Mapped[str] = ...        vs. lo que Postgres tiene                      REAL (engine_from_config)
+    ...                             REALMENTE en este momento                      y corre el archivo de ②
+        │                                    │                                              │
+        ▼                                    ▼                                              ▼
+Se registra SOLO en              Escribe migrations/versions/*.py             Alembic traduce cada
+Base.metadata (db/database.py)   con Python — op.create_table(...)            op.create_table(...) al
+NINGÚN SQL corrió todavía         AÚN NINGÚN SQL corrió                        SQL real del dialecto de
+                                                                                Postgres, y LO EJECUTA
+```
+
+| Momento | Comando/archivo | Qué produce | ¿Toca la base de datos? |
+|---|---|---|---|
+| ① Los modelos se registran | Se importan `User`, `Category`, `Ticket` (en `main.py` y `migrations/env.py`) | `Base.metadata` queda "lleno" con el esquema que *debería* existir — es puro Python en RAM | ❌ No — nada se conecta ni se ejecuta todavía |
+| ② `alembic revision --autogenerate` | Compara `target_metadata` (①) contra la base real, y **escribe** `migrations/versions/520cf642f30a_...py` | Un archivo de **Python**, con llamadas `op.create_table(...)`, `op.add_column(...)`, etc. — no es SQL, es la API de Alembic | ✅ Se conecta **para leer/inspeccionar** el esquema actual, pero no modifica nada |
+| ③ `alembic upgrade head` | Ejecuta el archivo de ② dentro de una transacción real | Alembic **traduce** cada `op.create_table(...)` al SQL específico de Postgres (`CREATE TABLE ...`) y lo manda por la conexión | ✅ Sí — acá es donde la tabla se crea de verdad |
+
+```python
+# Esto es lo que quedó escrito en el paso ② (migrations/versions/520cf642f30a_...py)
+# — Python, no SQL:
+op.create_table('tickets',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(length=120), nullable=False),
+    sa.Column('description', sa.String(length=500), nullable=False),
+    sa.Column('priority', sa.String(length=20), nullable=False),
+    sa.Column('status', sa.String(length=20), nullable=False),
+    sa.Column('requester_id', sa.Integer(), nullable=False),
+    sa.Column('category_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['category_id'], ['categories.id']),
+    sa.ForeignKeyConstraint(['requester_id'], ['users.id']),
+    sa.PrimaryKeyConstraint('id'),
+)
+```
+
+> 💡 Recién en el paso ③, cuando `run_migrations_online()` (línea `context.run_migrations()`
+> de `env.py`) procesa esa llamada, Alembic la convierte en algo como
+> `CREATE TABLE tickets (id SERIAL NOT NULL, title VARCHAR(120) NOT NULL, ...,
+> PRIMARY KEY (id), FOREIGN KEY(category_id) REFERENCES categories (id), ...)` y lo
+> ejecuta. Ese texto de SQL **no vive escrito en ningún archivo del proyecto** — se arma
+> en memoria, en el momento, a partir de `op.create_table(...)` + el dialecto de Postgres.
+
+> 📌 Es exactamente la misma idea de "ORM = traductor Python↔SQL" de la
+> [sección 1 de esta clase](#🗄️-1-¿que-es-un-orm) (`class Ticket` → `CREATE TABLE`,
+> `Ticket(...)` → `INSERT`), aplicada esta vez al **esquema** (la estructura de las
+> tablas) en vez de a los **datos** (las filas). Mismo traductor, dos capas distintas.
+
+> 🧪 **Tip de entrevista:** *¿Por qué el paso ② no modifica la base de datos si ya se
+> conecta a ella?* Porque solo hace `SELECT` de metadatos internos de Postgres (qué
+> tablas/columnas existen) para poder comparar — es una consulta de **lectura**, nunca
+> un `CREATE`/`ALTER`. La escritura real queda reservada exclusivamente al paso ③.
+
 ### ✅ Checklist: agregar una tabla (o columna) nueva más adelante
 
 1. Escribir el modelo (`class Comment(Base): ...` en `models/comment.py`, por ejemplo).
