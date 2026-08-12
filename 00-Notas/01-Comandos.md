@@ -78,3 +78,35 @@ docker run -d \
 > el contenedor (los datos quedan, se puede volver a arrancar con `docker start`); `rm`
 > lo **borra** — si el contenedor no usaba un volumen externo, los datos de adentro se
 > pierden para siempre.
+
+### 🐘 `psql` dentro del contenedor — consultar/insertar sin salir de la terminal
+
+`docker exec` corre un comando **adentro** de un contenedor que ya está corriendo (no
+crea uno nuevo, a diferencia de `docker run`). Sirve para meterse a la base de Postgres
+del curso sin instalar `psql` en el Mac:
+
+| Comando | Qué hace | Ejemplo |
+|---|---|---|
+| `docker exec -it <contenedor> psql -U <user> -d <db>` | Abre una **sesión interactiva** de `psql` — queda ahí escribiendo SQL hasta que salís con `\q` | `docker exec -it curso-postgres psql -U postgres -d curso_backend` |
+| `docker exec <contenedor> psql -U <user> -d <db> -c "<SQL>"` | Corre **una sola consulta** y vuelve directo a tu terminal — sin quedar "adentro" | `docker exec curso-postgres psql -U postgres -d curso_backend -c "SELECT COUNT(*) FROM tickets;"` |
+
+> ⚠️ **`-it` vs. sin `-it`:** `-it` (*interactive* + *tty*) es para cuando vos vas a
+> tipear en la sesión de `psql`. Si el comando lo corre un script/otro proceso (no una
+> persona escribiendo), sacá el `-it` — con él puesto sin una terminal real detrás tira
+> `the input device is not a TTY`.
+
+**Ejemplos reales usados en la Clase 4** — ver tablas, contar filas, insertar datos de
+prueba (útil cuando un `POST /tickets/` da `500` por una FK a un `user`/`category` que
+todavía no existe — ver [[500-foreign-key-inexistente-sin-datos-previos]]):
+```bash
+# Ver qué tablas existen
+docker exec curso-postgres psql -U postgres -d curso_backend -c "\dt"
+
+# Contar filas de una tabla
+docker exec curso-postgres psql -U postgres -d curso_backend -c "SELECT COUNT(*) FROM tickets;"
+
+# Insertar datos de prueba (varias -c seguidas = varias sentencias, en orden)
+docker exec curso-postgres psql -U postgres -d curso_backend -c \
+  "INSERT INTO users (name, email) VALUES ('Styp Canto', 'styp@example.com');" \
+  -c "INSERT INTO categories (name) VALUES ('Infraestructura');"
+```
