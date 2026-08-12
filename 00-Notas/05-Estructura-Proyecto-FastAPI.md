@@ -54,4 +54,6 @@ Cliente HTTP
 > `db/`, el resto del código no se entera.
 
 ## 📎 Apuntes relacionados
-- [Clase 4 — PostgreSQL y persistencia de datos](../01-Clases/Clase-04.md)
+- [Clase 4 — PostgreSQL y persistencia de datos](../01-Clases/Clase-04.md) — incluye la
+  versión de este mismo diagrama con los nombres reales del código
+  (`TicketRepository`, `curso-postgres`, etc.)

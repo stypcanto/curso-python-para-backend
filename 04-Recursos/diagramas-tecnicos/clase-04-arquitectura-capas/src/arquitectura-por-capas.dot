@@ -1,0 +1,74 @@
+digraph ArquitecturaCapas {
+  rankdir=LR;
+  splines=ortho;
+  graph [
+    label="📐 DIAGRAMA DE ARQUITECTURA (vista por capas)\lProyecto de la Clase 4 — de uvicorn a PostgreSQL\l",
+    bgcolor="#FFFFFF", pad=0.4, margin=0.2, nodesep=0.5, ranksep=0.7,
+    fontname="Arial", fontsize=20, labelloc="t", labeljust="l"
+  ];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=10,
+        margin="0.18,0.12", penwidth=1.4, color="#4338CA", fillcolor="#EEF2FF", fontcolor="#312E81"];
+  edge [fontname="Arial", fontsize=9, color="#64748B", fontcolor="#475569", penwidth=1.2, arrowsize=0.75];
+
+  // ── Leyenda (franja horizontal arriba) ──────────────────────────
+  subgraph cluster_legend {
+    label="Leyenda"; style="rounded,dashed"; color="#CBD5E1"; fontname="Arial"; fontsize=11;
+    legend_actor  [label="Actor", fillcolor="#FEF3C7", color="#B45309", fontcolor="#92400E"];
+    legend_infra  [label="Infraestructura", fillcolor="#E0F2FE", color="#0369A1", fontcolor="#075985"];
+    legend_real   [label="Código (ya escrito)", fillcolor="#EEF2FF", color="#4338CA", fontcolor="#312E81"];
+    legend_db     [label="Base de datos", shape=cylinder, fillcolor="#DCFCE7", color="#15803D", fontcolor="#14532D"];
+    legend_dashed [label="- - -  solo al arrancar\n(no en cada petición)", shape=plain, fontsize=9];
+    legend_actor -> legend_infra -> legend_real -> legend_db -> legend_dashed [style=invis];
+  }
+
+  // ── Arranque del proceso (una sola vez, al levantar el server) ───
+  subgraph cluster_arranque {
+    label="Arranque (uvicorn main:app --reload)"; style="rounded,filled"; fillcolor="#F8FAFC"; color="#CBD5E1";
+    uvicorn [label="uvicorn\n(servidor ASGI)", fillcolor="#E0F2FE", color="#0369A1", fontcolor="#075985"];
+    main    [label="main.py\ncrea FastAPI(), monta\napp.include_router(...)"];
+  }
+
+  // ── Cliente ──────────────────────────────────────────────────────
+  cliente [label="Cliente HTTP\n(navegador, /docs, curl…)", shape=oval, fillcolor="#FEF3C7", color="#B45309", fontcolor="#92400E"];
+
+  // ── Capa API ─────────────────────────────────────────────────────
+  subgraph cluster_api {
+    label="Capa API (routers/ + schemas/)"; style="rounded,filled"; fillcolor="#F8FAFC"; color="#CBD5E1";
+    routers [label="routers/tickets.py\nAPIRouter (GET/POST/\nPATCH/DELETE)"];
+    schemas [label="schemas/ticket.py\nTicketCreate · TicketUpdate\nTicketResponse (Pydantic)"];
+  }
+
+  // ── Capa de negocio ──────────────────────────────────────────────
+  subgraph cluster_logica {
+    label="Capa de negocio"; style="rounded,filled"; fillcolor="#F8FAFC"; color="#CBD5E1";
+    services [label="services/ticket_service.py\nTicketService\n(reglas, 404 si no existe)"];
+  }
+
+  // ── Capa de datos ─────────────────────────────────────────────────
+  subgraph cluster_datos {
+    label="Capa de datos"; style="rounded,filled"; fillcolor="#F8FAFC"; color="#CBD5E1";
+    repositories [label="repositories/\nTicketRepository\n(get_all/create/update/delete)"];
+    models [label="models/\nUser · Category · Ticket\n(SQLAlchemy ORM)"];
+    core [label="core/config.py\nSettings (.env)"];
+    db [label="db/database.py\nengine · SessionLocal\nget_db() · Base"];
+  }
+
+  postgres [label="PostgreSQL\n(contenedor Docker\ncurso-postgres)", shape=cylinder, fillcolor="#DCFCE7", color="#15803D", fontcolor="#14532D"];
+
+  // Arranque: uvicorn levanta main.py, que monta el router (pasa UNA vez)
+  uvicorn -> main [label="  ejecuta"];
+  main -> routers [label="  include_router()", style=dashed];
+
+  // Petición real: cada request de un cliente
+  cliente -> routers [label="  HTTP"];
+  routers -> schemas [label="  valida"];
+  schemas -> services [label="  llama"];
+  services -> repositories [label="  usa"];
+  repositories -> models [label="  consulta"];
+  models -> db [label="  usa engine/Base"];
+  core -> db [label="  settings.database_url"];
+  db -> postgres [label="  SQL"];
+
+  // Ancla la leyenda arriba, sin afectar el layout del flujo real
+  legend_dashed -> uvicorn [style=invis, constraint=false];
+}

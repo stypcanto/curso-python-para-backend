@@ -1,0 +1,44 @@
+digraph ModeloDatosTickets {
+  rankdir=LR;
+  splines=spline;
+  graph [
+    label="📐 DIAGRAMA ENTIDAD-RELACIÓN\lSistema de tickets — Clase 4: PostgreSQL y persistencia de datos\l",
+    bgcolor="#FFFFFF", pad=0.4, margin=0.15, nodesep=0.65, ranksep=0.95,
+    fontname="Arial", fontsize=20, labelloc="t", labeljust="l"
+  ];
+  node [shape=plain, fontname="Arial", fontsize=10];
+  edge [fontname="Arial", fontsize=9, color="#64748B", fontcolor="#475569", penwidth=1.2, arrowsize=0.8];
+
+  // ── Tabla: users ──────────────────────────────────────────────
+  users [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" COLOR="#15803D">
+      <TR><TD BGCOLOR="#DCFCE7" COLSPAN="2"><B>users</B></TD></TR>
+      <TR><TD ALIGN="LEFT">🔑 PK</TD><TD ALIGN="LEFT">id</TD></TR>
+      <TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">name</TD></TR>
+      <TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">email  (unique)</TD></TR>
+    </TABLE>>];
+
+  // ── Tabla: categories ────────────────────────────────────────
+  categories [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" COLOR="#15803D">
+      <TR><TD BGCOLOR="#DCFCE7" COLSPAN="2"><B>categories</B></TD></TR>
+      <TR><TD ALIGN="LEFT">🔑 PK</TD><TD ALIGN="LEFT">id</TD></TR>
+      <TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">name  (unique)</TD></TR>
+    </TABLE>>];
+
+  // ── Tabla: tickets (central) ─────────────────────────────────
+  tickets [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" COLOR="#4338CA">
+      <TR><TD BGCOLOR="#EEF2FF" COLSPAN="2"><B>tickets</B></TD></TR>
+      <TR><TD ALIGN="LEFT">🔑 PK</TD><TD ALIGN="LEFT">id</TD></TR>
+      <TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">title</TD></TR>
+      <TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">description</TD></TR>
+      <TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">priority  (def. "Media")</TD></TR>
+      <TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">status  (def. "Abierto")</TD></TR>
+      <TR><TD ALIGN="LEFT">🔗 FK</TD><TD ALIGN="LEFT">requester_id → users.id</TD></TR>
+      <TR><TD ALIGN="LEFT">🔗 FK</TD><TD ALIGN="LEFT">category_id → categories.id</TD></TR>
+    </TABLE>>];
+
+  users -> tickets [label="  1 : N  (requester)", arrowhead=none, color="#15803D", fontcolor="#14532D"];
+  categories -> tickets [label="  1 : N  (category)", arrowhead=none, color="#15803D", fontcolor="#14532D"];
+}

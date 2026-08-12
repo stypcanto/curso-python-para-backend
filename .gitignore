@@ -7,6 +7,9 @@
 .venv/
 __pycache__/
 *.pyc
+
+# Variables de entorno / credenciales (nunca se suben al repo)
+.env
 node_modules/
 .vitepress/cache/
 .vitepress/dist/

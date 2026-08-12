@@ -27,6 +27,7 @@ el venv activado):
 |---|---|---|
 | `pip --version` | Muestra la versión de pip **del entorno virtual activo** (falla con "command not found" si el venv no está activado — ver [[pip-command-not-found-venv-inactivo]]) | `pip --version` |
 | `pip install <paquete>` | Instala una librería en el venv activo | `pip install fastapi "uvicorn[standard]"` |
+| `python3 -m pip install <paquete>` | Igual que `pip install`, pero a prueba de errores: le pide a **ese `python3` puntual** que use su propio `pip` (`-m` = ejecutar un módulo), en vez de confiar en cuál `pip` encuentre el `PATH` primero | `python3 -m pip install alembic` |
 | `pip show <paquete>` | Muestra la versión instalada de una librería (para no reinstalar de más) | `pip show fastapi` |
 | `pip freeze > requirements.txt` | Congela todas las dependencias instaladas y sus versiones exactas en un archivo | `pip freeze > requirements.txt` |
 | `pip install -r requirements.txt` | Instala todas las dependencias listadas en el archivo (lo que corre alguien que clona el repo) | `pip install -r requirements.txt` |

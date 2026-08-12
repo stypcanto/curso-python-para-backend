@@ -1,0 +1,59 @@
+digraph ORMFlujo {
+  rankdir=LR;
+  splines=spline;
+  graph [
+    label="📐 DIAGRAMA DE FLUJO\lCómo el ORM traduce Python a SQL — Clase 4\l",
+    bgcolor="#FFFFFF", pad=0.4, margin=0.15, nodesep=0.7, ranksep=0.75,
+    fontname="Arial", fontsize=20, labelloc="t", labeljust="l"
+  ];
+  node [shape=plain, fontname="Arial", fontsize=10];
+  edge [fontname="Arial", fontsize=9, color="#64748B", fontcolor="#475569", penwidth=1.2, arrowsize=0.8];
+
+  // ── Fila 1: definir la estructura ───────────────────────────────
+  py1 [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#4338CA">
+      <TR><TD BGCOLOR="#EEF2FF"><B>🐍 Python (código)</B></TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT FACE="Courier New">class Ticket:<BR ALIGN="LEFT"/>    title: str<BR ALIGN="LEFT"/>    priority: str<BR ALIGN="LEFT"/></FONT></TD></TR>
+    </TABLE>>];
+
+  orm1 [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#7E22CE">
+      <TR><TD BGCOLOR="#F3E8FF"><B>⚙️ ORM (SQLAlchemy)</B></TD></TR>
+      <TR><TD>traduce la clase<BR/>a una tabla</TD></TR>
+    </TABLE>>];
+
+  sql1 [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#15803D">
+      <TR><TD BGCOLOR="#DCFCE7"><B>🐘 PostgreSQL</B></TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT FACE="Courier New">CREATE TABLE tickets (<BR ALIGN="LEFT"/>    id SERIAL PRIMARY KEY,<BR ALIGN="LEFT"/>    title TEXT,<BR ALIGN="LEFT"/>    priority TEXT<BR ALIGN="LEFT"/>);<BR ALIGN="LEFT"/></FONT></TD></TR>
+    </TABLE>>];
+
+  py1 -> orm1 -> sql1;
+
+  // ── Fila 2: crear un registro ───────────────────────────────────
+  py2 [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#4338CA">
+      <TR><TD BGCOLOR="#EEF2FF"><B>🐍 Python (código)</B></TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT FACE="Courier New">ticket = Ticket(<BR ALIGN="LEFT"/>    title="Error login",<BR ALIGN="LEFT"/>    priority="Alta")<BR ALIGN="LEFT"/></FONT></TD></TR>
+    </TABLE>>];
+
+  orm2 [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#7E22CE">
+      <TR><TD BGCOLOR="#F3E8FF"><B>⚙️ ORM (SQLAlchemy)</B></TD></TR>
+      <TR><TD>traduce el objeto<BR/>a un INSERT</TD></TR>
+    </TABLE>>];
+
+  sql2 [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#15803D">
+      <TR><TD BGCOLOR="#DCFCE7"><B>🐘 PostgreSQL</B></TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT FACE="Courier New">INSERT INTO tickets<BR ALIGN="LEFT"/>(title, priority)<BR ALIGN="LEFT"/>VALUES ('Error login',<BR ALIGN="LEFT"/>'Alta');<BR ALIGN="LEFT"/></FONT></TD></TR>
+    </TABLE>>];
+
+  py2 -> orm2 -> sql2;
+
+  // Fuerza el orden vertical: fila 1 (definir estructura) arriba,
+  // fila 2 (crear un registro) abajo — sin esto Graphviz las ordena
+  // a su criterio y puede quedar invertido.
+  { rank=same; py1; py2; }
+  py1 -> py2 [style=invis];
+}

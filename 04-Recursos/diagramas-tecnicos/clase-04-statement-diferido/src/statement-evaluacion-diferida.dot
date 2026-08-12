@@ -1,0 +1,34 @@
+digraph StatementDiferido {
+  rankdir=LR;
+  splines=spline;
+  graph [
+    label="📐 DIAGRAMA DE FLUJO\lEvaluación diferida: statement vs. ejecución real — Clase 4\l",
+    bgcolor="#FFFFFF", pad=0.4, margin=0.15, nodesep=0.7, ranksep=0.85,
+    fontname="Arial", fontsize=20, labelloc="t", labeljust="l"
+  ];
+  node [shape=plain, fontname="Arial", fontsize=10];
+  edge [fontname="Arial", fontsize=9, color="#64748B", fontcolor="#475569", penwidth=1.2, arrowsize=0.8];
+
+  statement [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#4338CA">
+      <TR><TD BGCOLOR="#EEF2FF"><B>🐍 statement (Python)</B></TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT FACE="Courier New">select(Ticket)<BR ALIGN="LEFT"/>  .order_by(Ticket.id)<BR ALIGN="LEFT"/></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT"><I>la receta — no ejecuta<BR ALIGN="LEFT"/>nada todavía</I></TD></TR>
+    </TABLE>>];
+
+  scalars [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#7E22CE">
+      <TR><TD BGCOLOR="#F3E8FF"><B>⚙️ db.scalars(statement)</B></TD></TR>
+      <TR><TD>acá la Session ejecuta<BR/>el statement de verdad</TD></TR>
+    </TABLE>>];
+
+  postgres [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#15803D">
+      <TR><TD BGCOLOR="#DCFCE7"><B>🐘 PostgreSQL</B></TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT FACE="Courier New">SELECT * FROM tickets<BR ALIGN="LEFT"/>ORDER BY id;<BR ALIGN="LEFT"/></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT"><I>esto es lo que realmente<BR ALIGN="LEFT"/>corre en la base de datos</I></TD></TR>
+    </TABLE>>];
+
+  statement -> scalars [label="  se ejecuta"];
+  scalars -> postgres [label="  se traduce a SQL"];
+}
