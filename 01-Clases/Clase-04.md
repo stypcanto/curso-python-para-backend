@@ -25,9 +25,8 @@ sidebar: "Clase 4 · PostgreSQL"
 
 ## 🗄️ 1. ¿Qué es un ORM?
 
-El profe arrancó definiendo el **ORM (Object-Relational Mapping / Mapeo
-Objeto-Relacional)**: la capa que **traduce información entre dos mundos que hablan
-distinto**:
+**ORM (Object-Relational Mapping / Mapeo Objeto-Relacional)**: la capa que **traduce
+información entre dos mundos que hablan distinto**:
 
 - El mundo de **Python** (clases, objetos, atributos).
 - El mundo de la **base de datos relacional** (tablas, filas, columnas).
@@ -48,18 +47,16 @@ La idea central es **modelar información como tablas, pero manipularla como obj
 > 💡 En resumen: el ORM te deja **modelar tus datos como clases de Python** y él se
 > encarga de generar el SQL correspondiente (INSERT/SELECT/UPDATE/DELETE) por debajo.
 
-### 🗺️ Ejemplo en vivo: modelando un sistema de tickets
-
-El profe dibujó a mano el modelo de datos de un sistema de tickets (el mismo dominio de
-los ejemplos SQL de arriba), con 3 entidades y sus relaciones. El diagrama de abajo es
-la versión actualizada con los **nombres reales** que quedaron en el código
-(`02-Ejercicios/Clase-04/app/models/`) — en Postgres las tablas van en **plural**
-(`users`, `categories`, `tickets`), a diferencia del boceto original del profe que las
-nombraba en singular:
-
 ### 🗺️ Diagrama: modelo de datos del sistema de tickets
 
 ![Diagrama entidad-relación: users, categories y tickets con sus claves primarias, foráneas y relaciones 1:N](/clase-04-er-tickets.png)
+
+Tres entidades y sus relaciones (mismo dominio de los ejemplos SQL de arriba), con los
+nombres reales que quedaron en el código (`02-Ejercicios/Clase-04/app/models/`). Los
+nombres de tabla van en **plural** (`users`, `categories`, `tickets`) — la convención
+estándar en SQLAlchemy/Django/Rails para dejar claro que una tabla contiene *muchas*
+filas de ese tipo; la clase Python/entidad conceptual sí va en singular (`User`,
+`Category`, `Ticket`).
 
 | Entidad (tabla) | Campos | Rol |
 |---|---|---|
@@ -75,18 +72,12 @@ nombraba en singular:
 > 📌 Convención: el campo de la FK se nombra `<entidad>_id` (`requester_id`,
 > `category_id`) — así se lee directo qué tabla referencia.
 
-> 📝 El boceto original del profe nombraba las entidades en singular (`user`,
-> `category`, `ticket`) — son los nombres de la **clase Python**/entidad conceptual.
-> El nombre de la **tabla SQL real** (`__tablename__`) va en plural, que es la
-> convención más común en SQLAlchemy/Django/Rails para dejar claro que una tabla
-> contiene *muchas* filas de ese tipo.
-
 ## 🐘 2. SQL esencial — lo que SQLAlchemy hará por nosotros
 
 > Aunque usemos ORM, **comprender SQL es imprescindible** para depurar, optimizar y
 > tomar decisiones informadas.
 
-El profe repasó las 4 operaciones base que después el ORM va a generar por nosotros:
+Las 4 operaciones base que después el ORM va a generar por nosotros:
 
 **INSERT** — crear un registro nuevo:
 ```sql
@@ -117,8 +108,8 @@ JOIN categories c ON t.category_id = c.id;
 
 ## 🏗️ 3. Arquitectura del proyecto (estructura de carpetas)
 
-El profe armó en VS Code la estructura por capas que va a usar de acá en adelante para
-el proyecto con FastAPI + SQLAlchemy + Alembic:
+Estructura por capas del proyecto, en uso de acá en adelante para FastAPI + SQLAlchemy +
+Alembic:
 
 ```
 app/
@@ -721,9 +712,9 @@ permite:
 | Para qué sirve | Prototipar rápido en desarrollo | Proyectos reales, con datos que no se pueden perder |
 
 Primer intento: `Base.metadata.create_all(bind=engine)` directo en `main.py`, para que
-las tablas se creen solas al arrancar. **Funciona**, pero el profe indicó reemplazarlo
-por **Alembic** — la forma correcta para un proyecto real, porque versiona cada cambio
-de esquema por separado (se puede aplicar o revertir de a uno, con historial), en vez
+las tablas se creen solas al arrancar. **Funciona**, pero se reemplaza por **Alembic** —
+la forma correcta para un proyecto real, porque versiona cada cambio de esquema por
+separado (se puede aplicar o revertir de a uno, con historial), en vez
 de crear todo de una sola vez sin dejar rastro.
 
 **Instalación y arranque** (carpeta `migrations/`, no `alembic/` — coincide con la que
