@@ -439,6 +439,7 @@ ejercicios de POO.
 | [`02-Ejercicios/Clase-02/contrasena.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/contrasena.py) | Compara la contraseña ingresada contra una guardada de referencia con `==`, ignorando mayúsculas/minúsculas (`.lower()`). |
 | [`02-Ejercicios/Clase-02/funciones.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/funciones.py) | Primera función propia (`def`), con parámetros y un `if`/`else` que devuelve un booleano. |
 | [`02-Ejercicios/Clase-02/gestortarea.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/gestortarea.py) | Gestor de tareas por consola: 3 funciones independientes (`mostrar_tarea`, `agregar_tarea`, `eliminar_tarea`) + un menú en bucle `while True`. |
+| [`02-Ejercicios/Clase-02/superheroes.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/superheroes.py) | Manipulación de listas: `.append()`, `.remove()` y reemplazo por índice con `.index()`. |
 
 **Enunciado original de `contrasena.py`** (tal como lo planteó el ejercicio):
 > Escribir un programa que almacene la cadena de caracteres `holamundo` en una variable,
@@ -610,6 +611,53 @@ Seleccione una opción: 4
 > `ValueError` si el usuario escribía texto en vez de un número, cortando todo el
 > programa. Se envolvió en `try`/`except ValueError` (mismo patrón de manejo de errores
 > de la Clase 1) para que solo avise y deje reintentar, sin cerrar el gestor.
+
+### 🦸 `superheroes.py` — añadir, eliminar y reemplazar en una lista
+Enunciado: dada la lista de héroes de los Vengadores, (1) agregar a Spider-Man, (2)
+eliminar a Thor y (3) reemplazar a Capitán América por Pantera Negra.
+
+> 📝 **Bug del editor de la plataforma:** al reiniciar el ejercicio, el editor fue
+> devolviendo distintas listas de arranque en cada intento — ninguna coincidía del todo
+> con el enunciado (`["Iron Man", "pantera negra", "spider man", ...]`,
+> `["Iron Man", "Pantera negra", ..., "Spider Man"]`, etc., con nombres mal escritos o
+> sin Thor/Capitán América). La versión final se resolvió con la lista original que da
+> por sentada el enunciado de texto, para poder aplicar los tres pasos pedidos
+> literalmente (agregar, eliminar, reemplazar) en vez de ir parchando errores de
+> tipeo del editor.
+
+```python
+# Lista original de héroes de los Vengadores
+avengers = ["Iron Man", "Capitán América", "Thor", "Hulk", "Viuda Negra"]
+
+# Agregar a Spider-Man
+avengers.append("Spider-Man")
+
+# Eliminar a Thor
+avengers.remove("Thor")
+
+# Reemplazar a Capitán América con Pantera Negra
+avengers[avengers.index("Capitán América")] = "Pantera Negra"
+
+# La lista final de héroes de los Vengadores
+print("La lista final de héroes:", avengers)
+```
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · superheroes.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 superheroes.py
+<span class="terminal-shot__output">La lista final de héroes: ['Iron Man', 'Pantera Negra', 'Hulk', 'Viuda Negra', 'Spider-Man']</span></code></pre>
+</div>
+
+| Método | Qué hace | Detalle a notar |
+|---|---|---|
+| `.append("Spider-Man")` | Agrega al final de la lista. | Coincide con la salida esperada: Spider-Man queda último. |
+| `.remove("Thor")` | Elimina la **primera aparición** del valor dado. | No hace falta saber la posición, solo el valor exacto. |
+| `avengers[avengers.index("Capitán América")] = "Pantera Negra"` | Busca el índice del valor y reemplaza en ese lugar. | `.index()` evita hardcodear la posición (`avengers[1] = ...` también funcionaría, pero es frágil si el orden cambia). |
 
 ## 🎯 Reto de POO propuesto en la diapositiva de cierre
 La empresa requiere registrar solicitudes y notificar al usuario; el canal de
