@@ -440,6 +440,7 @@ ejercicios de POO.
 | [`02-Ejercicios/Clase-02/funciones.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/funciones.py) | Primera función propia (`def`), con parámetros y un `if`/`else` que devuelve un booleano. |
 | [`02-Ejercicios/Clase-02/gestortarea.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/gestortarea.py) | Gestor de tareas por consola: 3 funciones independientes (`mostrar_tarea`, `agregar_tarea`, `eliminar_tarea`) + un menú en bucle `while True`. |
 | [`02-Ejercicios/Clase-02/superheroes.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/superheroes.py) | Manipulación de listas: `.append()`, `.remove()` y reemplazo por índice con `.index()`. |
+| [`02-Ejercicios/Clase-02/calculadora.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/calculadora.py) | Función con 3 parámetros (`a`, `b`, `operation`) y una rama `if/elif` por operador; manejo de división por cero, división no exacta y operación inválida. |
 
 **Enunciado original de `contrasena.py`** (tal como lo planteó el ejercicio):
 > Escribir un programa que almacene la cadena de caracteres `holamundo` en una variable,
@@ -658,6 +659,78 @@ print("La lista final de héroes:", avengers)
 | `.append("Spider-Man")` | Agrega al final de la lista. | Coincide con la salida esperada: Spider-Man queda último. |
 | `.remove("Thor")` | Elimina la **primera aparición** del valor dado. | No hace falta saber la posición, solo el valor exacto. |
 | `avengers[avengers.index("Capitán América")] = "Pantera Negra"` | Busca el índice del valor y reemplaza en ese lugar. | `.index()` evita hardcodear la posición (`avengers[1] = ...` también funcionaría, pero es frágil si el orden cambia). |
+
+### 🧮 `calculadora.py` — función con `if/elif` por operador
+Enunciado: definir una función que reciba dos números (`a`, `b`) y una operación
+(`+`, `-`, `*`, `/`), y devuelva el resultado. La rama de `/` ya venía en el código
+como referencia, con el caso de división por cero.
+
+```python
+def calculadora(a, b, operation):
+    if operation == '/':
+        if b != 0:
+            # a % b es el resto de la división. Si el resto es 0, "a" se
+            # divide exacto entre "b" (ej: 8 / 4 = 2.0, resto 0).
+            # Si el resto NO es 0, la división no es exacta (ej: 37 / 8 =
+            # 4.625, resto 5) -> avisamos en vez de solo mostrar el decimal.
+            if a % b == 0:
+                return a / b
+            else:
+                return f"{a} no es divisible entre {b}"
+        else:
+            return "Error: ¡Intentando dividir por cero!"
+    elif operation == '+':
+        return a + b
+    elif operation == '-':
+        return a - b
+    elif operation == '*':
+        return a * b
+    else:
+        # Si el usuario escribe algo distinto de +, -, *, /, ninguno de los
+        # if/elif de arriba se cumple. Sin este 'else', la función no haría
+        # ningún 'return' y devolvería None -> se imprimiría "Resultado: None"
+        # sin explicar qué pasó. Mismo patrón que el error de división por
+        # cero: devolver un mensaje claro en vez de un None silencioso.
+        return "Error: operación no válida. Usa +, -, * o /."
+
+# Solicitar al usuario los números y el tipo de operación
+a = float(input("Ingresa el primer número: "))
+b = float(input("Ingresa el segundo número: "))
+operation = input("Especifica la operación que deseas realizar (+, -, *, /): ")
+
+# Llamando a la función 'calculadora' y mostrando el resultado
+result = calculadora(a, b, operation)
+print("Resultado:", result)
+```
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · calculadora.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 calculadora.py
+Ingresa el primer número: 34
+Ingresa el segundo número: 12
+Especifica la operación que deseas realizar (+, -, *, /): *
+<span class="terminal-shot__output">Resultado: 408.0</span>
+<span class="terminal-shot__prompt">$</span> python3 calculadora.py
+Ingresa el primer número: 37
+Ingresa el segundo número: 8
+Especifica la operación que deseas realizar (+, -, *, /): /
+<span class="terminal-shot__output">Resultado: 37.0 no es divisible entre 8.0</span></code></pre>
+</div>
+
+| Caso | Qué pasa | Detalle a notar |
+|---|---|---|
+| `b == 0` en `/` | Devuelve `"Error: ¡Intentando dividir por cero!"` | Venía como referencia en el enunciado original. |
+| `a % b != 0` en `/` | Devuelve `"{a} no es divisible entre {b}"` en vez del decimal. | `%` es el operador **módulo** (resto de la división); si el resto no es 0, la división no es exacta. Mejora agregada sobre el enunciado original. |
+| `operation` no es `+ - * /` | Devuelve `"Error: operación no válida..."` | Sin este `else`, la función devolvía `None` de forma silenciosa (ningún `if/elif` se cumplía) y el programa imprimía `Resultado: None` sin explicar qué pasó. |
+
+> 📝 **Detalle de nombres:** la función se llama `calculadora` (no `calculate`, como
+> sugería el enunciado en inglés) — mismo comportamiento, nombre en español para ser
+> consistente con el resto de los ejercicios de la clase.
 
 ## 🎯 Reto de POO propuesto en la diapositiva de cierre
 La empresa requiere registrar solicitudes y notificar al usuario; el canal de
