@@ -21,6 +21,9 @@ sidebar: "Clase 1 · Fundamentos de Python"
   excepciones propias, `logging`, variables de entorno y comprehensions.
 - *(práctica libre)* `input()` para leer datos del usuario por consola, combinado con
   conversión de tipos (`float`) para trabajar el dato como número.
+- *(práctica libre)* El módulo `calendar` de la librería estándar (no se instala con
+  `pip`) y la diferencia entre variables sueltas vs. agruparlas en un `dict`/lista de
+  `dict`s para el mismo dato.
 
 # 📖 PARTE TEÓRICA
 
@@ -83,6 +86,28 @@ backend_python/
 > 📝 La diapositiva solo mostraba la activación en Windows (`.\.venv\Scripts\activate`).
 > Trabajo en macOS, así que documento primero `source .venv/bin/activate` (ver
 > `CLAUDE.md` — comandos de sistema siempre en macOS/Linux primero).
+
+### 🎬 Qué hizo el profesor, paso a paso (y para qué sirve cada comando)
+
+| Comando | Qué hace | Para qué |
+|---|---|---|
+| `python3 -m venv .venv` | Crea la carpeta `.venv/` con una copia aislada del intérprete de Python y su propio `pip` | Que las librerías de este proyecto no se mezclen con las de otro (ni con las del sistema) |
+| `source .venv/bin/activate` | Activa ese entorno **en la terminal actual** | Que `python` y `pip` (sin el "3") apunten al Python del proyecto, no al del sistema |
+| `deactivate` | Sale del entorno virtual activo | Volver a usar el Python "normal" del sistema |
+
+> 📝 **¿Por qué `source` y no correr `activate` directo?** `activate` es un script que
+> modifica variables de entorno (`PATH`, `VIRTUAL_ENV`). Si lo corrés sin `source`
+> (`.venv/bin/activate` a secas), zsh lo ejecuta en un **subshell**: ese subshell activa
+> el venv y se cierra al instante, sin que tu terminal se entere del cambio — por eso el
+> prompt nunca muestra `(.venv)`. `source` (o su alias `.`) le dice al shell "ejecutá
+> este script **en mí mismo**, no en un proceso aparte" — así el cambio de variables
+> queda en tu sesión actual.
+>
+> ⚠️ Tropiezo real durante la clase: si hacés `cd` hacia **adentro** de la carpeta
+> `.venv` (en vez de quedarte en `Clase-01/`), `source .venv/bin/activate` deja de
+> encontrar la ruta — `.venv` no está dentro de sí misma. Verificá con `pwd` que estás
+> un nivel **arriba** de `.venv` antes de activar — ver
+> [[2026-08-14-activate-sin-source-no-funciona]].
 
 ### 🧩 Extensiones de VS Code recomendadas en clase
 | Extensión | Publisher (id) | Para qué sirve |
@@ -523,10 +548,34 @@ uso directamente para pedirle datos al usuario por consola.
 | [`02-Ejercicios/Clase-01/variables.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-01/variables.py) | Declarar variables, `print()` con varios argumentos, sumar variables numéricas |
 | [`02-Ejercicios/Clase-01/input.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-01/input.py) | `input()` para leer texto del usuario y concatenarlo con `+` |
 | [`02-Ejercicios/Clase-01/temperatura.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-01/temperatura.py) | `input()` + conversión a `float` + `str()` para insertar un número en un texto |
+| [`02-Ejercicios/Clase-01/calenda.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-01/calenda.py) | Módulo `calendar` de la librería estándar — imprime el calendario de un mes |
 
 > 📌 `input()` **siempre devuelve texto (`str`)**, aunque el usuario escriba un número —
 > por eso `temperatura.py` lo envuelve en `float(...)` antes de usarlo como número (el
 > mismo patrón de conversión de tipos de la sección 4 de la teoría).
+
+```python
+# calenda.py
+import calendar
+
+print(calendar.month(2026, 8))
+```
+```
+    August 2026
+Mo Tu We Th Fr Sa Su
+                1  2
+ 3  4  5  6  7  8  9
+10 11 12 13 14 15 16
+17 18 19 20 21 22 23
+24 25 26 27 28 29 30
+31
+```
+
+> 📝 `calendar` es parte de la **librería estándar** de Python — viene incluido, se usa
+> con `import` directo, sin `pip install`. Intenté antes `pip install python3-calendar`
+> y falló (`Could not find a version that satisfies the requirement`): ese nombre
+> `python3-algo` es la convención de paquetes de **apt/Debian/Ubuntu**, no de
+> PyPI/`pip` — dos ecosistemas de paquetes distintos. Ver [00-Notas/01-Comandos.md](../00-Notas/01-Comandos.md).
 
 <div class="terminal-shot">
   <div class="terminal-shot__titlebar">
@@ -546,6 +595,103 @@ Ingrese su nombre: Styp
 Ingrese la temperatura del lunes: 18.5
 <span class="terminal-shot__output">La temperatura del lunes es: 18.5°C</span></code></pre>
 </div>
+
+## 🖊️ Práctica libre: variables sueltas, listas y diccionarios
+Siguiendo con la práctica libre, repetí el mismo dato (una "solicitud") de tres formas
+distintas — primero como variables sueltas, después agrupado en una lista y en un
+diccionario, y por último combinando lista + diccionario — para comparar en carne propia
+la diferencia que explica la teoría (sección 5: "Agrupando información relacionada").
+
+| Archivo | Qué practica |
+|---|---|
+| [`02-Ejercicios/Clase-01/main2.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-01/main2.py) | Variables sueltas (`request_id`, `request_title`, ...) — el dato **sin agrupar**, cada pieza en su propia variable |
+| [`02-Ejercicios/Clase-01/lista.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-01/lista.py) | Una `list` simple (`categoria`) y cómo imprimirla dentro de un texto con `str(...)` |
+| [`02-Ejercicios/Clase-01/diccionario.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-01/diccionario.py) | Un `dict` (`request`) — el mismo dato de `main2.py`, pero agrupado y accedido por clave (`request['id']`) |
+| [`02-Ejercicios/Clase-01/listadediccionarios.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-01/listadediccionarios.py) | Una **lista de diccionarios** (dos solicitudes) recorrida con `for` — el patrón que más se repite en Backend |
+
+```python
+# main2.py — variables sueltas, sin agrupar
+request_id = 1001
+request_title = "Clase 01 - Ejercicios"
+request_estimated_hours = 2.5
+request_is_active = True
+request_assigned_user = "styp"
+
+print(f"Request ID: {request_id}")
+```
+
+```python
+# diccionario.py — el mismo dato, pero agrupado en un dict
+request = {
+    "id": 1001,
+    "title": "Clase 01 - Ejercicios",
+    "estimated_hours": 2.5,
+    "is_active": True,
+    "assigned_user": "styp"}
+
+print(f"Request ID: {request['id']}")
+print(f"Request Title: {request['title']}")
+print(f"Estimated Hours: {request['estimated_hours']}")
+```
+
+```python
+# listadediccionarios.py — varias solicitudes, cada una un dict, recorridas con for
+request = [
+    {"id": 1001, "title": "Clase 01 - Ejercicios", "estimated_hours": 2.5,
+     "is_active": True, "assigned_user": "styp"},
+    {"id": 1002, "title": "Clase 02 - Ejercicios", "estimated_hours": 3.0,
+     "is_active": False, "assigned_user": "jdoe"},
+]
+
+for req in request:
+    print(f"Request ID: {req['id']}")
+    print(f"Request Title: {req['title']}")
+    print(f"Estimated Hours: {req['estimated_hours']}")
+    print(f"Is Active: {req['is_active']}")
+    print(f"Assigned User: {req['assigned_user']}")
+    print()
+```
+
+> 📌 Comparando `main2.py` con `diccionario.py` se ve exactamente lo que dice la teoría
+> (sección 5): con variables sueltas, si tuviera 10 solicitudes necesitaría 50 variables
+> con nombres distintos (`request_id_1`, `request_id_2`...); con un `dict` por solicitud
+> y una `list` para agruparlas (`listadediccionarios.py`), agregar una solicitud más es
+> solo agregar un elemento a la lista — el `for` ya sabe recorrerlas todas sin importar
+> cuántas sean.
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · main2.py / lista.py / diccionario.py / listadediccionarios.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 main2.py
+<span class="terminal-shot__output">Request ID: 1001</span>
+<span class="terminal-shot__prompt">$</span> python3 lista.py
+<span class="terminal-shot__output">Categorías disponibles:['Electrónica', 'Ropa', 'Libros']</span>
+<span class="terminal-shot__prompt">$</span> python3 diccionario.py
+<span class="terminal-shot__output">Request ID: 1001
+Request Title: Clase 01 - Ejercicios
+Estimated Hours: 2.5</span>
+<span class="terminal-shot__prompt">$</span> python3 listadediccionarios.py
+<span class="terminal-shot__output">Request ID: 1001
+Request Title: Clase 01 - Ejercicios
+Estimated Hours: 2.5
+Is Active: True
+Assigned User: styp
+&nbsp;
+Request ID: 1002
+Request Title: Clase 02 - Ejercicios
+Estimated Hours: 3.0
+Is Active: False
+Assigned User: jdoe</span></code></pre>
+</div>
+
+> 💡 Detalle de estilo en `lista.py`: `"texto" + str(categoria)` funciona, pero mezclar
+> `+` con `str(...)` a mano es justo lo que resuelve más limpio un f-string —
+> `f"Categorías disponibles: {categoria}"` da el mismo resultado sin el `+` ni el
+> `str()` explícito (mismo patrón ya usado en `diccionario.py` y en la teoría, sección 7).
 
 # 🏋️ EJERCICIOS CON SOLUCIÓN
 

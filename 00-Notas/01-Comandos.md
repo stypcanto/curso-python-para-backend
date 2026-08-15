@@ -20,6 +20,20 @@ macOS — esa es la columna que realmente corre en su terminal:
 > "3". Una vez con el venv **activado**, en ambos sistemas ya se puede usar `python` (a
 > secas) y `pip` sin el "3" — el venv se encarga de apuntar al binario correcto.
 
+> 📝 **¿Por qué `source` y no correr `.venv/bin/activate` directo?** `activate` es un
+> script que modifica variables de entorno (`PATH`, `VIRTUAL_ENV`) para que la terminal
+> use el Python del venv. Si lo corrés normal (`./activate` o `.venv/bin/activate` sin
+> más), zsh abre un **subshell** para ejecutarlo: el subshell activa el venv y se cierra
+> al toque, sin que tu terminal actual se entere del cambio (por eso nunca aparece
+> `(.venv)` en el prompt). `source` (o su alias `.`) le dice al shell "ejecutá este
+> script **en mí mismo**, no en un proceso aparte" — así los cambios quedan en tu sesión.
+>
+> ⚠️ Otro tropiezo típico: si hiciste `cd` **dentro** de la carpeta `.venv` (en vez de
+> quedarte en la carpeta del proyecto/ejercicio), `source .venv/bin/activate` ya no
+> encuentra la ruta — `.venv` no está dentro de sí misma. Verificá con `pwd` que estás
+> **un nivel arriba** de `.venv` antes de activar — ver
+> [[2026-08-14-activate-sin-source-no-funciona]].
+
 El resto de comandos de `pip` son **iguales en cualquier sistema operativo** (una vez con
 el venv activado):
 
@@ -32,6 +46,18 @@ el venv activado):
 | `pip freeze > requirements.txt` | Congela todas las dependencias instaladas y sus versiones exactas en un archivo | `pip freeze > requirements.txt` |
 | `pip install -r requirements.txt` | Instala todas las dependencias listadas en el archivo (lo que corre alguien que clona el repo) | `pip install -r requirements.txt` |
 | `python3 archivo.py` | Ejecuta un script de Python | `python3 main.py` |
+
+> 📝 **No todo lo que se importa se instala con `pip`.** Módulos como `calendar`, `os`,
+> `json`, `datetime`, `re`, `logging` son parte de la **librería estándar** — vienen
+> incluidos con Python, se usan con `import` directo, sin `pip install` de por medio.
+> `pip install python3-calendar` da `ERROR: Could not find a version that satisfies the
+> requirement` porque ese nombre (`python3-algo`) es la convención de paquetes de
+> **apt/Debian/Ubuntu** (`sudo apt install python3-algo`), no de PyPI/`pip` — son dos
+> ecosistemas de paquetes distintos.
+> ```python
+> import calendar
+> print(calendar.month(2026, 8))   # no requiere instalar nada
+> ```
 
 ## 🐳 Docker
 
