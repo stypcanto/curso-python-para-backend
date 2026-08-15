@@ -6,392 +6,334 @@ sidebar: "Clase 2 · POO y arquitectura"
 
 > Python para Backend · 2026-08-04 · Carpeta: `02-Ejercicios/Clase-02`
 > ⬅️ Volver al [índice de clases](00-Indice.md)
+> 📎 Material: [Presentación de la Clase 2](../04-Recursos/presentaciones/Clase%202.pdf) —
+> "Programación Orientada a Objetos y Arquitectura en Python" (Tecylab)
 
-## 🎯 Qué aprendí (según temario — por confirmar/completar al documentar la clase)
-- Clases y objetos
-- Herencia y composición
-- Encapsulamiento y abstracción
-- Principios SOLID
-- Organización de proyectos Python
-- Patrones básicos de diseño
+## 🎯 Qué aprendí
+- Por qué mover la lógica de diccionarios sueltos a objetos con estado y comportamiento.
+- Clases, objetos, atributos y métodos (`Ticket`, `assign()`, `close()`, `get_summary()`).
+- Encapsulamiento con `_atributo` + `@property` para impedir estados inválidos.
+- Abstracción con `ABC` / `@abstractmethod` (`NotificationChannel`).
+- Herencia ("es un") con `User` → `Technician`.
+- Composición ("tiene un") con `TicketService`, que usa un `NotificationChannel`.
+- Los 5 principios SOLID aplicados al dominio de tickets.
+- Organización de un proyecto Python en módulos (`domain/`, `services/`,
+  `notifications/`, `policies/`).
+- *(profundización propia)* Los patrones Singleton, Factory y Strategy con ejemplos
+  completos — la presentación solo los menciona de pasada.
 
 # 📖 PARTE TEÓRICA
 
-> 📌 **Esta teoría no viene de la clase real dictada** (todavía no pasé capturas ni
-> grabación de la Clase 2) — es **teoría estándar de referencia**, armada solo a partir
-> de los 6 puntos del temario (ver "Qué aprendí" arriba) y verificada con fuentes
-> externas y en terminal. Cuando llegue el material real de la clase, esta sección se
-> revisa y se completa con los ejemplos/orden que se hayan dado — no se descarta, se
-> enriquece.
+> 📌 Esta teoría viene de la presentación **real** de la Clase 2 ("Programación
+> Orientada a Objetos y Arquitectura en Python", Tecylab —
+> [`04-Recursos/presentaciones/Clase 2.pdf`](../04-Recursos/presentaciones/Clase%202.pdf)).
+> Todo el código de las diapositivas está reproducido tal cual y verificado en terminal;
+> las tablas y callouts son mi resumen "con mis propias palabras".
 
-## 🏗️ 1. Clases y objetos
-Una **clase** es el molde: define qué datos (atributos) y qué comportamientos (métodos)
-va a tener cada cosa que se cree a partir de ella. Un **objeto** es una instancia
-concreta de esa clase — cada `SupportTicket(...)` que se crea es un objeto distinto, con
-sus propios valores, aunque comparta la misma "forma".
+## 📚 1. Definiciones clave
 
-```python
-class SupportTicket:
-    """Representa una solicitud de soporte."""
+### 🐍 Mecánica de Python (POO)
+| Término | Qué es | Se profundiza en |
+|---|---|---|
+| `class` | Define el molde: qué datos y qué operaciones tendrá cada objeto creado a partir de ella. | sección 3 |
+| `__init__` | El **constructor** — se ejecuta al crear el objeto y arma su estado inicial. | sección 3 |
+| `self` | Referencia al propio objeto — así cada método sabe sobre cuál instancia trabaja. | sección 3 |
+| Atributo | Dato que vive dentro del objeto (`self.title`). | sección 4 |
+| Método | Función que vive en la clase y opera sobre el objeto (`assign()`, `close()`). | sección 4 |
+| `@property` | Decorador que expone un método como si fuera un atributo de solo lectura (`ticket.status`, sin paréntesis). | sección 5 |
+| `_atributo` (guion bajo) | Convención "protegido": señal de que es uso interno, Python no lo bloquea de verdad. | sección 5 |
+| `ABC` / `@abstractmethod` | Clase base abstracta y decorador que obliga a las subclases a implementar un método, o Python no deja instanciarlas. | sección 6 |
+| `super()` | Llama al método de la **clase padre** desde una subclase (`super().__init__(...)`). | sección 7 |
+| `isinstance(obj, Clase)` | Verifica si un objeto es instancia de una clase (o de una subclase suya). | sección 7 |
 
-    def __init__(self, id: int, title: str, priority: str):
-        self.id = id            # atributo de instancia
-        self.title = title
-        self.priority = priority
+### 🧱 Principios y patrones de diseño
+| Término | Qué es | Se profundiza en |
+|---|---|---|
+| SOLID | Acrónimo de 5 principios de diseño orientado a objetos para reducir el costo del cambio. | sección 9 |
+| Strategy | Patrón: cambia el algoritmo/regla usada sin modificar quien lo usa. | sección 11 |
+| Factory | Patrón: centraliza en un solo lugar la lógica de "qué clase instanciar". | sección 11 |
+| Singleton | Patrón: garantiza que exista una única instancia compartida de una clase. | sección 11 |
 
-    def describe(self) -> str:
-        return f"Ticket {self.id}: {self.title} ({self.priority})"
+## 🧭 2. De datos aislados a objetos: por qué POO
+En la Clase 1 representamos una solicitud como un `dict` suelto. Funciona mientras el
+programa es chico, pero al crecer aparecen problemas estructurales:
 
-
-t1 = SupportTicket(1001, "Error de acceso", "Alta")
-t2 = SupportTicket(1002, "Lentitud del sistema", "Media")
-
-print(t1.describe())
-print(t2.describe())
-print(t1 is t2)
-```
-```
-Ticket 1001: Error de acceso (Alta)
-Ticket 1002: Lentitud del sistema (Media)
-False
-```
-
-| Concepto | Qué es |
+| Problema | Qué significa |
 |---|---|
-| `class` | Define el molde (atributos + métodos). |
-| `__init__` | El **constructor**: se ejecuta al crear el objeto (`SupportTicket(...)`) y arma su estado inicial. |
-| `self` | Referencia al propio objeto — así cada método sabe sobre cuál instancia está trabajando. |
-| Atributo | Dato que vive en el objeto (`self.title`). |
-| Método | Función que vive en la clase y opera sobre el objeto (`describe()`). |
+| Reglas distribuidas | La lógica de negocio queda dispersa por todo el programa, no en un solo lugar. |
+| Modificaciones sin control | Cualquier parte del código puede alterar el diccionario directamente, sin pasar por ninguna validación. |
+| Lógica repetida | El mismo comportamiento (por ejemplo, "cerrar un ticket") se duplica en varios puntos. |
+| Responsabilidades difusas | No queda claro qué parte del sistema es responsable de qué. |
 
-> 💡 `t1 is t2` da `False` porque son dos objetos **distintos** en memoria, aunque tengan
-> la misma clase — es el mismo principio de identidad vs. igualdad que ya apareció con
-> mutabilidad/aliasing en la Clase 1 (sección "para ir más allá").
+> 💡 Pregunta que abrió la clase: **¿dónde debería vivir la lógica que permite cerrar
+> una solicitud?** Con un `dict`, la respuesta es "en cualquier lado" — y ese es
+> justamente el problema. La POO responde: **dentro del objeto que representa esa
+> solicitud.**
 
-> 🧪 Tip de entrevista: ¿diferencia entre clase y objeto? La clase es la **definición**
-> (existe una sola vez en el código); el objeto es una **instancia en memoria** creada a
-> partir de esa definición (pueden existir muchos, cada uno con su propio estado).
-
-## 🧬 2. Herencia y composición
-Son las dos formas de **reutilizar código entre clases**, pero responden preguntas
-distintas: herencia responde "¿qué **ES**?", composición responde "¿qué **TIENE**?".
+## 🏗️ 3. La clase como plantilla
+Una **clase** establece qué datos tendrá un elemento, qué operaciones podrá realizar y
+qué reglas deberá respetar. Un **objeto** es una instancia concreta, con su propio
+estado.
 
 ```python
 class Ticket:
-    def __init__(self, id: int, title: str):
-        self.id = id
+    def __init__(
+        self, ticket_id: int,
+        title: str, priority: str,
+    ):
+        self.ticket_id = ticket_id
         self.title = title
-
-    def describe(self) -> str:
-        return f"Ticket {self.id}: {self.title}"
-
-
-# Herencia: UrgentTicket "ES" un Ticket (extiende su comportamiento)
-class UrgentTicket(Ticket):
-    def __init__(self, id: int, title: str, escalated_to: str):
-        super().__init__(id, title)          # reutiliza el __init__ del padre
-        self.escalated_to = escalated_to
-
-    def describe(self) -> str:
-        base = super().describe()            # reutiliza el describe() del padre
-        return f"{base} — ESCALADO a {self.escalated_to}"
+        self.priority = priority
+        self.status = "Pendiente"
 
 
-u = UrgentTicket(2001, "Caída del servidor", "Infraestructura")
-print(u.describe())
-print(isinstance(u, Ticket))
-
-
-# Composición: SupportAgent "TIENE" un Logger (usa sus servicios, no hereda de él)
-class Logger:
-    def log(self, message: str) -> None:
-        print(f"[LOG] {message}")
-
-
-class SupportAgent:
-    def __init__(self, name: str):
-        self.name = name
-        self.logger = Logger()               # composición: el agente contiene un logger
-
-    def resolve(self, ticket: Ticket) -> None:
-        self.logger.log(f"{self.name} resolvió: {ticket.describe()}")
-
-
-agent = SupportAgent("Styp")
-agent.resolve(u)
-```
-```
-Ticket 2001: Caída del servidor — ESCALADO a Infraestructura
-True
-[LOG] Styp resolvió: Ticket 2001: Caída del servidor — ESCALADO a Infraestructura
+ticket_1 = Ticket(
+    1001, "Error al iniciar sesión", "Alta"
+)
 ```
 
-| | Herencia (`class B(A)`) | Composición (`self.x = X()`) |
-|---|---|---|
-| Relación | "ES UN/A" (`UrgentTicket` ES UN `Ticket`) | "TIENE UN/A" (`SupportAgent` TIENE UN `Logger`) |
-| Acoplamiento | Más fuerte — la subclase queda atada a la implementación del padre | Más flexible — se puede cambiar el objeto interno sin tocar la clase que lo usa |
-| Cuándo usarla | Cuando de verdad hay una jerarquía "tipo de" | Para la mayoría de los demás casos (reutilizar comportamiento sin heredar) |
+> 📌 Mensaje clave de la clase: **la clase describe una estructura; cada objeto contiene
+> su propio estado.** Dos `Ticket(...)` creados a partir de la misma clase son objetos
+> distintos en memoria, aunque compartan la misma "forma" (mismo principio de identidad
+> vs. igualdad que ya apareció con mutabilidad/aliasing en la Clase 1).
 
-> 📌 Regla de oro muy citada en diseño OO: **"favorece la composición sobre la
-> herencia"** — no porque la herencia esté mal, sino porque abusar de ella genera
-> jerarquías rígidas y difíciles de cambiar. La herencia se reserva para cuando la
-> relación "ES UN/A" es real y estable.
-
-> 🧪 Tip de entrevista: ¿cuándo usar herencia y cuándo composición? Herencia si el objeto
-> **es un tipo más específico** del padre (un `UrgentTicket` sigue siendo, ante todo, un
-> `Ticket`); composición si el objeto **usa un servicio de otro** para funcionar (un
-> `SupportAgent` usa un `Logger`, pero no "es" un logger).
-
-## 🔒 3. Encapsulamiento y abstracción
-**Encapsulamiento**: agrupar datos y los métodos que los manejan dentro de la misma
-clase, y controlar qué se puede tocar desde afuera. **Abstracción**: exponer *qué* hace
-algo, escondiendo *cómo* lo hace por dentro — quien usa la clase no necesita saber los
-detalles internos.
+## ⚙️ 4. Estado y comportamiento: atributos y métodos
+Un objeto no debería ser un contenedor pasivo de información — combina **atributos**
+(el estado: identificador, título, prioridad, técnico asignado) con **métodos** (el
+comportamiento: qué puede hacer ese objeto).
 
 ```python
-class BankAccount:
-    def __init__(self, owner: str, balance: float):
-        self.owner = owner
-        self._balance = balance          # "protegido" (convención: no tocar desde afuera)
-        self.__pin = "1234"              # "privado" (name mangling: _BankAccount__pin)
+class Ticket:
+    def assign(self, technician: str) -> None:
+        self.technician = technician
+        self.status = "Asignado"
 
-    def deposit(self, amount: float) -> None:
-        if amount <= 0:
-            raise ValueError("El depósito debe ser positivo")
-        self._balance += amount
+    def close(self) -> None:
+        self.status = "Cerrado"
 
-    def get_balance(self) -> float:
-        return self._balance
-
-
-acc = BankAccount("Styp", 100.0)
-acc.deposit(50.0)
-print(acc.get_balance())
-print(acc._BankAccount__pin)   # accesible igual, pero deja claro que "no debería" tocarse
-```
-```
-150.0
-1234
+    def get_summary(self) -> str:
+        return (
+            f"{self.ticket_id} - "
+            f"{self.title} - "
+            f"{self.status}"
+        )
 ```
 
-| Prefijo | Convención | Qué significa |
-|---|---|---|
-| `nombre` | público | Se puede usar libremente desde afuera de la clase. |
-| `_nombre` | protegido | *Convención* ("uso interno") — Python no lo bloquea, solo lo sugiere. |
-| `__nombre` | privado | Python le cambia el nombre por dentro (*name mangling* → `_Clase__nombre`) para dificultar el acceso accidental, pero **sigue siendo accesible**. |
+| Método | Qué hace |
+|---|---|
+| `assign(technician)` | Asigna un técnico al ticket y cambia su estado a `"Asignado"`. |
+| `close()` | Cierra el ticket. |
+| `get_summary()` | Devuelve un resumen legible del ticket. |
 
-> ⚠️ Python **no tiene encapsulamiento estricto** como Java (`private` de verdad). Todo es
-> convención: el `_`/`__` es una señal para quien lee el código ("no lo toques desde
-> afuera"), no una barrera real que el lenguaje imponga.
+## 🔒 5. Encapsulamiento: proteger el estado interno
+El **encapsulamiento** centraliza las reglas de modificación y evita estados inválidos.
+En vez de dejar que cualquiera reasigne `ticket.status = "lo que sea"` desde afuera, el
+estado se guarda en un atributo "protegido" (`_status`) y se expone de solo lectura con
+`@property`; los **cambios** de estado solo pueden pasar por los métodos de la clase.
 
-La abstracción se implementa formalmente con **clases abstractas** (`ABC`): definen *qué*
-métodos debe tener una familia de clases, sin decir *cómo* los implementa cada una.
+```python
+class Ticket:
+    def __init__(self, ticket_id: int, title: str):
+        self.ticket_id = ticket_id
+        self.title = title
+        self._status = "Pendiente"
+
+    @property
+    def status(self) -> str:
+        return self._status
+
+    def close(self) -> None:
+        if self._status == "Cerrado":
+            raise ValueError("Ya está cerrada")
+        self._status = "Cerrado"
+```
+```python
+t = Ticket(1001, "Error al iniciar sesión")
+print(t.status)     # Pendiente (se lee como atributo, sin paréntesis)
+t.close()
+print(t.status)      # Cerrado
+t.close()             # ValueError: Ya está cerrada
+```
+
+| Beneficio | Qué significa |
+|---|---|
+| Reglas centralizadas | Toda la lógica de validación vive en un único lugar (el método `close()`, no repartida por el programa). |
+| Estados inválidos imposibles | Las transiciones incorrectas (cerrar dos veces) se previenen con excepciones. |
+| Mantenimiento sencillo | Los cambios afectan solo a la clase, no a quienes la consumen. |
+
+> ⚠️ Igual que se documentó como profundización en la Clase 1: Python **no tiene
+> encapsulamiento estricto** como Java. `_status` es una convención — nada impide
+> escribir `t._status = "lo que sea"` desde afuera, pero la señal para quien lee el
+> código es clara: "no lo toques directo, usá los métodos".
+
+## 🎭 6. Abstracción: mostrar lo necesario, ocultar la implementación
+Una **abstracción** define **qué** operación debe existir, sin obligar al consumidor a
+conocer sus detalles internos. En Python se formaliza con clases abstractas (`ABC`).
 
 ```python
 from abc import ABC, abstractmethod
 
 class NotificationChannel(ABC):
     @abstractmethod
-    def send(self, message: str) -> None:
-        ...
+    def send(
+        self, recipient: str, message: str
+    ) -> None:
+        pass
 
-class EmailChannel(NotificationChannel):
-    def send(self, message: str) -> None:
-        print(f"Email enviado: {message}")
 
-class SMSChannel(NotificationChannel):
-    def send(self, message: str) -> None:
-        print(f"SMS enviado: {message}")
-
-def notify_all(channels: list[NotificationChannel], message: str) -> None:
-    for channel in channels:
-        channel.send(message)      # no le importa CÓMO envía cada canal, solo QUE puede enviar
-
-notify_all([EmailChannel(), SMSChannel()], "Ticket 2001 resuelto")
-
-try:
-    NotificationChannel()   # no se puede instanciar directamente: es abstracta
-except TypeError as e:
-    print("Error esperado:", e)
+class EmailNotification(NotificationChannel):
+    def send(
+        self, recipient: str, message: str
+    ) -> None:
+        print(
+            f"Correo enviado a {recipient}: {message}"
+        )
 ```
-```
-Email enviado: Ticket 2001 resuelto
-SMS enviado: Ticket 2001 resuelto
-Error esperado: Can't instantiate abstract class NotificationChannel without an implementation for abstract method 'send'
-```
-
-> 💡 `notify_all` no sabe (ni le importa) si el canal es email o SMS — solo confía en que
-> **cualquier** `NotificationChannel` tiene un método `send`. Esa es la abstracción en la
-> práctica: programar contra la interfaz, no contra el detalle.
-
-## 🧱 4. Principios SOLID
-SOLID es un acrónimo de 5 principios de diseño orientado a objetos que buscan código
-**fácil de mantener, extender y probar**. No son reglas exclusivas de Python (nacieron en
-el mundo de lenguajes más estrictos como Java/C#), pero aplican igual.
-
-| Letra | Principio | Idea central |
-|---|---|---|
-| **S** | Single Responsibility (responsabilidad única) | Una clase debe tener **una sola razón para cambiar**. |
-| **O** | Open/Closed (abierto/cerrado) | Abierta a **extenderse** (agregar casos nuevos), cerrada a **modificarse** (no tocar lo que ya funciona). |
-| **L** | Liskov Substitution (sustitución de Liskov) | Una subclase debe poder **reemplazar** a su clase base sin romper el comportamiento esperado. |
-| **I** | Interface Segregation (segregación de interfaces) | Mejor varias interfaces **chicas y específicas** que una gigante y genérica. |
-| **D** | Dependency Inversion (inversión de dependencias) | Depender de **abstracciones**, no de clases concretas. |
 
 ```python
-from abc import ABC, abstractmethod
+NotificationChannel()   # TypeError: no se puede instanciar una clase abstracta
+```
 
-# S — cada clase tiene UNA sola razón para cambiar
-class Ticket:
-    def __init__(self, id: int, priority: str):
-        self.id = id
-        self.priority = priority
+> 💡 **¿Por qué importa?** El sistema conoce la operación `send()`, pero ignora cómo se
+> realiza el envío. Esto permite añadir nuevos canales (SMS, consola, webhook) **sin
+> modificar** el código que ya los usa — la pregunta de cierre de esta sección en clase
+> fue justo esa: *¿qué habría que tocar para agregar notificaciones por SMS?* Respuesta:
+> solo crear `SMSNotification(NotificationChannel)` — nada más.
 
-class TicketRepository:
-    """Solo se ocupa de guardar/leer tickets (no de calcular ni notificar)."""
-    def __init__(self):
-        self._tickets: list[Ticket] = []
+## 🧬 7. Herencia: especializar comportamientos existentes
+La herencia modela una relación **"es un"**: una subclase reutiliza automáticamente el
+comportamiento de su clase base y puede agregar el suyo propio.
 
-    def save(self, ticket: Ticket) -> None:
-        self._tickets.append(ticket)
-
-
-# O — se agregan casos nuevos SIN modificar el código existente
-class PriorityCalculator(ABC):
-    @abstractmethod
-    def response_hours(self) -> int: ...
-
-class HighPriority(PriorityCalculator):
-    def response_hours(self) -> int:
-        return 2
-
-class MediumPriority(PriorityCalculator):
-    def response_hours(self) -> int:
-        return 8
-    # mañana se agrega LowPriority sin tocar ninguna clase existente
-
-def print_response_time(calculator: PriorityCalculator) -> None:
-    print(f"Responder en {calculator.response_hours()}h")
-
-print_response_time(HighPriority())
-print_response_time(MediumPriority())
+```python
+class User:
+    def __init__(self, name: str, email: str):
+        self.name = name
+        self.email = email
 
 
-# L — una subclase debe poder sustituir a su clase base sin sorpresas
-class Bird:
-    def move(self) -> str:
-        return "se mueve"
+class Technician(User):
+    def __init__(
+        self, name: str, email: str, specialty: str
+    ):
+        super().__init__(name, email)
+        self.specialty = specialty
 
-class FlyingBird(Bird):
-    def move(self) -> str:
-        return "vuela"
+    def attend_ticket(self, ticket: Ticket) -> None:
+        ticket.assign(self.name)
+```
 
-def describe_movement(bird: Bird) -> None:
-    print(bird.move())
+> 📌 `Technician` **es un** `User` con comportamiento adicional (`attend_ticket`) —
+> `super().__init__(name, email)` reutiliza el constructor del padre en vez de repetir
+> `self.name = name` / `self.email = email` a mano.
 
-describe_movement(Bird())
-describe_movement(FlyingBird())   # sustituye a Bird sin romper describe_movement()
+| Ventaja / riesgo | Qué significa |
+|---|---|
+| ✅ Reutilización | Las características comunes se heredan automáticamente. |
+| ✅ Polimorfismo | Las subclases pueden usarse donde se espera la clase base (`isinstance(tech, User)` da `True`). |
+| ⚠️ Jerarquías profundas | Demasiada herencia genera acoplamiento rígido y difícil de mantener. |
 
+## 🧩 8. Composición: construir objetos a partir de otros objetos
+La composición representa una relación **"tiene un"** y ofrece más flexibilidad que la
+herencia: un objeto no *es* otro, sino que *usa* uno para funcionar.
 
-# I — interfaces chicas y específicas, no una gigante
-class Readable(ABC):
-    @abstractmethod
-    def read(self) -> str: ...
-
-class Writable(ABC):
-    @abstractmethod
-    def write(self, data: str) -> None: ...
-
-class ReadOnlyFile(Readable):
-    def read(self) -> str:
-        return "contenido"
-
-rof = ReadOnlyFile()
-print(rof.read())    # no está obligado a implementar write()
-
-
-# D — depender de una abstracción, no de una clase concreta
-class NotificationSender(ABC):
-    @abstractmethod
-    def send(self, message: str) -> None: ...
-
-class EmailSender(NotificationSender):
-    def send(self, message: str) -> None:
-        print(f"Email: {message}")
-
+```python
 class TicketService:
-    def __init__(self, sender: NotificationSender):   # depende de la abstracción
-        self._sender = sender
+    def __init__(
+        self, notification: NotificationChannel
+    ):
+        self.notification = notification
 
-    def close_ticket(self, ticket_id: int) -> None:
-        self._sender.send(f"Ticket {ticket_id} cerrado")
+    def register(
+        self, ticket: Ticket, requester_email: str
+    ) -> None:
+        message = f"Solicitud {ticket.ticket_id} registrada"
+        self.notification.send(
+            requester_email, message
+        )
 
-service = TicketService(EmailSender())   # se puede cambiar por SMSSender sin tocar TicketService
-service.close_ticket(1001)
-```
-```
-Responder en 2h
-Responder en 8h
-se mueve
-vuela
-contenido
-Email: Ticket 1001 cerrado
-```
 
-> ⚠️ Error común: confundir "clase pequeña" (S) con "clase con un solo método". SRP habla
-> de **una sola razón para cambiar** (un solo motivo de negocio), no de un límite de
-> líneas — una clase puede tener varios métodos y seguir cumpliendo SRP si todos giran
-> alrededor de la misma responsabilidad.
-
-> 🧪 Tip de entrevista: ¿por qué "Dependency Inversion" y no simplemente "usar
-> interfaces"? Porque invierte quién depende de quién: normalmente el código de alto
-> nivel (`TicketService`) dependería directo del de bajo nivel (`EmailSender`); con DIP,
-> **ambos** dependen de una abstracción (`NotificationSender`) — de ahí "inversión".
-
-## 📁 5. Organización de proyectos Python
-A medida que un proyecto crece, mezclar toda la lógica en un solo archivo (o en
-funciones sueltas sin agrupar) se vuelve difícil de mantener. La convención más usada en
-backend es separar por **responsabilidad** (parecido al principio S de SOLID, pero a
-nivel de carpetas en vez de clases):
-
-```
-mi_backend/
-├── .venv/                  # entorno virtual (no se sube a git)
-├── requirements.txt        # dependencias del proyecto
-├── main.py                 # punto de entrada (arranca la app)
-└── mi_backend/              # el paquete real del proyecto (mismo nombre, buena práctica)
-    ├── __init__.py
-    ├── models/              # entidades del dominio (qué ES un Ticket, un Usuario…)
-    │   └── ticket.py
-    ├── repositories/        # acceso a datos: guardar/leer (hoy en memoria, después en BD)
-    │   └── ticket_repository.py
-    ├── services/            # lógica de negocio (reglas, cálculos, validaciones)
-    │   └── ticket_service.py
-    └── routes/              # (más adelante, con FastAPI) los endpoints HTTP
-        └── ticket_routes.py
-└── tests/                   # pruebas, separadas del código de la app
-    └── test_ticket_service.py
+service = TicketService(EmailNotification())
 ```
 
-| Carpeta | Responsabilidad | Analogía con SOLID |
+| | Herencia | Composición |
 |---|---|---|
-| `models/` | Define la forma de los datos del dominio (parecido a la `dataclass` de la Clase 1). | — |
-| `repositories/` | Aísla **cómo** se guardan/leen los datos (lista en memoria, base de datos…). | Si mañana cambia de memoria a PostgreSQL, solo cambia esta carpeta — el resto ni se entera (D). |
-| `services/` | Reglas de negocio: qué hacer con los datos, no cómo guardarlos. | Cada servicio con una responsabilidad clara (S). |
-| `routes/` | La "puerta de entrada" HTTP — traduce peticiones en llamadas a los servicios. | — |
-| `tests/` | Pruebas separadas del código de producción. | — |
+| Relación | "Es un" | "Tiene un" |
+| Acoplamiento | Rígido | Flexible |
+| Propósito | Especialización | Colaboración |
+| Resultado | Clases relacionadas (jerarquía) | Objetos intercambiables |
 
-> 💡 Esta separación (`models` / `repositories` / `services` / `routes`) es exactamente la
-> antesala del **Repository Pattern** que se va a formalizar en la Clase 4 (PostgreSQL +
-> SQLAlchemy) — la idea ya aparece acá, solo que sin base de datos real todavía.
+> 💡 Regla del profe: **preferir composición cuando el comportamiento deba poder
+> cambiarse** — `TicketService` no sabe (ni le importa) si `notification` es un email o
+> un SMS, solo que cumple el contrato `NotificationChannel` (la abstracción de la
+> sección 6). Si mañana cambia el canal, `TicketService` no se toca.
 
-> 📌 El nombre de la carpeta del paquete interno (`mi_backend/mi_backend/`) suele repetir
-> el nombre del proyecto — es la convención más común en la comunidad Python para que
-> `import mi_backend` funcione igual una vez instalado el paquete.
+> 🧪 Tip de entrevista: ¿cuándo herencia y cuándo composición? Herencia si el objeto **es
+> un tipo más específico** del padre (`Technician` sigue siendo, ante todo, un `User`);
+> composición si el objeto **usa el servicio de otro** para funcionar (`TicketService`
+> usa un `NotificationChannel`, pero no "es" uno).
 
-## 🧩 6. Patrones básicos de diseño
-Un **patrón de diseño** es una solución ya probada a un problema recurrente de diseño de
-software — no es código para copiar y pegar tal cual, sino una plantilla que se adapta al
-contexto.
+## 🧱 9. Principios SOLID
+Cinco principios de diseño orientado a objetos que buscan **reducir el costo del
+cambio** — código fácil de extender sin romper lo que ya funciona.
+
+| Letra | Principio | Idea principal | Ejemplo del dominio de tickets |
+|---|---|---|---|
+| **S** | Single Responsibility | Una clase, un solo motivo para cambiar | `Ticket` no envía correos |
+| **O** | Open/Closed | Extender sin modificar lo existente | Agregar `SMSNotification` sin tocar las demás clases |
+| **L** | Liskov Substitution | Toda subclase debe respetar el contrato de la base | Todo canal ejecuta `send()` igual |
+| **I** | Interface Segregation | Contratos pequeños y específicos | Sin métodos innecesarios que una clase no vaya a usar |
+| **D** | Dependency Inversion | Depender de abstracciones, no de clases concretas | `TicketService` depende de `NotificationChannel`, no de `EmailNotification` |
+
+**Ejemplo incorrecto (viola SRP)** — una sola clase con tres motivos distintos para
+cambiar (guardar en BD, enviar correo, generar PDF):
+```python
+class Ticket:
+    def save_database(self): pass
+    def send_email(self): pass
+    def generate_pdf(self): pass
+```
+
+> ⚠️ Error común (ya señalado en la teoría de referencia previa): confundir "clase
+> pequeña" (S) con "clase de un solo método". SRP habla de **una sola razón de
+> negocio para cambiar**, no de un límite de líneas.
+
+## 📁 10. Organización del proyecto
+La convención de la clase separa el proyecto por **responsabilidad** (parecido al
+principio S, pero a nivel de carpetas):
+
+```
+helpdesk/
+├── main.py
+├── domain/
+│   ├── ticket.py
+│   └── user.py
+├── services/
+│   └── ticket_service.py
+├── notifications/
+│   ├── base.py
+│   ├── email.py
+│   └── console.py
+└── policies/
+    └── response_time.py
+```
+
+| Carpeta | Qué contiene |
+|---|---|
+| `domain/` | Las entidades del dominio — `Ticket`, `User`/`Technician` (secciones 3, 4, 7). |
+| `services/` | La lógica que coordina objetos del dominio — `TicketService` (sección 8). |
+| `notifications/` | La abstracción `NotificationChannel` y sus implementaciones concretas (sección 6). |
+| `policies/` | Reglas de negocio aisladas (p. ej. tiempos de respuesta según prioridad). |
+
+> 💡 Esta separación es la antesala del **Repository Pattern** que se formaliza en la
+> Clase 4 (PostgreSQL + SQLAlchemy) — la idea de aislar responsabilidades por carpeta ya
+> aparece acá, solo que todavía sin base de datos real.
+
+## 🧰 11. Patrones de diseño (profundización propia)
+La diapositiva de cierre solo menciona de pasada **Strategy** (cambia reglas sin
+modificar el consumidor) y **Factory** (centraliza la creación de objetos), con la idea
+de fondo: *"un patrón es una solución reutilizable, no código para copiar"*. Amplío acá
+con ejemplos completos y verificados, más un tercer patrón muy usado (Singleton), porque
+son los que más se repiten en entrevistas de backend.
 
 ### Singleton — una sola instancia compartida
 ```python
@@ -414,8 +356,8 @@ print(c1 is c2)
 {'env': 'prod'}
 True
 ```
-> 💡 Uso típico: un logger o una configuración global que debe ser **una sola** en toda la
-> aplicación (evita, por ejemplo, tener dos conexiones de configuración desincronizadas).
+> 💡 Uso típico: un logger o una configuración global que debe ser **una sola** en toda
+> la aplicación.
 
 ### Factory — centralizar la creación de objetos
 ```python
@@ -440,7 +382,9 @@ channel.send("Ticket 1001 actualizado")
 SMS: Ticket 1001 actualizado
 ```
 > 💡 Se usa cuando el código empieza a llenarse de `if`/`elif` para decidir qué clase
-> instanciar — la Factory concentra esa decisión en un solo lugar.
+> instanciar — la Factory concentra esa decisión en un solo lugar. Es exactamente la
+> respuesta a la pregunta de la sección 6 (¿qué tocar para agregar SMS?): un `Factory`
+> centralizaría también esa decisión.
 
 ### Strategy — intercambiar el algoritmo sin tocar quien lo usa
 ```python
@@ -468,37 +412,230 @@ print([t["id"] for t in sort_tickets(tickets, by_id)])
 [1001, 1002, 1003]
 ```
 > 💡 `sort_tickets` no cambia — solo cambia **qué función de estrategia** le paso. Es el
-> mismo patrón que ya usamos sin nombrarlo en la Clase 1 al pasar una función distinta a
-> `key=` de `sorted()`... salvo que ahí no la usamos; acá es la primera vez, pero la idea
-> de "pasar comportamiento como parámetro" ya apareció con las funciones de la Clase 1.
+> mismo espíritu que `NotificationChannel` (sección 6): el consumidor programa contra un
+> contrato, no contra el detalle de cómo se resuelve.
 
-| Patrón | Problema que resuelve | Dónde se vuelve a ver más adelante en el curso |
-|---|---|---|
-| Singleton | Necesito una única instancia compartida | Conexión a base de datos, configuración de la app (Clase 4+) |
-| Factory | Necesito crear objetos sin acoplarme a la clase exacta | Crear instancias de modelos/servicios según el tipo de petición |
-| Strategy | Necesito intercambiar un algoritmo sin tocar el código que lo usa | Repository Pattern (Clase 4): cambiar de dónde vienen los datos sin tocar el servicio |
+| Patrón | Problema que resuelve |
+|---|---|
+| Singleton | Necesito una única instancia compartida (config, conexión a BD en la Clase 4+). |
+| Factory | Necesito crear objetos sin acoplarme a la clase exacta. |
+| Strategy | Necesito intercambiar un algoritmo/regla sin tocar el código que lo usa (Repository Pattern, Clase 4). |
 
-> 🧪 Tip de entrevista: ¿diferencia entre Factory y Strategy? Factory decide **qué objeto
-> crear**; Strategy decide **qué algoritmo ejecutar** sobre un objeto que ya existe. Se
-> pueden combinar (una Factory que devuelve la Strategy correcta según el caso).
-
-> 🔗 Fuentes usadas para verificar esta teoría (búsqueda web, agosto 2026):
-> [Los pilares de la POO en Python](https://picodotdev.github.io/blog-bitix/2021/03/los-conceptos-de-encapsulacion-herencia-polimorfismo-y-composicion-de-la-programacion-orientada-a-objetos/) ·
-> [Principios SOLID en Python](https://softwarecrafters.io/python/principios-solid-python) ·
-> [Estructurando tu proyecto — The Hitchhiker's Guide to Python](https://python-guide-es.readthedocs.io/es/latest/writing/structure.html) ·
-> [Patrones de diseño en Python — Refactoring Guru](https://refactoring.guru/es/design-patterns/python)
+> 🧪 Tip de entrevista: ¿diferencia entre Factory y Strategy? Factory decide **qué
+> objeto crear**; Strategy decide **qué algoritmo ejecutar** sobre un objeto que ya
+> existe. Se pueden combinar (una Factory que devuelve la Strategy correcta según el
+> caso).
 
 # 💻 PARTE PRÁCTICA
-*(pendiente)*
+
+## 🧪 Laboratorio de la clase
+Repasa conceptos de la Clase 1 (conversión de tipos con `int()`, condicionales
+`if`/`else`, comparación de strings) aplicados a casos nuevos, antes de avanzar a los
+ejercicios de POO.
+
+| Archivo | Qué practica |
+|---|---|
+| [`02-Ejercicios/Clase-02/main.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/main.py) | Dado un empleado y su edad, determina si puede jubilarse (regla: 65 años o más). |
+| [`02-Ejercicios/Clase-02/contrasena.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/contrasena.py) | Compara la contraseña ingresada contra una guardada de referencia con `==`, ignorando mayúsculas/minúsculas (`.lower()`). |
+| [`02-Ejercicios/Clase-02/funciones.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/funciones.py) | Primera función propia (`def`), con parámetros y un `if`/`else` que devuelve un booleano. |
+| [`02-Ejercicios/Clase-02/gestortarea.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/gestortarea.py) | Gestor de tareas por consola: 3 funciones independientes (`mostrar_tarea`, `agregar_tarea`, `eliminar_tarea`) + un menú en bucle `while True`. |
+
+**Enunciado original de `contrasena.py`** (tal como lo planteó el ejercicio):
+> Escribir un programa que almacene la cadena de caracteres `holamundo` en una variable,
+> pregunte al usuario por la contraseña e imprima por pantalla si la contraseña
+> introducida por el usuario coincide con la guardada en la variable **sin tener en
+> cuenta mayúsculas y minúsculas**.
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · main.py / contrasena.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 main.py
+Ingrese la edad del empleado: 70
+<span class="terminal-shot__output">El empleado puede jubilarse
+El empleado tiene 70 años</span>
+<span class="terminal-shot__prompt">$</span> python3 contrasena.py
+Ingrese la contraseña del usuario: holamundo
+<span class="terminal-shot__output">La contraseña es correcta</span>
+<span class="terminal-shot__prompt">$</span> python3 contrasena.py
+Ingrese la contraseña del usuario: HOLAMUNDO
+<span class="terminal-shot__output">La contraseña es correcta</span>
+<span class="terminal-shot__prompt">$</span> python3 contrasena.py
+Ingrese la contraseña del usuario: otraclave
+<span class="terminal-shot__output">La contraseña es incorrecta</span></code></pre>
+</div>
+
+> 📌 `edad = int(input_edad)` repite el patrón de conversión de tipos de la Clase 1
+> (`input()` siempre devuelve `str`, hay que convertirlo explícito antes de comparar con
+> `>= 65`).
+
+> 📝 **Corrección aplicada al revisar el enunciado:** la primera versión usaba
+> `contrasena_usuario == contrasena_bd`, que **sí distingue mayúsculas de minúsculas** —
+> pero el enunciado pide ignorarlas. Con `"HOLAMUNDO"` daba "incorrecta" cuando debía dar
+> "correcta". Se corrigió normalizando ambos lados con `.lower()` antes de comparar
+> (`.casefold()` es la alternativa más robusta si hubiera tildes/ñ):
+> ```python
+> if contrasena_usuario.lower() == contrasena_bd.lower():
+>     print("La contraseña es correcta")
+> else:
+>     print("La contraseña es incorrecta")
+> ```
+
+> ⚠️ `contrasena.py` compara texto plano contra texto plano — perfecto para practicar
+> `==` con strings, pero **nunca** así en un backend real: las contraseñas se guardan
+> **hasheadas** (nunca en texto plano) y se comparan con funciones especiales resistentes
+> a *timing attacks* (p. ej. `bcrypt`, o `hmac.compare_digest` en la librería estándar).
+> Este patrón de "hashear y verificar credenciales" se retoma en las clases de
+> autenticación/JWT del curso (Clase 7).
+
+### 🔧 `funciones.py` — primera función propia con `def`
+```python
+def mi_primera_funcion(dato1, dato2):
+    if dato1 > dato2:
+        print(True)
+    else:
+        print(False)
+
+mi_primera_funcion(10, 5)
+```
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · funciones.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 funciones.py
+<span class="terminal-shot__output">True</span></code></pre>
+</div>
+
+> 📝 **Error corregido:** la primera versión escribía `print(true)` / `print(false)` en
+> minúscula, lo que da `NameError: name 'true' is not defined` (Python incluso sugiere
+> el error: *"Did you mean: 'True'?"*). A diferencia de JavaScript/Java, en Python los
+> booleanos son **`True`/`False` con mayúscula inicial** — ver
+> [[2026-08-14-nameerror-true-false-minuscula]].
+
+### 📋 `gestortarea.py` — funciones independientes + menú en bucle
+Enunciado: construir un gestor de tareas dividido en **funciones independientes**
+(mostrar / agregar / eliminar), reutilizadas desde un menú interactivo en `while True`.
+
+```python
+def mostrar_tarea(lista):
+    """Imprime todas las tareas de la lista, numeradas desde 1."""
+    if len(lista) == 0:
+        print("No hay tareas pendientes.")
+    else:
+        print(f"Tienes {len(lista)} tareas pendientes:")
+        for i, t in enumerate(lista, start=1):
+            print(f'{i}. []{t}')
+
+
+def agregar_tarea(lista, nueva_tarea):
+    """Agrega una tarea nueva al final de la lista (modifica la lista original)."""
+    lista.append(nueva_tarea)
+    print(f'Tarea "{nueva_tarea}" agregada correctamente.')
+
+
+def eliminar_tarea(lista, numero):
+    """Elimina la tarea en la posición `numero` (numeración 1..N, no 0..N-1)."""
+    if 1 <= numero <= len(lista):
+        borrada = lista.pop(numero - 1)
+        print(f'Tarea "{borrada}" eliminada correctamente.')
+    else:
+        print("Número de tarea inválido. No se pudo eliminar la tarea.")
+```
+
+| Función | Qué hace | Detalle a notar |
+|---|---|---|
+| `mostrar_tarea(lista)` | Imprime cada tarea numerada. | `enumerate(lista, start=1)` da el índice **empezando en 1**, para que el usuario vea "1. tarea" en vez de "0. tarea". |
+| `agregar_tarea(lista, nueva_tarea)` | Agrega al final con `.append()`. | Modifica la lista **en el mismo lugar** (mismo concepto de mutabilidad de la Clase 1) — no hace falta `return`. |
+| `eliminar_tarea(lista, numero)` | Borra por posición con `.pop()`. | `numero - 1`: el usuario piensa "tarea 1, 2, 3...", pero las listas empiezan en índice `0` — hay que restar 1 para llegar al índice real. |
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · gestortarea.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 gestortarea.py
+&nbsp;
+Gestor de Tareas
+1. Mostrar tareas
+2. Agregar tarea
+3. Eliminar tarea
+4. Salir
+Seleccione una opción: 1
+<span class="terminal-shot__output">Tienes 3 tareas pendientes:
+1. []Programar en Python
+2. []Hacer ejercicio
+3. []Leer un libro</span>
+&nbsp;
+Gestor de Tareas
+1. Mostrar tareas
+2. Agregar tarea
+3. Eliminar tarea
+4. Salir
+Seleccione una opción: 3
+Ingrese el número de la tarea a eliminar: abc
+<span class="terminal-shot__output">Eso no es un número válido. Intenta de nuevo.</span>
+&nbsp;
+Gestor de Tareas
+1. Mostrar tareas
+2. Agregar tarea
+3. Eliminar tarea
+4. Salir
+Seleccione una opción: 3
+Ingrese el número de la tarea a eliminar: 3
+<span class="terminal-shot__output">Tarea "Programar en Python" eliminada correctamente.</span>
+&nbsp;
+Gestor de Tareas
+1. Mostrar tareas
+2. Agregar tarea
+3. Eliminar tarea
+4. Salir
+Seleccione una opción: 4
+<span class="terminal-shot__output">Saliendo del gestor de tareas.</span></code></pre>
+</div>
+
+> 📝 **Bug corregido:** `mostrar_tarea` tenía
+> `print("Tienes " + len(lista) + "tareas pendientes:")` — `len(lista)` devuelve un
+> `int`, y Python **no concatena `str + int` con `+`** (a diferencia de JS, que sí lo
+> hace solo). Se cambió a f-string: `f"Tienes {len(lista)} tareas pendientes:"`.
+
+> 💡 **Mejora agregada:** en la opción 3, `int(input(...))` explotaba con
+> `ValueError` si el usuario escribía texto en vez de un número, cortando todo el
+> programa. Se envolvió en `try`/`except ValueError` (mismo patrón de manejo de errores
+> de la Clase 1) para que solo avise y deje reintentar, sin cerrar el gestor.
+
+## 🎯 Reto de POO propuesto en la diapositiva de cierre
+La empresa requiere registrar solicitudes y notificar al usuario; el canal de
+notificación puede cambiar sin modificar el servicio principal. Se pide construir:
+
+1. **Clase `Ticket`** — atributo de estado encapsulado, métodos `assign()` y `close()`.
+2. **Abstracción `NotificationChannel`** — con implementación `EmailNotification` y
+   composición dentro de `TicketService`.
+3. **Separación en módulos** — responsabilidades claras, nombres descriptivos, tipos
+   correctos y excepciones específicas (estructura `helpdesk/` de la sección 10).
+
+> 🔜 *(pendiente)* Todavía no está resuelto en `02-Ejercicios/Clase-02/` — cuando lo
+> tengas, se documenta acá con la salida verificada en terminal.
 
 # 🏋️ EJERCICIOS CON SOLUCIÓN
-*(pendiente — se documentan 10 ejercicios graduales cuando haya contenido de la clase)*
+*(pendiente — se documentan 10 ejercicios graduales de POO cuando esté resuelto el reto
+de arriba)*
 
 ## ❓ Preguntas y respuestas (autoevaluación)
-*(pendiente — 10 preguntas graduales)*
+*(pendiente — 10 preguntas graduales sobre clases, encapsulamiento, abstracción,
+herencia, composición y SOLID)*
 
 ## 📎 Apuntes relacionados
-*(pendiente)*
+- [Clase 1](Clase-01.md) — tipos de datos, conversión con `int()`/`float()`, base de
+  `dataclass` (antesala de los atributos tipados que ahora se ven en `Ticket`).
+- [00-Notas/02-Conceptos.md](../00-Notas/02-Conceptos.md) — tabla de conceptos.
 
 ## ➡️ Siguiente
 [Clase 3](Clase-03.md)
