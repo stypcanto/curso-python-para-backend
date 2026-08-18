@@ -208,6 +208,23 @@ requests = [
 | `for` | Recorre una colección elemento a elemento. |
 | `while` | Repite mientras se cumpla una condición. |
 
+**`if` / `elif` / `else`** ejecutan un bloque de código solo si se cumple una
+condición (una comparación, un booleano). Python evalúa las condiciones **en orden**
+y ejecuta el primer bloque cuya condición dé `True` — el resto ni se evalúa.
+
+**`for`** recorre una colección (lista, diccionario, string, `range(...)`...)
+**elemento a elemento**, ejecutando el bloque una vez por cada uno. Se usa cuando se
+sabe de antemano **sobre qué** se va a iterar — el `for` mismo se encarga de saber
+cuántas vueltas dar, sin necesidad de contarlas a mano.
+
+**`while`** repite un bloque de código **mientras** una condición se mantenga
+verdadera — la condición se vuelve a evaluar **antes de cada vuelta**, y en cuanto da
+`False` el bucle termina. Se usa cuando no se sabe de antemano cuántas repeticiones
+van a hacer falta (depende de que algo cambie durante la ejecución), y por eso
+necesita alguna variable que controle el corte (un contador, una bandera) actualizada
+a mano dentro del bloque — si se olvida actualizarla, el bucle **nunca termina**
+(bucle infinito).
+
 ```python
 if priority == "Alta":
     response_time = 2
@@ -222,7 +239,20 @@ for request in requests:
 for request in requests:
     if request["priority"] == "Alta":
         print(f"Crítica: {request['id']}")
+
+# while: repite mientras la condición sea verdadera — hay que
+# actualizar 'index' a mano en cada vuelta, o nunca se corta
+index = 0
+while index < len(requests):
+    print(requests[index]["id"])
+    index += 1
 ```
+
+> ⚠️ Con `requests` de 2 elementos, el `for` de la línea 8 y el `while` de más abajo
+> imprimen exactamente lo mismo (`1001`, `1002`) — misma tarea, dos formas de
+> recorrer. La diferencia está en **quién controla el corte**: el `for` lo hace solo
+> (recorre hasta el último elemento y para), el `while` depende de que `index` se
+> incremente a mano dentro del bloque.
 
 > 🧪 Tip de entrevista (pregunta de la clase): si `priorities = ["Alta", "Baja", "Alta"]`
 > y por cada `"Alta"` se suma 1 a `total`, ¿cuántas veces se suma? **Respuesta: 2** (solo
