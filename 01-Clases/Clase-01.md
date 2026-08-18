@@ -24,6 +24,10 @@ sidebar: "Clase 1 · Fundamentos de Python"
 - *(práctica libre)* El módulo `calendar` de la librería estándar (no se instala con
   `pip`) y la diferencia entre variables sueltas vs. agruparlas en un `dict`/lista de
   `dict`s para el mismo dato.
+- *(práctica libre)* Comparación de strings ignorando mayúsculas (`.lower()`),
+  condicionales aplicados a casos reales (jubilación, tributación), listas
+  (`.append()`/`.remove()`/`.index()`), `while` vs. `for` para recorrer una colección,
+  una función propia con varias ramas `if`/`elif`, y `try`/`except` a mano.
 
 # 📖 PARTE TEÓRICA
 
@@ -505,38 +509,11 @@ print(mapa_prioridades)  # {1001: 'Alta', 1002: 'Media', 1003: 'Alta'}
 
 # 💻 PARTE PRÁCTICA
 
-El reto de cierre de la clase: **procesador de solicitudes de soporte**. Un programa que
-recorre una lista de solicitudes y determina, para cada una, su tiempo máximo de
-respuesta — juntando todo lo visto (listas de diccionarios, `for`, función en módulo
-separado, `try`/`except`).
-
-Archivos: `02-Ejercicios/Clase-01/request_utils.py` (la función) y
-`02-Ejercicios/Clase-01/main.py` (el programa principal).
-
-Para correrlo:
-```bash
-cd 02-Ejercicios/Clase-01
-python3 main.py
-```
-
-<div class="terminal-shot">
-  <div class="terminal-shot__titlebar">
-    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
-    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
-    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
-    <span class="terminal-shot__title">zsh · main.py</span>
-  </div>
-  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 main.py
-<span class="terminal-shot__output">Solicitud 1001 (Error de acceso): responder en 2h
-Solicitud 1002 (Lentitud del sistema): responder en 8h
-Solicitud 1003 (Duda de uso): responder en 24h
-Solicitud 1004: Prioridad desconocida: Urgentisima</span></code></pre>
-</div>
-
-> 💡 Reflexión de cierre: ¿qué parte de este programa se podría reutilizar dentro de
-> una API? **La función que valida la prioridad y calcula el tiempo de respuesta** — la
-> lógica de negocio no cambia, solo cambia cómo se recibe y se entrega el resultado
-> (consola vs. una respuesta HTTP).
+> 📝 **`request_utils.py` sin documentar:** el reto de cierre que se documentaba acá
+> (`request_utils.py` + `main.py`, "procesador de solicitudes de soporte") no
+> correspondía en realidad a esta clase — al revisar la grabación, `main.py` era otro
+> ejercicio (ver más abajo). `request_utils.py` queda en la carpeta sin usarse por
+> ahora; se retoma si el reto real aparece en una clase siguiente.
 
 ## 🖊️ Práctica libre: variables e `input()`
 Aparte del reto, practiqué por mi cuenta variables y la función `input()` — que ya había
@@ -693,375 +670,368 @@ Assigned User: jdoe</span></code></pre>
 > `f"Categorías disponibles: {categoria}"` da el mismo resultado sin el `+` ni el
 > `str()` explícito (mismo patrón ya usado en `diccionario.py` y en la teoría, sección 7).
 
-# 🏋️ EJERCICIOS CON SOLUCIÓN
-
-### Ejercicio 1 — Tipos de datos y conversión
-Crea variables para representar una solicitud de soporte: `request_id` (1001), `title`
-("No puedo acceder") y `estimated_hours`, sabiendo que el dato llega como texto `"2.5"` y
-debe guardarse como número decimal. Imprime `estimated_hours` y su tipo.
-Salida esperada: `2.5 <class 'float'>`.
-
-<details><summary>💡 ¿Sabías que…? — conversión de tipos (str → número)</summary>
-
-Python no convierte automáticamente un texto en número: `"2.5" + 1` da error. Hay que
-convertir explícitamente con `int()` (a entero) o `float()` (a decimal) según el caso.
+## 🔐 `contrasena.py` — comparar strings ignorando mayúsculas
+Enunciado: almacenar la cadena `holamundo` en una variable, pedirle al usuario su
+contraseña e imprimir si coincide con la guardada, **sin distinguir mayúsculas de
+minúsculas**.
 
 ```python
-minutes_text = "45"
-estimated_minutes = int(minutes_text)
-print(estimated_minutes, type(estimated_minutes))  # 45 <class 'int'>
-```
-</details>
+contrasena_bd = "holamundo"
+contrasena_usuario = input("Ingrese la contraseña del usuario: ")
 
-<details><summary>Ver solución</summary>
-
-```python
-request_id = 1001
-title = "No puedo acceder"
-hours_text = "2.5"
-estimated_hours = float(hours_text)
-print(estimated_hours, type(estimated_hours))
-```
-</details>
-
-### Ejercicio 2 — Booleanos y `None`
-Crea `is_active` (`True`) y `assigned_user` (`None`, porque todavía no se asignó a
-nadie). Escribe un `if` que imprima `"Solicitud sin asignar"` cuando no haya usuario
-asignado, usando `is None` (no `== None`).
-
-<details><summary>💡 ¿Sabías que…? — comparar contra `None` con `is`</summary>
-
-Para comparar contra `None` se usa `is None` / `is not None`, no `==`. Es la forma
-"correcta" en Python porque `None` es un valor único en memoria, no algo que se compara
-por igualdad como un número o texto.
-
-```python
-owner = None
-if owner is None:
-    print("Ticket sin dueño")
-```
-</details>
-
-<details><summary>Ver solución</summary>
-
-```python
-is_active = True
-assigned_user = None
-if assigned_user is None:
-    print("Solicitud sin asignar")
-print("Activa:", is_active)
-```
-</details>
-
-### Ejercicio 3 — Listas
-Crea una lista `categories` con `"Hardware"`, `"Software"` y `"Accesos"`, e imprime
-cuántos elementos tiene usando `len()`.
-Salida esperada: `Cantidad de categorias: 3`.
-
-<details><summary>💡 ¿Sabías que…? — `len()` funciona sobre cualquier colección</summary>
-
-`len()` no es exclusivo de listas: también funciona con `dict`, `str` y otras
-colecciones — siempre devuelve "cuántos elementos hay".
-
-```python
-departments = ["Ventas", "Soporte", "TI", "RRHH"]
-print("Cantidad de departamentos:", len(departments))
-```
-</details>
-
-<details><summary>Ver solución</summary>
-
-```python
-categories = ["Hardware", "Software", "Accesos"]
-print("Cantidad de categorias:", len(categories))
-```
-</details>
-
-### Ejercicio 4 — Diccionarios
-Crea el diccionario `request` con `id` (1001), `title` ("Error de acceso"), `priority`
-("Alta") y `active` (`True`). Luego cambia `priority` a `"Media"` (un diccionario es
-mutable) e imprime el diccionario completo.
-
-<details><summary>💡 ¿Sabías que…? — actualizar una clave existente</summary>
-
-Asignar a una clave que ya existe la sobrescribe (no la duplica). Si la clave no existe
-todavía, `dict["clave"] = valor` la crea.
-
-```python
-ticket = {"id": 77, "title": "Impresora no responde", "priority": "Baja", "active": True}
-ticket["priority"] = "Alta"
-print(ticket)
-```
-</details>
-
-<details><summary>Ver solución</summary>
-
-```python
-request = {"id": 1001, "title": "Error de acceso", "priority": "Alta", "active": True}
-request["priority"] = "Media"
-print(request)
-```
-</details>
-
-### Ejercicio 5 — Lista de diccionarios
-Con `requests = [{"id": 1001, "priority": "Alta"}, {"id": 1002, "priority": "Media"},
-{"id": 1003, "priority": "Alta"}]`, cuenta cuántas solicitudes tienen prioridad
-`"Alta"` recorriendo la lista con `for`.
-Salida esperada: `Total Alta: 2`.
-
-<details><summary>💡 ¿Sabías que…? — acumular un conteo con `for`</summary>
-
-Un patrón muy común: crear una variable contador en 0 antes del `for`, y sumarle 1 cada
-vez que se cumple la condición dentro del ciclo (ver también el ejercicio de predicción
-de la teoría, sección 6).
-
-```python
-tickets = [{"id": 10, "priority": "Baja"}, {"id": 11, "priority": "Baja"}, {"id": 12, "priority": "Media"}]
-bajas = 0
-for t in tickets:
-    if t["priority"] == "Baja":
-        bajas += 1
-print("Total Baja:", bajas)
-```
-</details>
-
-<details><summary>Ver solución</summary>
-
-```python
-requests = [
-    {"id": 1001, "priority": "Alta"},
-    {"id": 1002, "priority": "Media"},
-    {"id": 1003, "priority": "Alta"},
-]
-altas = 0
-for r in requests:
-    if r["priority"] == "Alta":
-        altas += 1
-print("Total Alta:", altas)
-```
-</details>
-
-### Ejercicio 6 — Condicionales `if`/`elif`/`else`
-Dada `priority = "Media"`, asigna `response_time` según la tabla de la teoría (Alta→2,
-Media→8, cualquier otro caso→24) usando `if`/`elif`/`else`, e imprímelo.
-Salida esperada: `response_time: 8`.
-
-<details><summary>💡 ¿Sabías que…? — `elif` evita comparaciones innecesarias</summary>
-
-Con `elif` (en vez de varios `if` sueltos), en cuanto una condición se cumple las demás
-ni se evalúan — es más claro y evita bugs si dos condiciones podrían cumplirse a la vez.
-
-```python
-urgencia = "Baja"
-if urgencia == "Alta":
-    tiempo = 1
-elif urgencia == "Media":
-    tiempo = 4
+if contrasena_usuario.lower() == contrasena_bd.lower():
+    print("La contraseña es correcta")
 else:
-    tiempo = 12
-print("tiempo:", tiempo)
+    print("La contraseña es incorrecta")
 ```
-</details>
 
-<details><summary>Ver solución</summary>
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · contrasena.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 contrasena.py
+Ingrese la contraseña del usuario: holamundo
+<span class="terminal-shot__output">La contraseña es correcta</span>
+<span class="terminal-shot__prompt">$</span> python3 contrasena.py
+Ingrese la contraseña del usuario: HOLAMUNDO
+<span class="terminal-shot__output">La contraseña es correcta</span>
+<span class="terminal-shot__prompt">$</span> python3 contrasena.py
+Ingrese la contraseña del usuario: otraclave
+<span class="terminal-shot__output">La contraseña es incorrecta</span></code></pre>
+</div>
+
+> 📝 **Corrección aplicada al revisar el enunciado:** la primera versión comparaba
+> `contrasena_usuario == contrasena_bd` directo, que **sí distingue mayúsculas de
+> minúsculas** — con `"HOLAMUNDO"` daba "incorrecta" cuando el enunciado pedía que diera
+> "correcta". Se corrigió normalizando ambos lados con `.lower()` antes de comparar
+> (`.casefold()` sería la alternativa más robusta si hubiera tildes/ñ).
+
+> ⚠️ Comparar texto plano contra texto plano es perfecto para practicar `==` con
+> strings, pero **nunca** así en un backend real: las contraseñas se guardan
+> **hasheadas** (nunca en texto plano) y se comparan con funciones resistentes a
+> *timing attacks* (p. ej. `bcrypt`, o `hmac.compare_digest` en la librería estándar).
+> Este patrón de "hashear y verificar credenciales" se retoma en las clases de
+> autenticación/JWT del curso (Clase 7).
+
+## 👤 `main.py` — condicional simple: ¿puede jubilarse?
+Enunciado: dada la edad de un empleado, indicar si puede jubilarse (regla: 65 años o
+más).
 
 ```python
-priority = "Media"
-if priority == "Alta":
-    response_time = 2
-elif priority == "Media":
-    response_time = 8
+input_edad = input("Ingrese la edad del empleado: ")
+edad = int(input_edad)
+
+if edad >= 65:
+    print("El empleado puede jubilarse")
+    print("El empleado tiene " + str(edad) + " años")
 else:
-    response_time = 24
-print("response_time:", response_time)
-```
-</details>
-
-### Ejercicio 7 — Ciclos `for`
-Usando la lista `requests` del ejercicio 5, imprime `"Critica: <id>"` por cada solicitud
-con prioridad `"Alta"`.
-Salida esperada:
-```
-Critica: 1001
-Critica: 1003
+    print("El empleado no puede jubilarse")
+    print("El empleado tiene " + str(edad) + " años")
 ```
 
-<details><summary>💡 ¿Sabías que…? — f-strings dentro de un `for`</summary>
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · main.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 main.py
+Ingrese la edad del empleado: 70
+<span class="terminal-shot__output">El empleado puede jubilarse
+El empleado tiene 70 años</span>
+<span class="terminal-shot__prompt">$</span> python3 main.py
+Ingrese la edad del empleado: 50
+<span class="terminal-shot__output">El empleado no puede jubilarse
+El empleado tiene 50 años</span></code></pre>
+</div>
 
-Los f-strings (`f"..."`) permiten insertar variables directo en el texto con `{}` — es
-más legible que concatenar con `+`, y se puede combinar con acceso a diccionario dentro
-de las llaves: `f"{r['id']}"`.
+> 📌 `edad = int(input_edad)` repite el patrón de conversión de tipos de la sección 4 de
+> la teoría (`input()` siempre devuelve `str`, hay que convertirlo explícito antes de
+> comparar con `>= 65`).
+
+## 💰 `impuestos.py` — condicional con cálculo
+Enunciado: para tributar un impuesto hay que ser mayor de 16 años y tener ingresos
+mensuales — el programa pregunta la edad y el salario, y muestra si corresponde
+tributar (18% del salario) o no.
 
 ```python
-for t in tickets:
-    if t["priority"] == "Baja":
-        print(f"Sin urgencia: {t['id']}")
-```
-</details>
+salario = float(input("Ingrese su salario: "))
+edad = int(input("Ingrese su edad: "))
 
-<details><summary>Ver solución</summary>
+if edad >= 16:
+    print(f"Tiene que tributar, le corresponde {salario * 0.18} soles")
+else:
+    print("Aun no tiene que tributar")
+```
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · impuestos.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 impuestos.py
+Ingrese su salario: 1500
+Ingrese su edad: 20
+<span class="terminal-shot__output">Tiene que tributar, le corresponde 270.0 soles</span>
+<span class="terminal-shot__prompt">$</span> python3 impuestos.py
+Ingrese su salario: 1500
+Ingrese su edad: 10
+<span class="terminal-shot__output">Aun no tiene que tributar</span></code></pre>
+</div>
+
+> 💡 Mismo patrón que `main.py`: un `if`/`else` sobre un valor convertido con
+> `int()`/`float()` — acá además se **calcula** un resultado (`salario * 0.18`) dentro
+> de la rama verdadera, en vez de solo imprimir un mensaje fijo.
+
+## 🦸 `superheroes.py` — añadir, eliminar y reemplazar en una lista
+
+> 📚 **¿Qué es una lista y para qué sirve?** Una `list` en Python es una **colección
+> ordenada y mutable** de elementos — guarda varios valores (strings, números, lo que
+> sea) en una sola variable, en un orden que se mantiene, y se puede modificar después
+> de creada (a diferencia de un `str` o una `tuple`). Sirve para cualquier caso donde
+> tengas "varias cosas del mismo tipo": una lista de tareas, de héroes, de solicitudes,
+> de nombres de usuarios. Se accede por **índice** (posición), empezando en `0`:
+> ```python
+> avengers = ["Iron Man", "Thor", "Hulk"]
+> avengers[0]        # "Iron Man" (primer elemento, índice 0)
+> len(avengers)       # 3 (cantidad de elementos)
+> ```
+> Definición completa (con tabla comparando `list` vs. `dict`) en
+> [[Clase-01#🖊️-practica-libre-variables-sueltas-listas-y-diccionarios]] más arriba.
+>
+> Métodos usados en este ejercicio:
+>
+> | Método | Qué hace |
+> |---|---|
+> | `.append(x)` | Agrega `x` al **final** de la lista. |
+> | `.remove(x)` | Elimina la **primera aparición** del valor `x` (no por posición). |
+> | `.index(x)` | Devuelve la **posición** (índice) donde está `x`, para poder reemplazarlo: `lista[lista.index(x)] = nuevo_valor`. |
+
+Enunciado: dada la lista de héroes de los Vengadores, (1) agregar a Spider-Man, (2)
+eliminar a Thor y (3) reemplazar a Capitán América por Pantera Negra.
+
+> 📝 **Bug del editor de la plataforma:** al reiniciar el ejercicio, el editor fue
+> devolviendo distintas listas de arranque en cada intento — ninguna coincidía del todo
+> con el enunciado (`["Iron Man", "pantera negra", "spider man", ...]`,
+> `["Iron Man", "Pantera negra", ..., "Spider Man"]`, etc., con nombres mal escritos o
+> sin Thor/Capitán América). La versión final se resolvió con la lista original que da
+> por sentada el enunciado de texto, para poder aplicar los tres pasos pedidos
+> literalmente (agregar, eliminar, reemplazar) en vez de ir parchando errores de
+> tipeo del editor.
 
 ```python
-for r in requests:
-    if r["priority"] == "Alta":
-        print(f"Critica: {r['id']}")
-```
-</details>
+# Lista original de héroes de los Vengadores
+avengers = ["Iron Man", "Capitán América", "Thor", "Hulk", "Viuda Negra"]
 
-### Ejercicio 8 — Funciones con tipado
-Escribe `calculate_response_time(priority: str) -> int` que devuelva el tiempo de
-respuesta (Alta→2, Media→8, cualquier otro caso→24), e imprime el resultado para
-`"Alta"`, `"Media"` y `"Baja"`.
-Salida esperada:
-```
-2
-8
-24
+# Agregar a Spider-Man
+avengers.append("Spider-Man")
+
+# Eliminar a Thor
+avengers.remove("Thor")
+
+# Reemplazar a Capitán América con Pantera Negra
+avengers[avengers.index("Capitán América")] = "Pantera Negra"
+
+# La lista final de héroes de los Vengadores
+print("La lista final de héroes:", avengers)
 ```
 
-<details><summary>💡 ¿Sabías que…? — los type hints no son obligatorios ni se validan solos</summary>
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · superheroes.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 superheroes.py
+<span class="terminal-shot__output">La lista final de héroes: ['Iron Man', 'Pantera Negra', 'Hulk', 'Viuda Negra', 'Spider-Man']</span></code></pre>
+</div>
 
-`priority: str` y `-> int` son *pistas* para quien lee el código (y para el editor) —
-Python no lanza error si en la práctica le pasas otro tipo. Sirven para claridad y para
-que herramientas como VS Code avisen antes de ejecutar, ver la sección "🧩 7. Organizando
-y reutilizando la lógica" de esta misma clase.
+| Método | Qué hace | Detalle a notar |
+|---|---|---|
+| `.append("Spider-Man")` | Agrega al final de la lista. | Coincide con la salida esperada: Spider-Man queda último. |
+| `.remove("Thor")` | Elimina la **primera aparición** del valor dado. | No hace falta saber la posición, solo el valor exacto. |
+| `avengers[avengers.index("Capitán América")] = "Pantera Negra"` | Busca el índice del valor y reemplaza en ese lugar. | `.index()` evita hardcodear la posición (`avengers[1] = ...` también funcionaría, pero es frágil si el orden cambia). |
+
+## 🔁 `ciclos.py` — recorrer una lista con `while`
+Enunciado: dada una lista de solicitudes (diccionarios con `id` y `title`), imprimir el
+`id` de cada una usando un bucle `while` (no `for`).
 
 ```python
-def calcular_prioridad_dias(nivel: str) -> int:
-    if nivel == "Critico":
-        return 1
-    if nivel == "Normal":
-        return 5
-    return 15
-
-print(calcular_prioridad_dias("Critico"))
-```
-</details>
-
-<details><summary>Ver solución</summary>
-
-```python
-def calculate_response_time(priority: str) -> int:
-    if priority == "Alta":
-        return 2
-    if priority == "Media":
-        return 8
-    return 24
-
-print(calculate_response_time("Alta"))
-print(calculate_response_time("Media"))
-print(calculate_response_time("Baja"))
-```
-</details>
-
-### Ejercicio 9 — Manejo de errores con `try`/`except`
-Escribe una función `to_hours(value)` que intente convertir `value` a `float` y lo
-devuelva; si falla (por ejemplo si `value` es `"tres"`), debe imprimir
-`"Debe ingresar un número"` y devolver `None`. Pruébala con `"3.5"` y con `"tres"`.
-
-<details><summary>💡 ¿Sabías que…? — capturar solo el error esperado</summary>
-
-`except ValueError` captura específicamente el error que lanza `int()`/`float()` cuando
-el texto no es un número válido. Un `except:` sin tipo también atraparía otros errores
-que no tienen nada que ver (por ejemplo un typo en el código) y ocultaría bugs reales.
-
-```python
-def a_entero(valor):
-    try:
-        return int(valor)
-    except ValueError:
-        print("Valor invalido")
-        return None
-
-print(a_entero("diez"))
-```
-</details>
-
-<details><summary>Ver solución</summary>
-
-```python
-def to_hours(value):
-    try:
-        return float(value)
-    except ValueError:
-        print("Debe ingresar un número")
-        return None
-
-print(to_hours("3.5"))
-print(to_hours("tres"))
-```
-</details>
-
-### Ejercicio 10 — Reto integrador: procesador de solicitudes
-Junta todo lo anterior: dada una lista de solicitudes (cada una con `id`, `title` y
-`priority`), recórrelas con `for`, calcula el tiempo de respuesta con una función que
-lance `ValueError` si la prioridad no es `"Alta"`, `"Media"` o `"Baja"`, captura ese
-error con `try`/`except` para que el programa no se detenga, e imprime un resultado
-formateado por cada solicitud (incluida la de prioridad desconocida).
-Salida esperada (usa las mismas 4 solicitudes del ejemplo de la parte práctica):
-```
-Solicitud 1001 (Error de acceso): responder en 2h
-Solicitud 1002 (Lentitud del sistema): responder en 8h
-Solicitud 1003 (Duda de uso): responder en 24h
-Solicitud 1004: Prioridad desconocida: Urgentisima
-```
-
-<details><summary>💡 ¿Sabías que…? — `raise` dentro de una función que después se captura con `except`</summary>
-
-`raise` "lanza" el error hacia quien llamó a la función; si esa función se llama dentro
-de un `for` envuelto en `try`/`except`, el `for` puede seguir con la siguiente vuelta en
-vez de cortar todo el programa. Es el mismo patrón que en la parte práctica de esta
-clase, con otro caso de negocio (validar un código de país en vez de una prioridad):
-
-```python
-def obtener_prefijo(pais: str) -> str:
-    prefijos = {"Peru": "+51", "Chile": "+56"}
-    if pais not in prefijos:
-        raise ValueError(f"País no soportado: {pais}")
-    return prefijos[pais]
-
-for nombre in ["Peru", "Marte"]:
-    try:
-        print(obtener_prefijo(nombre))
-    except ValueError as e:
-        print(e)
-```
-</details>
-
-<details><summary>Ver solución</summary>
-
-```python
-# request_utils.py
-def calculate_response_time(priority: str) -> int:
-    if priority == "Alta":
-        return 2
-    if priority == "Media":
-        return 8
-    if priority == "Baja":
-        return 24
-    raise ValueError(f"Prioridad desconocida: {priority}")
-
-
-# main.py
-from request_utils import calculate_response_time
-
-support_requests = [
-    {"id": 1001, "title": "Error de acceso", "priority": "Alta"},
-    {"id": 1002, "title": "Lentitud del sistema", "priority": "Media"},
-    {"id": 1003, "title": "Duda de uso", "priority": "Baja"},
-    {"id": 1004, "title": "Solicitud rara", "priority": "Urgentisima"},
+lista_solicitudes = [
+    {"id": 1001, "title": "Error de acceso 1"},
+    {"id": 1002, "title": "Error de acceso 2"},
+    {"id": 1003, "title": "Error de acceso 3"},
 ]
 
-for request in support_requests:
-    try:
-        hours = calculate_response_time(request["priority"])
-        print(f"Solicitud {request['id']} ({request['title']}): responder en {hours}h")
-    except ValueError as error:
-        print(f"Solicitud {request['id']}: {error}")
+contador = 0
+while contador < 3:
+    print(lista_solicitudes[contador].get("id"))
+    contador = contador + 1
 ```
 
-(código real, verificado corriendo `python3 main.py` — ver `02-Ejercicios/Clase-01/`)
-</details>
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · ciclos.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 ciclos.py
+<span class="terminal-shot__output">1001
+1002
+1003</span></code></pre>
+</div>
+
+> 💡 `.get("id")` devuelve el valor de la clave `"id"` igual que `["id"]`, pero sin
+> lanzar `KeyError` si la clave no existiera (devolvería `None`) — más seguro cuando no
+> se está 100% seguro de que la clave siempre está presente.
+>
+> ⚠️ El `while` acá funciona porque el largo de la lista (`3`) está *hardcodeado* en la
+> condición — si `lista_solicitudes` tuviera un elemento más, el bucle lo ignoraría. La
+> versión robusta sería `while contador < len(lista_solicitudes):`, o directamente usar
+> `for` (ver `listasolicitudes.py` a continuación), que no depende de un contador manual.
+
+## 📋 `listasolicitudes.py` — recorrer una lista con `for`
+Enunciado: la misma lista de solicitudes de `ciclos.py`, pero recorrida con `for` en vez
+de `while`, imprimiendo el `title` de cada una.
+
+```python
+lista_solicitudes = [
+    {"id": 1001, "title": "Error de acceso 1"},
+    {"id": 1002, "title": "Error de acceso 2"},
+    {"id": 1003, "title": "Error de acceso 3"},
+]
+
+for solicitud in lista_solicitudes:
+    print(solicitud["title"])
+```
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · listasolicitudes.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 listasolicitudes.py
+<span class="terminal-shot__output">Error de acceso 1
+Error de acceso 2
+Error de acceso 3</span></code></pre>
+</div>
+
+> 📌 Comparado con `ciclos.py`: el `for` no necesita contador ni condición de corte —
+> recorre exactamente los elementos que haya, ni uno más ni uno menos. Por eso en
+> Python se prefiere `for` sobre `while` para recorrer colecciones, y se reserva `while`
+> para "repetir hasta que pase algo" sin saber de antemano cuántas vueltas van a ser.
+
+## 🧮 `calculadora.py` — función con `if/elif` por operador
+Enunciado: definir una función que reciba dos números (`a`, `b`) y una operación
+(`+`, `-`, `*`, `/`), y devuelva el resultado. La rama de `/` ya venía en el código
+como referencia, con el caso de división por cero.
+
+```python
+def calculadora(a, b, operation):
+    if operation == '/':
+        if b != 0:
+            # a % b es el resto de la división. Si el resto es 0, "a" se
+            # divide exacto entre "b" (ej: 8 / 4 = 2.0, resto 0).
+            # Si el resto NO es 0, la división no es exacta (ej: 37 / 8 =
+            # 4.625, resto 5) -> avisamos en vez de solo mostrar el decimal.
+            if a % b == 0:
+                return a / b
+            else:
+                return f"{a} no es divisible entre {b}"
+        else:
+            return "Error: ¡Intentando dividir por cero!"
+    elif operation == '+':
+        return a + b
+    elif operation == '-':
+        return a - b
+    elif operation == '*':
+        return a * b
+    else:
+        # Si el usuario escribe algo distinto de +, -, *, /, ninguno de los
+        # if/elif de arriba se cumple. Sin este 'else', la función no haría
+        # ningún 'return' y devolvería None -> se imprimiría "Resultado: None"
+        # sin explicar qué pasó. Mismo patrón que el error de división por
+        # cero: devolver un mensaje claro en vez de un None silencioso.
+        return "Error: operación no válida. Usa +, -, * o /."
+
+# Solicitar al usuario los números y el tipo de operación
+a = float(input("Ingresa el primer número: "))
+b = float(input("Ingresa el segundo número: "))
+operation = input("Especifica la operación que deseas realizar (+, -, *, /): ")
+
+# Llamando a la función 'calculadora' y mostrando el resultado
+result = calculadora(a, b, operation)
+print("Resultado:", result)
+```
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · calculadora.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 calculadora.py
+Ingresa el primer número: 34
+Ingresa el segundo número: 12
+Especifica la operación que deseas realizar (+, -, *, /): *
+<span class="terminal-shot__output">Resultado: 408.0</span>
+<span class="terminal-shot__prompt">$</span> python3 calculadora.py
+Ingresa el primer número: 37
+Ingresa el segundo número: 8
+Especifica la operación que deseas realizar (+, -, *, /): /
+<span class="terminal-shot__output">Resultado: 37.0 no es divisible entre 8.0</span></code></pre>
+</div>
+
+| Caso | Qué pasa | Detalle a notar |
+|---|---|---|
+| `b == 0` en `/` | Devuelve `"Error: ¡Intentando dividir por cero!"` | Venía como referencia en el enunciado original. |
+| `a % b != 0` en `/` | Devuelve `"{a} no es divisible entre {b}"` en vez del decimal. | `%` es el operador **módulo** (resto de la división); si el resto no es 0, la división no es exacta. Mejora agregada sobre el enunciado original. |
+| `operation` no es `+ - * /` | Devuelve `"Error: operación no válida..."` | Sin este `else`, la función devolvía `None` de forma silenciosa (ningún `if/elif` se cumplía) y el programa imprimía `Resultado: None` sin explicar qué pasó. |
+
+> 📝 **Detalle de nombres:** la función se llama `calculadora` (no `calculate`, como
+> sugería el enunciado en inglés) — mismo comportamiento, nombre en español para ser
+> consistente con el resto de los ejercicios de la clase.
+
+## 🚨 `try-except.py` — capturar `ValueError` al convertir un dato
+Enunciado: pedir la edad del usuario y convertirla a número, avisando (sin cortar el
+programa) si el valor ingresado no es numérico.
+
+```python
+try:
+    edad = int(input("Ingrese su edad: "))
+except ValueError:
+    print("Debe ingresar un valor numérico")
+```
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · try-except.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 try-except.py
+Ingrese su edad: 25
+<span class="terminal-shot__prompt">$</span> python3 try-except.py
+Ingrese su edad: veinticinco
+<span class="terminal-shot__output">Debe ingresar un valor numérico</span></code></pre>
+</div>
+
+> 💡 Es la versión mínima, hecha a mano, del mismo patrón de la teoría (sección 8) y de
+> `contrasena.py`/`impuestos.py` más arriba: cualquier `int(input(...))` puede fallar si
+> el usuario escribe texto, y `try`/`except ValueError` evita que ese error tumbe todo
+> el programa.
 
 ## ❓ Preguntas y respuestas (autoevaluación)
 
@@ -1104,10 +1074,12 @@ directamente en el sistema?**
 > Cuando se va a reutilizar en más de un archivo — por ejemplo, la misma función de
 > cálculo que usa un script de consola después la puede usar una API.
 
-**10. En el reto de la clase, ¿qué parte del programa se podría reutilizar dentro de una
-API?**
-> La función que valida la prioridad y calcula el tiempo de respuesta — la lógica de
-> negocio no cambia, solo cambia cómo entra el dato y cómo se entrega la respuesta.
+**10. En `contrasena.py`, ¿por qué `contrasena_usuario == contrasena_bd` no era
+suficiente para cumplir el enunciado, y qué lo corrige?**
+> Porque `==` sobre strings distingue mayúsculas de minúsculas — `"HOLAMUNDO" ==
+> "holamundo"` da `False`. El enunciado pedía ignorar esa diferencia, así que hay que
+> normalizar ambos lados antes de comparar: `contrasena_usuario.lower() ==
+> contrasena_bd.lower()`.
 
 ## 📎 Apuntes relacionados
 - [00-Notas/02-Conceptos.md](../00-Notas/02-Conceptos.md) — tabla de conceptos (tipos de
