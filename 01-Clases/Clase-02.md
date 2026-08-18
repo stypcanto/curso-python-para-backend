@@ -494,6 +494,20 @@ Ingrese la contraseña del usuario: otraclave
 > autenticación/JWT del curso (Clase 7).
 
 ### 🔧 `funciones.py` — primera función propia con `def`
+
+> 📚 **¿Qué es una función y para qué sirve?** Una función es un bloque de código con
+> **nombre**, que se define una sola vez (`def`) y se puede **reutilizar** llamándolo
+> las veces que haga falta (`mi_primera_funcion(10, 5)`), en vez de repetir la misma
+> lógica copiada y pegada. Entre paréntesis van los **parámetros** (`dato1`, `dato2`):
+> valores que la función recibe de afuera y usa dentro de su propio bloque. La
+> definición completa (con type hints y la regla de "una función, un propósito claro")
+> ya está en [[Clase-01#🧩-7-organizando-y-reutilizando-la-logica-funciones-y-modulos]]
+> de la Clase 1 — acá se aplica ese mismo concepto por primera vez a mano, sin type
+> hints todavía.
+
+Enunciado: definir una función propia que reciba dos datos y muestre si el primero es
+mayor que el segundo.
+
 ```python
 def mi_primera_funcion(dato1, dato2):
     if dato1 > dato2:
@@ -514,11 +528,25 @@ mi_primera_funcion(10, 5)
 <span class="terminal-shot__output">True</span></code></pre>
 </div>
 
+| Parte | Qué hace | Detalle a notar |
+|---|---|---|
+| `def mi_primera_funcion(dato1, dato2):` | Declara la función y sus dos parámetros. | El nombre y los parámetros son elegidos por quien escribe la función — no son palabras reservadas. |
+| `if dato1 > dato2:` | Compara los dos parámetros recibidos. | Con `10, 5` la condición es verdadera → entra al `if`. |
+| `print(True)` / `print(False)` | Muestra el resultado de la comparación por pantalla. | La función **no usa `return`** — solo imprime. No devuelve ningún valor reutilizable a quien la llama (a diferencia de `calculadora()`, que sí hace `return`). |
+| `mi_primera_funcion(10, 5)` | Llama a la función con valores concretos (los *argumentos*). | Sin esta línea, la función queda solo definida — nunca se ejecuta. |
+
 > 📝 **Error corregido:** la primera versión escribía `print(true)` / `print(false)` en
 > minúscula, lo que da `NameError: name 'true' is not defined` (Python incluso sugiere
 > el error: *"Did you mean: 'True'?"*). A diferencia de JavaScript/Java, en Python los
 > booleanos son **`True`/`False` con mayúscula inicial** — ver
 > [[2026-08-14-nameerror-true-false-minuscula]].
+>
+> 💡 **`print` vs. `return` — por qué importa la diferencia:** esta función solo
+> *muestra* el resultado en la terminal; si otra parte del programa necesitara *usar*
+> ese `True`/`False` (guardarlo en una variable, pasarlo a otra función), habría que
+> cambiar `print(...)` por `return ...`. Es la misma distinción que aparece en
+> `calculadora.py` más abajo, que sí devuelve el resultado con `return` para poder
+> imprimirlo después con `print("Resultado:", result)`.
 
 ### 📋 `gestortarea.py` — funciones independientes + menú en bucle
 Enunciado: construir un gestor de tareas dividido en **funciones independientes**
@@ -613,7 +641,51 @@ Seleccione una opción: 4
 > programa. Se envolvió en `try`/`except ValueError` (mismo patrón de manejo de errores
 > de la Clase 1) para que solo avise y deje reintentar, sin cerrar el gestor.
 
+> ✅ **Repaso — ¿está bien resuelto o lo compliqué de más?** El enunciado solo pedía
+> 3 funciones independientes (mostrar / agregar / eliminar); todo lo demás que se le
+> agregó **no es sobre-ingeniería**, tiene un motivo concreto:
+> - El menú `while True` no era obligatorio, pero es lo que hace usable el programa
+>   reutilizando esas 3 funciones.
+> - `enumerate(lista, start=1)` es la forma estándar de numerar desde 1 (no magia).
+> - El `try`/`except` de la opción 3 es el mismo patrón de manejo de errores ya visto
+>   en la Clase 1, no algo nuevo inventado para complicar.
+>
+> Dos cosas para tener claras (no son errores, son el "por qué" del código):
+> - `numero - 1` en `eliminar_tarea`: el usuario piensa "tarea 1, 2, 3...", pero las
+>   listas de Python arrancan en índice `0` → hay que restar 1 para llegar al índice real.
+> - `.pop(indice)` borra **y devuelve** el elemento borrado en el mismo paso — por eso
+>   se puede armar el mensaje `f'Tarea "{borrada}" eliminada correctamente.'` sin haber
+>   guardado el nombre antes.
+>
+> Detalle cosmético pendiente (no funcional): `print(f'{i}. []{t}')` imprime
+> `1. []Programar en Python` sin espacio dentro de los corchetes — si el `[]` busca
+> simular un checkbox vacío, se vería mejor como `[ ]` (con espacio) o `☐`.
+
 ### 🦸 `superheroes.py` — añadir, eliminar y reemplazar en una lista
+
+> 📚 **¿Qué es una lista y para qué sirve?** Una `list` en Python es una **colección
+> ordenada y mutable** de elementos — guarda varios valores (strings, números, lo que
+> sea) en una sola variable, en un orden que se mantiene, y se puede modificar después
+> de creada (a diferencia de un `str` o una `tuple`). Sirve para cualquier caso donde
+> tengas "varias cosas del mismo tipo": una lista de tareas, de héroes, de solicitudes,
+> de nombres de usuarios. Se accede por **índice** (posición), empezando en `0`:
+> ```python
+> avengers = ["Iron Man", "Thor", "Hulk"]
+> avengers[0]        # "Iron Man" (primer elemento, índice 0)
+> len(avengers)       # 3 (cantidad de elementos)
+> ```
+> Definición completa (con tabla comparando `list` vs. `dict`) en
+> [[Clase-01#🖊️-práctica-libre-variables-sueltas-listas-y-diccionarios]] de la Clase 1.
+>
+> Métodos usados en este ejercicio:
+>
+> | Método | Qué hace |
+> |---|---|
+> | `.append(x)` | Agrega `x` al **final** de la lista. |
+> | `.remove(x)` | Elimina la **primera aparición** del valor `x` (no por posición). |
+> | `.index(x)` | Devuelve la **posición** (índice) donde está `x`, para poder reemplazarlo: `lista[lista.index(x)] = nuevo_valor`. |
+> | `.pop(i)` | Elimina el elemento en la posición `i` **y lo devuelve** (usado en `gestortarea.py`). |
+
 Enunciado: dada la lista de héroes de los Vengadores, (1) agregar a Spider-Man, (2)
 eliminar a Thor y (3) reemplazar a Capitán América por Pantera Negra.
 
@@ -746,12 +818,679 @@ notificación puede cambiar sin modificar el servicio principal. Se pide constru
 > tengas, se documenta acá con la salida verificada en terminal.
 
 # 🏋️ EJERCICIOS CON SOLUCIÓN
-*(pendiente — se documentan 10 ejercicios graduales de POO cuando esté resuelto el reto
-de arriba)*
+
+> 📌 Repaso de **todo lo visto en esta clase**, de básico a completo: primero lo que ya
+> se practicó en `02-Ejercicios/Clase-02/` (función propia, listas, `if`/`elif`,
+> funciones independientes + manejo de errores), y después cada concepto de POO de la
+> parte teórica (clase, encapsulamiento, abstracción, herencia, composición, patrón +
+> SOLID) — en otro dominio y con otros datos, para practicar sin copiar.
+
+### Ejercicio 1 — Función propia con `def`
+Definí una función `es_par(numero)` que reciba un número entero y muestre por pantalla
+si es par o impar (usando el operador `%`, resto de la división). Probala con el
+número `7`. Salida esperada: `Es impar`.
+
+<details><summary>💡 ¿Sabías que…? — repaso de `def` y parámetros</summary>
+
+Repaso: una función se declara con `def nombre(parámetros):` y se ejecuta recién
+cuando se **llama** (`nombre(valor)`), no al definirla — ver
+[[Clase-02#🔧-funciones-py-—-primera-funcion-propia-con-def]]. Ejemplo de referencia
+(otro caso, mismo patrón):
+
+```python
+def es_mayor_de_edad(edad):
+    if edad >= 18:
+        print("Es mayor de edad")
+    else:
+        print("Es menor de edad")
+
+es_mayor_de_edad(16)
+```
+```
+Es menor de edad
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def es_par(numero):
+    if numero % 2 == 0:
+        print("Es par")
+    else:
+        print("Es impar")
+
+es_par(7)
+```
+```
+Es impar
+```
+</details>
+
+### Ejercicio 2 — Agregar, eliminar y reemplazar en una lista
+Dada `frutas = ["Manzana", "Pera", "Uva", "Kiwi", "Mango"]`: (1) agregá `"Fresa"` al
+final, (2) eliminá `"Uva"`, (3) reemplazá `"Kiwi"` por `"Piña"`. Imprimí la lista final.
+
+<details><summary>💡 ¿Sabías que…? — repaso de `.append()`/`.remove()`/`.index()`</summary>
+
+Repaso: `.append(x)` agrega al final, `.remove(x)` borra la primera aparición del
+**valor**, y `lista[lista.index(x)] = nuevo` busca la posición de `x` para reemplazarlo
+sin hardcodear el índice — ver [[Clase-02#🦸-superheroes-py-—-anadir-eliminar-y-reemplazar-en-una-lista]].
+Ejemplo de referencia:
+
+```python
+colores = ["Rojo", "Verde", "Azul", "Amarillo"]
+colores.append("Violeta")
+colores.remove("Verde")
+colores[colores.index("Amarillo")] = "Naranja"
+print("Lista final de colores:", colores)
+```
+```
+Lista final de colores: ['Rojo', 'Azul', 'Naranja', 'Violeta']
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+frutas = ["Manzana", "Pera", "Uva", "Kiwi", "Mango"]
+
+frutas.append("Fresa")
+frutas.remove("Uva")
+frutas[frutas.index("Kiwi")] = "Piña"
+
+print("Lista final de frutas:", frutas)
+```
+```
+Lista final de frutas: ['Manzana', 'Pera', 'Piña', 'Mango', 'Fresa']
+```
+</details>
+
+### Ejercicio 3 — Función con `if`/`elif` por caso, y un caso inválido
+Definí `convertir_temperatura(valor, escala)`: si `escala` es `'C'`, devuelve el valor
+convertido de Celsius a Fahrenheit (`valor * 9/5 + 32`); si es `'F'`, de Fahrenheit a
+Celsius (`(valor - 32) * 5/9`); si no es ninguna de las dos, devuelve un mensaje de
+error. Probala con `25, 'C'`. Salida esperada: `Resultado: 77.0`.
+
+<details><summary>💡 ¿Sabías que…? — repaso del patrón `if`/`elif`/`else` con `return`</summary>
+
+Repaso: el último `else` evita que la función devuelva `None` en silencio cuando
+ningún caso coincide — mismo patrón que la rama de operación inválida de
+`calculadora()`, ver [[Clase-02#🧮-calculadora-py-—-funcion-con-if-elif-por-operador]].
+Ejemplo de referencia:
+
+```python
+def convertir_distancia(valor, unidad):
+    if unidad == 'km':
+        return valor * 0.621371
+    elif unidad == 'mi':
+        return valor / 0.621371
+    else:
+        return "Error: unidad no válida. Usa 'km' o 'mi'."
+
+print("Resultado:", convertir_distancia(10, 'km'))
+```
+```
+Resultado: 6.21371
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def convertir_temperatura(valor, escala):
+    if escala == 'C':
+        return valor * 9/5 + 32
+    elif escala == 'F':
+        return (valor - 32) * 5/9
+    else:
+        return "Error: escala no válida. Usa 'C' o 'F'."
+
+resultado = convertir_temperatura(25, 'C')
+print("Resultado:", resultado)
+```
+```
+Resultado: 77.0
+```
+</details>
+
+### Ejercicio 4 — Funciones independientes + manejo de errores sobre una lista compartida
+Escribí tres funciones independientes que operen sobre una misma lista de contactos:
+`mostrar_contactos(lista)`, `agregar_contacto(lista, nombre)` y
+`eliminar_contacto(lista, numero)` (recibe el número **tal como lo ve el usuario**,
+empezando en 1; si el número no existe, avisa sin romper el programa). Agregá
+`"Ana"` y `"Luis"`, mostrá la lista, eliminá el contacto 1 y mostrá de nuevo.
+
+<details><summary>💡 ¿Sabías que…? — repaso de índice `numero - 1`, `.pop()` y `try`/`except`</summary>
+
+Repaso: el usuario cuenta desde 1, pero las listas de Python arrancan en índice `0`
+(de ahí `numero - 1`); `.pop(indice)` borra **y devuelve** el elemento en el mismo
+paso; y envolver la conversión/acceso en `try`/`except` evita que un número inválido
+corte el programa — ver [[Clase-02#📋-gestortarea-py-—-funciones-independientes-menu-en-bucle]].
+Ejemplo de referencia (mismo patrón, con el caso de número inválido):
+
+```python
+def mostrar_pendientes(lista):
+    if not lista:
+        print("No hay pendientes.")
+    else:
+        print(f"Tienes {len(lista)} pendiente(s):")
+        for i, item in enumerate(lista, start=1):
+            print(f"{i}. {item}")
+
+def agregar_pendiente(lista, texto):
+    lista.append(texto)
+    print(f'Pendiente "{texto}" agregado correctamente.')
+
+def eliminar_pendiente(lista, numero):
+    try:
+        indice = numero - 1
+        eliminado = lista.pop(indice)
+        print(f'Pendiente "{eliminado}" eliminado correctamente.')
+    except (IndexError, ValueError):
+        print("Número de pendiente no válido.")
+
+pendientes = []
+agregar_pendiente(pendientes, "Pagar la luz")
+agregar_pendiente(pendientes, "Llamar al dentista")
+mostrar_pendientes(pendientes)
+eliminar_pendiente(pendientes, 5)
+```
+```
+Pendiente "Pagar la luz" agregado correctamente.
+Pendiente "Llamar al dentista" agregado correctamente.
+Tienes 2 pendiente(s):
+1. Pagar la luz
+2. Llamar al dentista
+Número de pendiente no válido.
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def mostrar_contactos(lista):
+    if not lista:
+        print("No hay contactos.")
+    else:
+        print(f"Tienes {len(lista)} contacto(s):")
+        for i, contacto in enumerate(lista, start=1):
+            print(f"{i}. {contacto}")
+
+def agregar_contacto(lista, nombre):
+    lista.append(nombre)
+    print(f'Contacto "{nombre}" agregado correctamente.')
+
+def eliminar_contacto(lista, numero):
+    try:
+        indice = numero - 1
+        eliminado = lista.pop(indice)
+        print(f'Contacto "{eliminado}" eliminado correctamente.')
+    except (IndexError, ValueError):
+        print("Número de contacto no válido.")
+
+contactos = []
+agregar_contacto(contactos, "Ana")
+agregar_contacto(contactos, "Luis")
+mostrar_contactos(contactos)
+eliminar_contacto(contactos, 1)
+mostrar_contactos(contactos)
+```
+```
+Contacto "Ana" agregado correctamente.
+Contacto "Luis" agregado correctamente.
+Tienes 2 contacto(s):
+1. Ana
+2. Luis
+Contacto "Ana" eliminado correctamente.
+Tienes 1 contacto(s):
+1. Luis
+```
+</details>
+
+### Ejercicio 5 — Una clase con atributos y métodos
+Definí una clase `Producto` con atributos `nombre`, `precio` y `stock`, y métodos
+`vender(cantidad)` (resta del stock), `reponer(cantidad)` (suma al stock) y
+`resumen()` (devuelve un string legible). Creá un `Producto("Teclado", 25000, 10)`,
+vendé 3, reponé 5 e imprimí el resumen.
+
+<details><summary>💡 ¿Sabías que…? — repaso de clase, `__init__` y métodos</summary>
+
+Repaso: la clase define la estructura (atributos + métodos), `__init__` arma el
+estado inicial de cada objeto, y los métodos operan sobre `self` — ver
+[[Clase-02#🏗️-3-la-clase-como-plantilla]] y [[Clase-02#⚙️-4-estado-y-comportamiento-atributos-y-metodos]].
+Ejemplo de referencia:
+
+```python
+class Empleado:
+    def __init__(self, nombre, salario_base, horas_extra):
+        self.nombre = nombre
+        self.salario_base = salario_base
+        self.horas_extra = horas_extra
+
+    def agregar_horas(self, cantidad):
+        self.horas_extra += cantidad
+
+    def calcular_pago(self):
+        return self.salario_base + (self.horas_extra * 5000)
+
+    def resumen(self):
+        return f"{self.nombre}: ${self.calcular_pago()} ({self.horas_extra}h extra)"
+
+ana = Empleado("Ana", 800000, 2)
+ana.agregar_horas(3)
+print(ana.resumen())
+```
+```
+Ana: $825000 (5h extra)
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class Producto:
+    def __init__(self, nombre, precio, stock):
+        self.nombre = nombre
+        self.precio = precio
+        self.stock = stock
+
+    def vender(self, cantidad):
+        self.stock -= cantidad
+
+    def reponer(self, cantidad):
+        self.stock += cantidad
+
+    def resumen(self):
+        return f"{self.nombre}: {self.stock} unidades a ${self.precio}"
+
+teclado = Producto("Teclado", 25000, 10)
+teclado.vender(3)
+teclado.reponer(5)
+print(teclado.resumen())
+```
+```
+Teclado: 12 unidades a $25000
+```
+</details>
+
+### Ejercicio 6 — Encapsulamiento con `_atributo` + `@property`
+Definí `CuentaBancaria` con `titular` y saldo **protegido** (`_saldo`), expuesto de
+solo lectura con `@property saldo`. El método `retirar(monto)` debe lanzar
+`ValueError("Fondos insuficientes")` si `monto` supera el saldo. Creá una cuenta con
+$1000, retirá $300 (imprimí el saldo), y después intentá retirar $2000.
+
+<details><summary>💡 ¿Sabías que…? — repaso de `_atributo`, `@property` y estados inválidos</summary>
+
+Repaso: el guion bajo es una **convención** (Python no bloquea el acceso de verdad),
+`@property` expone el valor de solo lectura, y las transiciones inválidas se
+bloquean con una excepción dentro del método — mismo patrón que `Ticket.close()` en
+[[Clase-02#🔒-5-encapsulamiento-proteger-el-estado-interno]]. Ejemplo de referencia:
+
+```python
+class Almacen:
+    def __init__(self, producto, stock_inicial):
+        self.producto = producto
+        self._stock = stock_inicial
+
+    @property
+    def stock(self):
+        return self._stock
+
+    def despachar(self, cantidad):
+        if cantidad > self._stock:
+            raise ValueError("Stock insuficiente")
+        self._stock -= cantidad
+
+almacen = Almacen("Cajas", 50)
+almacen.despachar(20)
+print(almacen.stock)
+almacen.despachar(100)
+```
+```
+30
+ValueError: Stock insuficiente
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class CuentaBancaria:
+    def __init__(self, titular, saldo_inicial):
+        self.titular = titular
+        self._saldo = saldo_inicial
+
+    @property
+    def saldo(self):
+        return self._saldo
+
+    def retirar(self, monto):
+        if monto > self._saldo:
+            raise ValueError("Fondos insuficientes")
+        self._saldo -= monto
+
+cuenta = CuentaBancaria("Ana", 1000)
+cuenta.retirar(300)
+print(cuenta.saldo)
+cuenta.retirar(2000)
+```
+```
+700
+ValueError: Fondos insuficientes
+```
+</details>
+
+### Ejercicio 7 — Abstracción con `ABC` / `@abstractmethod`
+Definí una clase abstracta `PaymentMethod` con el método abstracto `pay(amount)`, y
+una implementación concreta `CreditCardPayment` que imprima el pago realizado. Creá un
+`CreditCardPayment()`, pagá `500`, y después intentá instanciar `PaymentMethod()`
+directamente.
+
+<details><summary>💡 ¿Sabías que…? — repaso de `ABC` y por qué no se puede instanciar</summary>
+
+Repaso: `ABC` + `@abstractmethod` define **qué** operación debe existir sin
+implementarla; instanciar la clase abstracta directamente lanza `TypeError` — ver
+[[Clase-02#🎭-6-abstraccion-mostrar-lo-necesario-ocultar-la-implementacion]]. Ejemplo
+de referencia:
+
+```python
+from abc import ABC, abstractmethod
+
+class ExportFormat(ABC):
+    @abstractmethod
+    def export(self, data):
+        pass
+
+class CSVExport(ExportFormat):
+    def export(self, data):
+        print(f"Exportando a CSV: {data}")
+
+exporter = CSVExport()
+exporter.export("reporte de ventas")
+ExportFormat()
+```
+```
+Exportando a CSV: reporte de ventas
+TypeError: Can't instantiate abstract class ExportFormat without an implementation for abstract method 'export'
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from abc import ABC, abstractmethod
+
+class PaymentMethod(ABC):
+    @abstractmethod
+    def pay(self, amount):
+        pass
+
+class CreditCardPayment(PaymentMethod):
+    def pay(self, amount):
+        print(f"Pago de ${amount} realizado con tarjeta de crédito")
+
+payment = CreditCardPayment()
+payment.pay(500)
+PaymentMethod()
+```
+```
+Pago de $500 realizado con tarjeta de crédito
+TypeError: Can't instantiate abstract class PaymentMethod without an implementation for abstract method 'pay'
+```
+</details>
+
+### Ejercicio 8 — Herencia con `super()`
+Definí `Vehicle` con `brand` y `model`, y `Car(Vehicle)` que agrega `doors` y un
+método `info()`. El `__init__` de `Car` debe reutilizar el de `Vehicle` con
+`super()`. Creá `Car("Toyota", "Corolla", 4)`, imprimí `info()` y comprobá que
+`isinstance(car, Vehicle)` es `True`.
+
+<details><summary>💡 ¿Sabías que…? — repaso de "es un" y `super().__init__()`</summary>
+
+Repaso: la herencia modela "es un" — `Car` **es un** `Vehicle` con comportamiento
+adicional — y `super().__init__(...)` reutiliza el constructor del padre en vez de
+repetir sus atributos a mano, ver [[Clase-02#🧬-7-herencia-especializar-comportamientos-existentes]].
+Ejemplo de referencia:
+
+```python
+class Publication:
+    def __init__(self, title, author):
+        self.title = title
+        self.author = author
+
+class Book(Publication):
+    def __init__(self, title, author, pages):
+        super().__init__(title, author)
+        self.pages = pages
+
+    def info(self):
+        return f"{self.title} de {self.author} ({self.pages} páginas)"
+
+book = Book("Clean Code", "Robert C. Martin", 464)
+print(book.info())
+print(isinstance(book, Publication))
+```
+```
+Clean Code de Robert C. Martin (464 páginas)
+True
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class Vehicle:
+    def __init__(self, brand, model):
+        self.brand = brand
+        self.model = model
+
+class Car(Vehicle):
+    def __init__(self, brand, model, doors):
+        super().__init__(brand, model)
+        self.doors = doors
+
+    def info(self):
+        return f"{self.brand} {self.model} ({self.doors} puertas)"
+
+car = Car("Toyota", "Corolla", 4)
+print(car.info())
+print(isinstance(car, Vehicle))
+```
+```
+Toyota Corolla (4 puertas)
+True
+```
+</details>
+
+### Ejercicio 9 — Composición: un servicio que usa una abstracción
+Definí `OrderService`, que recibe un `PaymentMethod` (Ejercicio 7) en su constructor
+y en `checkout(amount)` imprime `"Procesando compra..."` y delega el pago al método
+recibido. Creá el servicio con un `CreditCardPayment()` y hacé `checkout(750)`.
+
+<details><summary>💡 ¿Sabías que…? — repaso de "tiene un" vs. "es un"</summary>
+
+Repaso: `OrderService` no **es** un método de pago, **usa** uno — la misma relación
+que `TicketService` con `NotificationChannel`, ver
+[[Clase-02#🧩-8-composicion-construir-objetos-a-partir-de-otros-objetos]]. Gracias a
+que ambos programan contra la abstracción (Ejercicio 7), el método de pago puede
+cambiarse sin tocar `OrderService`. Ejemplo de referencia:
+
+```python
+class ReportService:
+    def __init__(self, export_format):
+        self.export_format = export_format
+
+    def generate(self, data):
+        print("Generando reporte...")
+        self.export_format.export(data)
+
+service = ReportService(CSVExport())
+service.generate("ventas de agosto")
+```
+```
+Generando reporte...
+Exportando a CSV: ventas de agosto
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class OrderService:
+    def __init__(self, payment_method):
+        self.payment_method = payment_method
+
+    def checkout(self, amount):
+        print("Procesando compra...")
+        self.payment_method.pay(amount)
+
+service = OrderService(CreditCardPayment())
+service.checkout(750)
+```
+```
+Procesando compra...
+Pago de $750 realizado con tarjeta de crédito
+```
+</details>
+
+### Ejercicio 10 — Integración: patrón Strategy + principio Open/Closed
+Escribí dos funciones de descuento, `descuento_regular(precio)` (no descuenta nada) y
+`descuento_black_friday(precio)` (30% off), y una función `aplicar_descuento(precio,
+estrategia)` que reciba **cuál** función de descuento usar como parámetro. Probala con
+`1000` y cada estrategia.
+
+<details><summary>💡 ¿Sabías que…? — repaso de Strategy y por qué es Open/Closed</summary>
+
+Repaso: `aplicar_descuento` no cambia — solo cambia qué función de estrategia recibe
+— mismo espíritu que `sort_tickets(tickets, strategy)` de
+[[Clase-02#🧰-11-patrones-de-diseno-profundizacion-propia]]. Es también un ejemplo de
+**Open/Closed (O)**: agregar una promoción nueva (`descuento_navidad`) no requiere
+tocar `aplicar_descuento`. Ejemplo de referencia:
+
+```python
+def envio_estandar(peso_kg):
+    return peso_kg * 2000
+
+def envio_express(peso_kg):
+    return peso_kg * 2000 + 5000
+
+def calcular_envio(peso_kg, estrategia):
+    return estrategia(peso_kg)
+
+print(calcular_envio(3, envio_estandar))
+print(calcular_envio(3, envio_express))
+```
+```
+6000
+11000
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def descuento_regular(precio):
+    return precio
+
+def descuento_black_friday(precio):
+    return precio * 0.7
+
+def aplicar_descuento(precio, estrategia):
+    return estrategia(precio)
+
+print(aplicar_descuento(1000, descuento_regular))
+print(aplicar_descuento(1000, descuento_black_friday))
+```
+```
+1000
+700.0
+```
+</details>
 
 ## ❓ Preguntas y respuestas (autoevaluación)
-*(pendiente — 10 preguntas graduales sobre clases, encapsulamiento, abstracción,
-herencia, composición y SOLID)*
+
+**1. ¿Cuál es la diferencia entre una clase y un objeto?**
+> La clase es el **molde**: define qué datos y qué operaciones tendrá cada elemento
+> creado a partir de ella (sección 3). El objeto es una **instancia concreta**, con su
+> propio estado en memoria — `Ticket` es la clase, `ticket_1 = Ticket(1001, ...)` es un
+> objeto. Dos objetos de la misma clase son distintos entre sí aunque compartan la misma
+> "forma".
+
+**2. ¿Para qué sirven `__init__` y `self` dentro de una clase?**
+> `__init__` es el **constructor**: se ejecuta automáticamente al crear el objeto y arma
+> su estado inicial (`self.ticket_id = ticket_id`, etc.). `self` es la referencia al
+> **propio objeto** — gracias a `self`, cada método sabe sobre cuál instancia está
+> trabajando, y sin él Python no tendría forma de distinguir `ticket_1.close()` de
+> `ticket_2.close()` (sección 3).
+
+**3. En la clase `Ticket`, ¿qué es un atributo y qué es un método? Da un ejemplo de cada uno.**
+> El **atributo** es el estado que vive dentro del objeto — un dato, como
+> `self.ticket_id` o `self.status`. El **método** es una función que vive en la clase y
+> opera sobre ese estado — por ejemplo `assign(technician)` (cambia `status` a
+> `"Asignado"`) o `close()` (cambia `status` a `"Cerrado"`) (sección 4).
+
+**4. `Ticket` guarda el estado en `_status` (con guion bajo) y lo expone con
+`@property status`, en vez de un simple `self.status` público. ¿Qué gana el código con
+eso?**
+> Encapsulamiento: todas las reglas de cambio de estado quedan centralizadas en los
+> métodos de la clase (`close()`), en vez de que cualquier parte del programa pueda
+> hacer `ticket.status = "lo que sea"` sin validar nada. Así, transiciones inválidas
+> (cerrar un ticket ya cerrado) se pueden bloquear con una excepción en un único lugar
+> (sección 5). `_status` es solo una **convención** — Python no impide de verdad escribir
+> `t._status = "x"` desde afuera, pero comunica "no lo toques directo".
+
+**5. ¿Qué hace que `NotificationChannel` sea una clase abstracta, y qué pasa si se
+intenta hacer `NotificationChannel()` directamente?**
+> Hereda de `ABC` y su método `send()` está decorado con `@abstractmethod` (sección 6).
+> Eso significa que define **qué** operación debe existir (`send(recipient, message)`)
+> sin implementarla, y obliga a cada subclase concreta (`EmailNotification`) a
+> implementarla. Instanciar `NotificationChannel()` directamente lanza `TypeError`:
+> Python no deja crear objetos de una clase con métodos abstractos sin implementar.
+
+**6. `Technician` hereda de `User` y su `__init__` empieza con
+`super().__init__(name, email)`. ¿Qué relación modela la herencia y para qué sirve ese
+`super()`?**
+> La herencia modela una relación **"es un"** — `Technician` **es un** `User` con
+> comportamiento adicional (`attend_ticket`) (sección 7). `super().__init__(...)` llama
+> al constructor de la clase padre para reutilizar su lógica (`self.name = name`,
+> `self.email = email`) en vez de repetirla a mano en la subclase.
+
+**7. `TicketService` recibe un `NotificationChannel` en su constructor en vez de heredar
+de él. ¿Por qué se eligió composición ("tiene un") y no herencia ("es un") en este caso?**
+> Porque `TicketService` no **es** un canal de notificación, **usa** uno para funcionar
+> — la relación correcta es "tiene un" (sección 8). Con composición, `TicketService` no
+> sabe (ni le importa) si `self.notification` es un email o un SMS, solo que cumple el
+> contrato `NotificationChannel`; si mañana cambia el canal, `TicketService` no se toca.
+> Regla del profe: preferir composición cuando el comportamiento deba poder cambiarse.
+
+**8. De los 5 principios SOLID, ¿cuáles dos se ven más claramente reflejados en el diseño
+`TicketService` + `NotificationChannel` (abstracción) del reto de POO, y por qué?**
+> **Dependency Inversion (D):** `TicketService` depende de la abstracción
+> `NotificationChannel`, no de una clase concreta como `EmailNotification` — puede
+> recibir cualquier canal que cumpla el contrato. **Open/Closed (O):** para agregar un
+> canal nuevo (SMS, webhook) alcanza con crear `SMSNotification(NotificationChannel)`
+> sin modificar `TicketService` ni las clases existentes (sección 9).
+
+**9. ¿Cuál es la diferencia entre el patrón Factory y el patrón Strategy? Menciona un
+ejemplo de cada uno.**
+> Factory decide **qué objeto crear** — `channel_factory("sms")` centraliza en un solo
+> lugar la lógica de instanciar `EmailChannel` o `SMSChannel` según un parámetro, en vez
+> de esparcir `if`/`elif` por el código. Strategy decide **qué algoritmo ejecutar** sobre
+> algo que ya existe — `sort_tickets(tickets, by_priority)` recibe la función de orden
+> como parámetro sin cambiar `sort_tickets` (sección 11). Se pueden combinar: una Factory
+> que devuelve la Strategy correcta según el caso.
+
+**10. En el reto de POO de cierre (`Ticket`, `NotificationChannel` + `EmailNotification`,
+`TicketService`), ¿qué patrón de diseño de la sección 11 describe mejor la relación
+`TicketService` → `NotificationChannel`, y qué principio SOLID garantiza que sea seguro
+agregar un canal nuevo sin romper nada?**
+> Es el mismo espíritu que **Strategy**: `TicketService` programa contra el contrato
+> `NotificationChannel.send()`, no contra una implementación concreta, así que el canal
+> puede intercambiarse sin tocar `TicketService` (secciones 8 y 11). El principio que lo
+> garantiza es **Open/Closed (O)**: el sistema queda abierto a extensión (agregar
+> `SMSNotification`) pero cerrado a modificación (no hay que tocar `TicketService` ni las
+> clases existentes) — la misma pregunta que cerró la sección 6 de la teoría.
 
 ## 📎 Apuntes relacionados
 - [Clase 1](Clase-01.md) — tipos de datos, conversión con `int()`/`float()`, base de
