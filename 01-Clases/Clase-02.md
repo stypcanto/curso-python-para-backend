@@ -148,12 +148,61 @@ class Ticket:
 ticket_1 = Ticket(
     1001, "Error al iniciar sesión", "Alta"
 )
+print(ticket_1.ticket_id)
+print(ticket_1.title)
+print(ticket_1.priority)
+print(ticket_1.status)
 ```
+```
+1001
+Error al iniciar sesión
+Alta
+Pendiente
+```
+
+> 💡 Cada `print(ticket_1.xxx)` accede a un **atributo** por su nombre, sin paréntesis
+> — se lee igual que acceder a una clave de un `dict` (`request["title"]`, Clase 1), pero
+> con `.` en vez de `[...]` porque ahora el dato vive **dentro de un objeto**, no de un
+> diccionario suelto.
 
 > 📌 Mensaje clave de la clase: **la clase describe una estructura; cada objeto contiene
 > su propio estado.** Dos `Ticket(...)` creados a partir de la misma clase son objetos
 > distintos en memoria, aunque compartan la misma "forma" (mismo principio de identidad
 > vs. igualdad que ya apareció con mutabilidad/aliasing en la Clase 1).
+
+**Ejemplo con varios objetos de la misma clase**, para ver ese "propio estado" en
+carne propia — tres `Perro` distintos, cada uno con sus propios valores:
+
+```python
+class Perro:
+    def __init__(self, peso: float, talla: float, familia: str):
+        self.peso = peso
+        self.talla = talla
+        self.familia = familia
+
+
+perro_golden = Perro(15.5, 2.20, "Golden")
+perro_salchicha = Perro(2.2, 1.2, "Salchicha")
+perro_san_bernardo = Perro(15.3, 2604, "San Bernardo")
+
+print(perro_golden.peso, perro_golden.familia)
+print(perro_salchicha.peso, perro_salchicha.familia)
+print(perro_san_bernardo.peso, perro_san_bernardo.familia)
+```
+```
+15.5 Golden
+2.2 Salchicha
+15.3 San Bernardo
+```
+
+> ⚠️ Los tres objetos comparten la misma clase (mismos 3 atributos: `peso`, `talla`,
+> `familia`) pero **cada uno guarda sus propios valores** — modificar
+> `perro_golden.peso` no afecta a `perro_salchicha.peso` para nada, son objetos
+> independientes en memoria. Nota aparte: `perro_san_bernardo` quedó con `talla = 2604`
+> (probablemente un error de tipeo al practicar, ¿quiso decir `2.604`? un San Bernardo
+> real mide ~0.7m) — se deja tal cual porque no rompe el ejercicio (sigue siendo un
+> `float` válido), pero ilustra que Python **no valida rangos "razonables"** de un dato,
+> solo su tipo.
 
 ## ⚙️ 5. Estado y comportamiento: atributos y métodos
 Un objeto no debería ser un contenedor pasivo de información — combina **atributos**
@@ -495,6 +544,7 @@ ejercicios de POO.
 |---|---|
 | [`02-Ejercicios/Clase-02/funciones.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/funciones.py) | Primera función propia (`def`), con parámetros y un `if`/`else` que devuelve un booleano. |
 | [`02-Ejercicios/Clase-02/gestortarea.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/gestortarea.py) | Gestor de tareas por consola: 3 funciones independientes (`mostrar_tarea`, `agregar_tarea`, `eliminar_tarea`) + un menú en bucle `while True`. |
+| [`02-Ejercicios/Clase-02/ticket.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/ticket.py) | Primera práctica de clases: `Ticket` (con `__init__` y `print()` de cada atributo) y `Perro` (tres instancias con estado propio). |
 
 > 📝 **Reclasificados a la Clase 1:** al revisar la grabación, `main.py` (jubilación),
 > `contrasena.py`, `superheroes.py` y `calculadora.py` correspondían en realidad a la
@@ -668,6 +718,77 @@ Seleccione una opción: 4
 > Detalle cosmético pendiente (no funcional): `print(f'{i}. []{t}')` imprime
 > `1. []Programar en Python` sin espacio dentro de los corchetes — si el `[]` busca
 > simular un checkbox vacío, se vería mejor como `[ ]` (con espacio) o `☐`.
+
+### 🎫 `ticket.py` — primera práctica de clases y objetos
+Enunciado: crear la clase `Ticket` de la teoría (sección 4), instanciar un ticket e
+imprimir cada uno de sus atributos por separado. Después, para practicar que "cada
+objeto tiene su propio estado", crear una clase `Perro` y tres instancias con datos
+distintos.
+
+```python
+class Ticket:
+    def __init__(self, ticket_id: int, title: str, priority: str):
+        self.ticket_id = ticket_id
+        self.title = title
+        self.priority = priority
+        self.status = "pendiente"
+
+ticket_1 = Ticket(1001, "Error al inicial sesión", "Alta")
+print(ticket_1.ticket_id)
+print(ticket_1.title)
+print(ticket_1.priority)
+print(ticket_1.status)
+```
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · ticket.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 ticket.py
+<span class="terminal-shot__output">1001
+Error al inicial sesión
+Alta
+pendiente
+15.5 Golden
+2.2 Salchicha
+15.3 San Bernardo</span></code></pre>
+</div>
+
+> 📝 `"Error al inicial sesión"` quedó con una errata de tipeo (sería "inicia**r**
+> sesión") — es solo el valor de un `str` que se está practicando, no afecta el
+> funcionamiento del ejercicio, así que se documenta tal cual salió.
+
+**Segunda parte — varios objetos, mismo molde:**
+
+```python
+class Perro:
+    def __init__(self, peso: float, talla: float, familia: str):
+        self.peso = peso
+        self.talla = talla
+        self.familia = familia
+
+perro_golden = Perro(15.5, 2.20, "Golden")
+perro_salchicha = Perro(2.2, 1.2, "Salchicha")
+perro_san_bernardo = Perro(15.3, 2604, "San Bernardo")
+
+print(perro_golden.peso, perro_golden.familia)
+print(perro_salchicha.peso, perro_salchicha.familia)
+print(perro_san_bernardo.peso, perro_san_bernardo.familia)
+```
+
+| Objeto | `peso` | `familia` |
+|---|---|---|
+| `perro_golden` | `15.5` | `"Golden"` |
+| `perro_salchicha` | `2.2` | `"Salchicha"` |
+| `perro_san_bernardo` | `15.3` | `"San Bernardo"` |
+
+> 💡 Los tres objetos vienen de la **misma** clase `Perro` (comparten los 3 mismos
+> atributos), pero cada `print()` muestra valores distintos — es la demostración en
+> código de "la clase describe la estructura, cada objeto tiene su propio estado"
+> (ver teoría, sección 4).
 
 ## 🎯 Reto de POO propuesto en la diapositiva de cierre
 La empresa requiere registrar solicitudes y notificar al usuario; el canal de
