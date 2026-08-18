@@ -1104,6 +1104,1461 @@ print(mapa_prioridades)  # {1001: 'Alta', 1002: 'Media', 1003: 'Alta'}
 > (sección 6/7) — una comprehension no es "magia", es azúcar sintáctico para ese mismo
 > patrón, más compacto.
 
+# 🏋️ EJERCICIOS CON SOLUCIÓN
+
+> 📌 30 ejercicios que repasan **toda la teoría de esta clase** (secciones 1 a 15), de
+> lo más básico a lo más completo. Cada uno tiene un desplegable **"💡 ¿Sabías que…?"**
+> con el repaso del concepto + un ejemplo de referencia (otro dominio, mismo patrón) y
+> un desplegable **"Ver solución"** — todo el código fue corrido en terminal antes de
+> documentarlo. Los ejercicios 1-20 son de un solo concepto; del 21 en adelante
+> combinan varios, hasta el ejercicio integrador final (30).
+
+### Ejercicio 1 — Tipos de datos y conversión
+Crea `request_id` (`1001`), `title` (`"No puedo acceder"`) y, sabiendo que el precio
+llega como texto `"49.90"`, conviértelo a decimal en `price`. Imprime `price` y su
+tipo con `print(price, type(price))`. Salida esperada: `49.9` y la clase `float`.
+
+<details><summary>💡 ¿Sabías que…? — conversión de tipos (str → número), sección 4</summary>
+
+Python no convierte automáticamente un texto en número: hay que hacerlo explícito con
+`int()` (entero) o `float()` (decimal), según el caso.
+
+```python
+product_id = 2001
+name = "Teclado mecánico"
+stock_text = "15"
+stock = int(stock_text)
+in_promo = False
+supplier = None
+
+print(stock, type(stock))
+```
+```
+15 <class 'int'>
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+request_id = 1001
+title = "No puedo acceder"
+price_text = "49.90"
+price = float(price_text)
+is_paid = True
+assigned_to = None
+
+print(price, type(price))
+```
+```
+49.9 <class 'float'>
+```
+</details>
+
+### Ejercicio 2 — Booleanos y `None`
+Crea `is_active` (`True`) y `assigned_user` (`None`). Escribe un `if` que imprima
+`"Solicitud sin asignar"` cuando no haya usuario asignado, comparando con `is None`
+(no `== None`).
+
+<details><summary>💡 ¿Sabías que…? — comparar contra `None` con `is`, sección 4</summary>
+
+Para comparar contra `None` se usa `is None` / `is not None`, no `==`. `None` es un
+único valor especial en memoria, no algo que se compara por igualdad como un número.
+
+```python
+manager = None
+if manager is None:
+    print("Producto sin encargado")
+```
+```
+Producto sin encargado
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+is_active = True
+assigned_user = None
+
+if assigned_user is None:
+    print("Solicitud sin asignar")
+print("Activa:", is_active)
+```
+```
+Solicitud sin asignar
+Activa: True
+```
+</details>
+
+### Ejercicio 3 — Lista: crear, indexar, `len()`
+Crea `categories` con `"Hardware"`, `"Software"` y `"Accesos"`. Imprime el primer
+elemento, el último (con índice negativo) y la cantidad total.
+
+<details><summary>💡 ¿Sabías que…? — índices negativos, sección 5</summary>
+
+`lista[-1]` accede al **último** elemento sin necesitar saber cuántos hay
+(`lista[len(lista) - 1]` daría lo mismo, pero es más largo e innecesario).
+
+```python
+colors = ["Rojo", "Verde", "Azul", "Amarillo"]
+print(colors[0])
+print(colors[-1])
+print(len(colors))
+```
+```
+Rojo
+Amarillo
+4
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+categories = ["Hardware", "Software", "Accesos"]
+print(categories[0])
+print(categories[-1])
+print(len(categories))
+```
+```
+Hardware
+Accesos
+3
+```
+</details>
+
+### Ejercicio 4 — Diccionario: acceder y actualizar
+Crea `request` con `id` (`1001`), `title` (`"Error de acceso"`) y `priority`
+(`"Alta"`). Imprime `title`, después cambia `priority` a `"Media"` e imprime el
+diccionario completo.
+
+<details><summary>💡 ¿Sabías que…? — actualizar una clave existente, sección 5</summary>
+
+Asignar a una clave que ya existe la **sobrescribe** (no la duplica). Si la clave no
+existiera, `dict["clave"] = valor` la crearía.
+
+```python
+product = {"id": 2001, "name": "Teclado", "stock": 15}
+print(product["name"])
+product["stock"] = 12
+print(product)
+```
+```
+Teclado
+{'id': 2001, 'name': 'Teclado', 'stock': 12}
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+request = {"id": 1001, "title": "Error de acceso", "priority": "Alta"}
+print(request["title"])
+request["priority"] = "Media"
+print(request)
+```
+```
+Error de acceso
+{'id': 1001, 'title': 'Error de acceso', 'priority': 'Media'}
+```
+</details>
+
+### Ejercicio 5 — Lista de diccionarios: sumar un campo
+Con `requests = [{"id": 1001, "hours": 2}, {"id": 1002, "hours": 8}, {"id": 1003,
+"hours": 5}]`, recorre la lista con `for` y suma el campo `hours` de todas. Salida
+esperada: `Total horas: 15`.
+
+<details><summary>💡 ¿Sabías que…? — acumular un total con `for`, sección 5</summary>
+
+Patrón muy común: una variable acumuladora en `0` antes del `for`, que se le suma un
+campo del diccionario en cada vuelta.
+
+```python
+orders = [{"id": 1, "amount": 100}, {"id": 2, "amount": 250}, {"id": 3, "amount": 75}]
+total = 0
+for o in orders:
+    total += o["amount"]
+print("Total monto:", total)
+```
+```
+Total monto: 425
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+requests = [
+    {"id": 1001, "hours": 2},
+    {"id": 1002, "hours": 8},
+    {"id": 1003, "hours": 5},
+]
+total = 0
+for r in requests:
+    total += r["hours"]
+print("Total horas:", total)
+```
+```
+Total horas: 15
+```
+</details>
+
+### Ejercicio 6 — Condicionales `if`/`elif`/`else`
+Dado `hours = 30`, clasifica la carga de trabajo: menos de 20 → `"Baja"`; hasta 40
+(inclusive) → `"Normal"`; más de 40 → `"Sobrecarga"`. Salida esperada:
+`Carga: Normal`.
+
+<details><summary>💡 ¿Sabías que…? — rangos con `elif`, sección 6</summary>
+
+`elif condicion <= limite` funciona porque Python ya descartó el `if` anterior — no
+hace falta repetir el límite inferior (`20 <= score <= 40`), alcanza con la condición
+superior.
+
+```python
+score = 65
+if score < 50:
+    grade = "Insuficiente"
+elif score <= 79:
+    grade = "Aprobado"
+else:
+    grade = "Sobresaliente"
+print("Nota:", grade)
+```
+```
+Nota: Aprobado
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+hours = 30
+if hours < 20:
+    load = "Baja"
+elif hours <= 40:
+    load = "Normal"
+else:
+    load = "Sobrecarga"
+print("Carga:", load)
+```
+```
+Carga: Normal
+```
+</details>
+
+### Ejercicio 7 — Ciclo `for` con condición
+Con la lista de solicitudes del ejercicio 5 (usa `priority` en vez de `hours`: Alta,
+Baja, Alta), imprime `f"Urgente: {r['id']}"` solo para las de prioridad `"Alta"`.
+
+<details><summary>💡 ¿Sabías que…? — `if` dentro de un `for`, sección 6</summary>
+
+El `if` adentro del `for` no "salta" vueltas — se evalúa en **cada** vuelta, y el
+`print` solo se ejecuta cuando la condición de esa vuelta específica es verdadera.
+
+```python
+products = [{"id": 1, "stock": 0}, {"id": 2, "stock": 5}, {"id": 3, "stock": 0}]
+for p in products:
+    if p["stock"] == 0:
+        print(f"Sin stock: {p['id']}")
+```
+```
+Sin stock: 1
+Sin stock: 3
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+requests = [
+    {"id": 1001, "priority": "Alta"},
+    {"id": 1002, "priority": "Baja"},
+    {"id": 1003, "priority": "Alta"},
+]
+for r in requests:
+    if r["priority"] == "Alta":
+        print(f"Urgente: {r['id']}")
+```
+```
+Urgente: 1001
+Urgente: 1003
+```
+</details>
+
+### Ejercicio 8 — Ciclo `while`
+Con `tickets_pendientes = 5`, usa un `while` para "atenderlos" uno por uno
+(decrementando el contador) y cuenta cuántos se atendieron. Salida esperada:
+`Tickets atendidos: 5`.
+
+<details><summary>💡 ¿Sabías que…? — `while` que consume un contador, sección 6</summary>
+
+Patrón alternativo al de "contador que sube": acá el `while` corre **mientras quede
+algo por consumir**, restando 1 en cada vuelta hasta llegar a `0` (que es "falsy" al
+evaluarse como condición implícita, aunque acá se compara explícito con `> 0`).
+
+```python
+saldo = 3
+retiros = 0
+while saldo > 0:
+    retiros += 1
+    saldo -= 1
+print("Retiros realizados:", retiros)
+```
+```
+Retiros realizados: 3
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+tickets_pendientes = 5
+atendidos = 0
+while tickets_pendientes > 0:
+    atendidos += 1
+    tickets_pendientes -= 1
+print("Tickets atendidos:", atendidos)
+```
+```
+Tickets atendidos: 5
+```
+</details>
+
+### Ejercicio 9 — Función simple con `def`
+Escribe `saludar(nombre)` que **devuelva** (no imprima) el string `f"Hola, {nombre}!"`.
+Guarda el resultado en una variable e imprímelo.
+
+<details><summary>💡 ¿Sabías que…? — guardar el resultado de una función, sección 7</summary>
+
+Como la función usa `return` (no `print`), el valor queda disponible para guardarlo en
+una variable y reutilizarlo — a diferencia de una función que solo imprime.
+
+```python
+def despedir(nombre):
+    return f"Chau, {nombre}!"
+
+mensaje = despedir("Luis")
+print(mensaje)
+```
+```
+Chau, Luis!
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def saludar(nombre):
+    return f"Hola, {nombre}!"
+
+mensaje = saludar("Ana")
+print(mensaje)
+```
+```
+Hola, Ana!
+```
+</details>
+
+### Ejercicio 10 — Función con type hints y varias ramas
+Escribe `calcular_envio(peso: float, distancia_km: float) -> float`: hasta 10 km,
+`peso * 500`; hasta 50 km, `peso * 800`; más de 50 km, `peso * 1200`. Pruébala con
+`peso=2` en las 3 distancias (`5`, `30`, `100`).
+
+<details><summary>💡 ¿Sabías que…? — varias ramas `if`/`elif`/`else` con `return`, sección 7</summary>
+
+Cada rama termina la función apenas hace `return` — no hace falta `else` explícito
+después de un `if`/`elif` que ya retornó, pero se agrega igual por claridad (mismo
+criterio que `calculadora.py`).
+
+```python
+def calcular_comision(monto: float, tipo: str) -> float:
+    if tipo == "bronce":
+        return monto * 0.02
+    elif tipo == "plata":
+        return monto * 0.05
+    else:
+        return monto * 0.08
+
+print(calcular_comision(1000, "bronce"))
+print(calcular_comision(1000, "plata"))
+print(calcular_comision(1000, "oro"))
+```
+```
+20.0
+50.0
+80.0
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def calcular_envio(peso: float, distancia_km: float) -> float:
+    if distancia_km <= 10:
+        return peso * 500
+    elif distancia_km <= 50:
+        return peso * 800
+    else:
+        return peso * 1200
+
+print(calcular_envio(2, 5))
+print(calcular_envio(2, 30))
+print(calcular_envio(2, 100))
+```
+```
+1000
+1600
+2400
+```
+</details>
+
+### Ejercicio 11 — `try`/`except` al convertir tipos
+Escribe `to_hours(value)` que intente convertir `value` a `float`; si falla, imprime
+`"Debe ingresar un número"` y devuelve `None`. Pruébala con `"3.5"` y con `"tres"`.
+
+<details><summary>💡 ¿Sabías que…? — capturar solo el error esperado, sección 8</summary>
+
+`except ValueError` captura específicamente el error de `int()`/`float()` con texto no
+numérico. Un `except:` sin tipo también atraparía errores que no tienen nada que ver,
+ocultando bugs reales.
+
+```python
+def to_edad(value):
+    try:
+        return int(value)
+    except ValueError:
+        print("Debe ingresar un número")
+        return None
+
+print(to_edad("30"))
+print(to_edad("treinta"))
+```
+```
+30
+Debe ingresar un número
+None
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def to_hours(value):
+    try:
+        return float(value)
+    except ValueError:
+        print("Debe ingresar un número")
+        return None
+
+print(to_hours("3.5"))
+print(to_hours("tres"))
+```
+```
+3.5
+Debe ingresar un número
+None
+```
+</details>
+
+### Ejercicio 12 — `raise` manual con mensaje de negocio
+Escribe `registrar_horas(horas)`: si `horas <= 0`, lanza `ValueError("Las horas deben
+ser positivas")`; si no, imprime `f"Horas registradas: {horas}"`. Pruébala con `5` y
+con `-2` (capturando el error con `try`/`except`).
+
+<details><summary>💡 ¿Sabías que…? — `raise` propio vs. `raise` que lanza Python solo, sección 8</summary>
+
+Acá **el código decide** que `-5` es inválido y lanza el error a propósito (con
+`raise`) — no es un error que Python detecte solo (como sí pasa con `int("texto")`).
+Es la forma de aplicar una **regla de negocio**.
+
+```python
+def registrar_stock(cantidad):
+    if cantidad < 0:
+        raise ValueError("El stock no puede ser negativo")
+    print(f"Stock registrado: {cantidad}")
+
+registrar_stock(10)
+try:
+    registrar_stock(-5)
+except ValueError as e:
+    print("Error:", e)
+```
+```
+Stock registrado: 10
+Error: El stock no puede ser negativo
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def registrar_horas(horas):
+    if horas <= 0:
+        raise ValueError("Las horas deben ser positivas")
+    print(f"Horas registradas: {horas}")
+
+registrar_horas(5)
+try:
+    registrar_horas(-2)
+except ValueError as e:
+    print("Error:", e)
+```
+```
+Horas registradas: 5
+Error: Las horas deben ser positivas
+```
+</details>
+
+### Ejercicio 13 — Función + lista de diccionarios + condición combinadas
+Escribe `contar_por_prioridad(requests, prioridad)` que devuelva cuántas solicitudes
+de la lista tienen esa prioridad. Pruébala contando las `"Alta"` de una lista de 3
+solicitudes (2 Altas, 1 Media).
+
+<details><summary>💡 ¿Sabías que…? — combinar función + `for` + `if` + acumulador, secciones 5-7</summary>
+
+Es la unión de tres cosas ya practicadas por separado: la función (sección 7) envuelve
+un `for` con `if` (sección 6) que recorre una lista de diccionarios (sección 5) —
+ninguna es nueva, lo nuevo es **combinarlas**.
+
+```python
+def contar_por_categoria(products, categoria):
+    total = 0
+    for p in products:
+        if p["category"] == categoria:
+            total += 1
+    return total
+
+products = [
+    {"id": 1, "category": "Hardware"},
+    {"id": 2, "category": "Software"},
+    {"id": 3, "category": "Hardware"},
+]
+print(contar_por_categoria(products, "Hardware"))
+```
+```
+2
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def contar_por_prioridad(requests, prioridad):
+    total = 0
+    for r in requests:
+        if r["priority"] == prioridad:
+            total += 1
+    return total
+
+requests = [
+    {"id": 1, "priority": "Alta"},
+    {"id": 2, "priority": "Media"},
+    {"id": 3, "priority": "Alta"},
+]
+print(contar_por_prioridad(requests, "Alta"))
+```
+```
+2
+```
+</details>
+
+### Ejercicio 14 — Lista: `.append()`/`.remove()`/reemplazo por índice
+Con `tareas = ["Revisar PR", "Actualizar docs", "Deploy"]`: agrega `"Code review"`,
+elimina `"Deploy"` y reemplaza `"Actualizar docs"` por `"Actualizar README"`.
+
+<details><summary>💡 ¿Sabías que…? — mismo patrón que `superheroes.py`, sección 5</summary>
+
+`.index(x)` busca la posición de `x` para poder reemplazarlo sin hardcodear el índice
+— si el orden de la lista cambiara, el reemplazo seguiría apuntando al elemento
+correcto (busca por **valor**, no por posición fija).
+
+```python
+invitados = ["Ana", "Luis", "Carlos", "Marta"]
+invitados.append("Sofía")
+invitados.remove("Carlos")
+invitados[invitados.index("Luis")] = "Luis Fernando"
+print(invitados)
+```
+```
+['Ana', 'Luis Fernando', 'Marta', 'Sofía']
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+tareas = ["Revisar PR", "Actualizar docs", "Deploy"]
+tareas.append("Code review")
+tareas.remove("Deploy")
+tareas[tareas.index("Actualizar docs")] = "Actualizar README"
+print(tareas)
+```
+```
+['Revisar PR', 'Actualizar README', 'Code review']
+```
+</details>
+
+### Ejercicio 15 — Comparar strings ignorando mayúsculas
+Con `usuario_bd = "admin"` y `usuario_input = "ADMIN"`, imprime `"Usuario válido"` si
+coinciden **sin distinguir mayúsculas/minúsculas**, o `"Usuario inválido"` si no.
+
+<details><summary>💡 ¿Sabías que…? — mismo patrón que `contrasena.py`, sección 6</summary>
+
+`"ADMIN" == "admin"` da `False` — `==` sobre strings **sí** distingue mayúsculas. Hay
+que normalizar ambos lados con `.lower()` (o `.upper()`, cualquiera de los dos, con
+que sean consistentes) antes de comparar.
+
+```python
+codigo_bd = "promo10"
+codigo_input = "PROMO10"
+if codigo_input.lower() == codigo_bd.lower():
+    print("Código válido")
+else:
+    print("Código inválido")
+```
+```
+Código válido
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+usuario_bd = "admin"
+usuario_input = "ADMIN"
+if usuario_input.lower() == usuario_bd.lower():
+    print("Usuario válido")
+else:
+    print("Usuario inválido")
+```
+```
+Usuario válido
+```
+</details>
+
+### Ejercicio 16 — `for` vs. `while`: mismo resultado
+Con `ids = [101, 102, 103, 104]`, imprime todos los elementos **dos veces**: primero
+recorriendo con `for`, después con `while` (usando un índice manual).
+
+<details><summary>💡 ¿Sabías que…? — comparar ambos enfoques lado a lado, sección 6</summary>
+
+Ambos recorridos producen exactamente la misma salida — la diferencia no está en el
+resultado, sino en **quién controla el corte** (ver la teoría de la sección 6): el
+`for` lo hace solo, el `while` depende del índice que se actualiza a mano.
+
+```python
+nombres = ["Ana", "Luis", "Carla"]
+
+for n in nombres:
+    print(n)
+
+indice = 0
+while indice < len(nombres):
+    print(nombres[indice])
+    indice += 1
+```
+```
+Ana
+Luis
+Carla
+Ana
+Luis
+Carla
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+ids = [101, 102, 103, 104]
+
+for i in ids:
+    print(i)
+
+indice = 0
+while indice < len(ids):
+    print(ids[indice])
+    indice += 1
+```
+```
+101
+102
+103
+104
+101
+102
+103
+104
+```
+</details>
+
+### Ejercicio 17 — Función que calcula un promedio
+Escribe `promedio_horas(requests)` que devuelva el promedio del campo `hours` de una
+lista de diccionarios (usa `{"hours": 2}, {"hours": 8}, {"hours": 5}`). Salida
+esperada: `Promedio: 5.0`.
+
+<details><summary>💡 ¿Sabías que…? — dividir un acumulador por `len()`, sección 7</summary>
+
+El promedio es el mismo patrón acumulador del ejercicio 5, solo que al final se divide
+el total entre `len(lista)` — la cantidad de elementos, no un número fijo (así sirve
+para cualquier tamaño de lista).
+
+```python
+def promedio_precios(products):
+    total = 0
+    for p in products:
+        total += p["price"]
+    return total / len(products)
+
+products = [{"price": 10.0}, {"price": 25.0}, {"price": 15.0}]
+promedio = promedio_precios(products)
+print(f"Promedio: {round(promedio, 2)}")
+```
+```
+Promedio: 16.67
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def promedio_horas(requests):
+    total = 0
+    for r in requests:
+        total += r["hours"]
+    return total / len(requests)
+
+requests = [{"hours": 2}, {"hours": 8}, {"hours": 5}]
+promedio = promedio_horas(requests)
+print(f"Promedio: {promedio}")
+```
+```
+Promedio: 5.0
+```
+</details>
+
+### Ejercicio 18 — Mutabilidad: modificar una lista "en el lugar"
+Escribe `marcar_revisadas(requests_list)` que le agregue la clave `"revisado": True`
+a cada diccionario de la lista (sin crear una lista nueva) y la devuelva. Comprueba
+que la lista **original** también quedó modificada, y que `resultado is original`
+da `True`.
+
+<details><summary>💡 ¿Sabías que…? — el bug de mutabilidad más común, sección 9</summary>
+
+Como los diccionarios son mutables, modificarlos **dentro** de la función (sin
+reasignar la lista completa) afecta también a la variable de quien llamó a la
+función — no hizo falta ningún `return` para que el cambio "se vea afuera".
+
+```python
+def aplicar_descuento(products_list):
+    for p in products_list:
+        p["con_descuento"] = True
+    return products_list
+
+original = [{"id": 1}, {"id": 2}]
+resultado = aplicar_descuento(original)
+print(original)
+print(resultado is original)
+```
+```
+[{'id': 1, 'con_descuento': True}, {'id': 2, 'con_descuento': True}]
+True
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def marcar_revisadas(requests_list):
+    for r in requests_list:
+        r["revisado"] = True
+    return requests_list
+
+original = [{"id": 1}, {"id": 2}]
+resultado = marcar_revisadas(original)
+print(original)
+print(resultado is original)
+```
+```
+[{'id': 1, 'revisado': True}, {'id': 2, 'revisado': True}]
+True
+```
+</details>
+
+### Ejercicio 19 — Mutabilidad: reasignación local (no afecta afuera)
+Escribe `resetear(requests_list)` que **reasigne** el parámetro a una lista nueva
+(`requests_list = []`), le agregue un elemento y la devuelva. Comprueba que la lista
+**original** queda intacta.
+
+<details><summary>💡 ¿Sabías que…? — la otra cara de la mutabilidad, sección 9</summary>
+
+A diferencia del ejercicio 18, acá `requests_list = []` crea una lista **nueva y
+local** — deja de apuntar a la lista original, así que nada de lo que se haga después
+sobre ese nombre afecta a la variable de quien llamó a la función.
+
+```python
+def reiniciar(products_list):
+    products_list = []
+    products_list.append({"id": 8888})
+    return products_list
+
+original = [{"id": 1}]
+nueva = reiniciar(original)
+print(original)
+print(nueva)
+```
+```
+[{'id': 1}]
+[{'id': 8888}]
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def resetear(requests_list):
+    requests_list = []
+    requests_list.append({"id": 9999})
+    return requests_list
+
+original = [{"id": 1}]
+nueva = resetear(original)
+print(original)
+print(nueva)
+```
+```
+[{'id': 1}]
+[{'id': 9999}]
+```
+</details>
+
+### Ejercicio 20 — Parámetro opcional con `| None`
+Escribe `resumen_ticket(title: str, hours: float | None = None) -> str`: si `hours`
+es `None`, devuelve `f"{title} (sin estimar)"`; si no, `f"{title} ({hours}h)"`. Pruébala
+sin pasar `hours` y pasando `3.5`.
+
+<details><summary>💡 ¿Sabías que…? — valor por defecto + tipo opcional, sección 10</summary>
+
+`hours: float | None = None` dice dos cosas a la vez: el tipo puede ser `float` **o**
+`None` (opcional), y si no se pasa nada al llamar la función, toma `None` por
+defecto — no hace falta pasar el parámetro siempre.
+
+```python
+def resumen_producto(name: str, stock: int | None = None) -> str:
+    if stock is None:
+        return f"{name} (sin stock registrado)"
+    return f"{name} ({stock} unidades)"
+
+print(resumen_producto("Teclado"))
+print(resumen_producto("Mouse", 20))
+```
+```
+Teclado (sin stock registrado)
+Mouse (20 unidades)
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def resumen_ticket(title: str, hours: float | None = None) -> str:
+    if hours is None:
+        return f"{title} (sin estimar)"
+    return f"{title} ({hours}h)"
+
+print(resumen_ticket("Error de acceso"))
+print(resumen_ticket("Falla de red", 3.5))
+```
+```
+Error de acceso (sin estimar)
+Falla de red (3.5h)
+```
+</details>
+
+### Ejercicio 21 — `dataclass` básica
+Define `Ticket` con `id: int`, `title: str` y `priority: str` usando `@dataclass`.
+Crea una instancia e imprímela completa, y también solo su `priority`.
+
+<details><summary>💡 ¿Sabías que…? — qué gana un `dataclass` frente a un `dict`, sección 11</summary>
+
+`print(objeto)` de un `dataclass` ya muestra todos los campos con nombre, sin que haya
+que escribir un `__repr__` a mano — y a diferencia de un `dict`, si escribís mal un
+nombre de campo (`p1.preico`), el editor o Python avisan, en vez de fallar en
+silencio recién en producción.
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class Producto:
+    id: int
+    nombre: str
+    precio: float
+
+p1 = Producto(id=1, nombre="Teclado", precio=25000)
+print(p1)
+print(p1.precio)
+```
+```
+Producto(id=1, nombre='Teclado', precio=25000)
+25000
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class Ticket:
+    id: int
+    title: str
+    priority: str
+
+t1 = Ticket(id=1001, title="Error de acceso", priority="Alta")
+print(t1)
+print(t1.priority)
+```
+```
+Ticket(id=1001, title='Error de acceso', priority='Alta')
+Alta
+```
+</details>
+
+### Ejercicio 22 — `dataclass` con lista mutable (`field(default_factory=list)`)
+Agrega a `Ticket` un campo `tags: list[str] = field(default_factory=list)`. Crea dos
+tickets distintos, agrégale un tag solo al primero, e imprime ambos `tags` para
+comprobar que **no** se comparten entre instancias.
+
+<details><summary>💡 ¿Sabías que…? — por qué no `tags: list[str] = []` a secas, sección 11</summary>
+
+Si el valor por defecto fuera literalmente `[]` (sin `field(default_factory=...)`),
+**todas** las instancias compartirían la **misma** lista en memoria — modificar la de
+una afectaría a las demás. `default_factory` le dice a Python "creá una lista nueva
+por cada instancia", evitando ese bug clásico.
+
+```python
+from dataclasses import dataclass, field
+
+@dataclass
+class Pedido:
+    id: int
+    cliente: str
+    items: list[str] = field(default_factory=list)
+
+p1 = Pedido(id=1, cliente="Ana")
+p1.items.append("Teclado")
+print(p1)
+
+p2 = Pedido(id=2, cliente="Luis")
+print(p2.items)
+```
+```
+Pedido(id=1, cliente='Ana', items=['Teclado'])
+[]
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from dataclasses import dataclass, field
+
+@dataclass
+class Ticket:
+    id: int
+    title: str
+    tags: list[str] = field(default_factory=list)
+
+t1 = Ticket(id=1001, title="Error de acceso")
+t1.tags.append("urgente")
+print(t1)
+
+t2 = Ticket(id=1002, title="Falla de red")
+print(t2.tags)
+```
+```
+Ticket(id=1001, title='Error de acceso', tags=['urgente'])
+[]
+```
+</details>
+
+### Ejercicio 23 — `dataclass` inmutable (`frozen=True`)
+Define `TicketId` con un solo campo `valor: int`, marcada `frozen=True`. Crea una
+instancia, imprime su valor, e intenta modificarlo — capturá el error con
+`try`/`except FrozenInstanceError`.
+
+<details><summary>💡 ¿Sabías que…? — cuándo usar `frozen=True`, sección 11</summary>
+
+`frozen=True` sirve para datos que **no deberían cambiar** después de creados (un ID
+ya asignado, una configuración cargada una sola vez). Intentar reasignar cualquier
+campo lanza `FrozenInstanceError` en vez de dejarlo pasar en silencio.
+
+```python
+from dataclasses import dataclass
+from dataclasses import FrozenInstanceError
+
+@dataclass(frozen=True)
+class DNI:
+    numero: str
+
+dni = DNI("12345678")
+print(dni.numero)
+try:
+    dni.numero = "87654321"
+except FrozenInstanceError as e:
+    print("Error:", e)
+```
+```
+12345678
+Error: cannot assign to field 'numero'
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from dataclasses import dataclass
+from dataclasses import FrozenInstanceError
+
+@dataclass(frozen=True)
+class TicketId:
+    valor: int
+
+tid = TicketId(1001)
+print(tid.valor)
+try:
+    tid.valor = 2002
+except FrozenInstanceError as e:
+    print("Error:", e)
+```
+```
+1001
+Error: cannot assign to field 'valor'
+```
+</details>
+
+### Ejercicio 24 — Excepciones propias: jerarquía con 2 subclases
+Define `DomainError(Exception)`, y dos subclases: `TicketNotFoundError` (con
+`__init__(self, ticket_id)` que arma el mensaje) e `InvalidPriorityError` (vacía).
+Escribe `buscar_ticket(tickets, ticket_id)` que recorra la lista y lance
+`TicketNotFoundError` si no lo encuentra. Pruébala con un ID que no existe.
+
+<details><summary>💡 ¿Sabías que…? — por qué una jerarquía y no solo `ValueError`, sección 12</summary>
+
+Con una jerarquía propia se puede distinguir **qué tipo** de error de negocio pasó
+(no encontrado vs. dato inválido) y capturarlos por separado — cada uno se puede
+mapear después a un código HTTP distinto en una API (404 vs. 400).
+
+```python
+class DomainError(Exception):
+    pass
+
+class ProductoNoEncontradoError(DomainError):
+    def __init__(self, product_id: int):
+        super().__init__(f"Producto {product_id} no encontrado")
+
+class StockInvalidoError(DomainError):
+    pass
+
+def buscar_producto(productos, product_id):
+    for p in productos:
+        if p["id"] == product_id:
+            return p
+    raise ProductoNoEncontradoError(product_id)
+
+productos = [{"id": 1, "stock": 5}]
+try:
+    buscar_producto(productos, 999)
+except ProductoNoEncontradoError as e:
+    print(e)
+```
+```
+Producto 999 no encontrado
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class DomainError(Exception):
+    pass
+
+class TicketNotFoundError(DomainError):
+    def __init__(self, ticket_id: int):
+        super().__init__(f"Ticket {ticket_id} no encontrado")
+
+class InvalidPriorityError(DomainError):
+    pass
+
+def buscar_ticket(tickets, ticket_id):
+    for t in tickets:
+        if t["id"] == ticket_id:
+            return t
+    raise TicketNotFoundError(ticket_id)
+
+tickets = [{"id": 1001, "priority": "Alta"}]
+try:
+    buscar_ticket(tickets, 9999)
+except TicketNotFoundError as e:
+    print(e)
+```
+```
+Ticket 9999 no encontrado
+```
+</details>
+
+### Ejercicio 25 — Capturar por la clase base (`except DomainError`)
+Con la misma jerarquía del ejercicio 24, escribe `validar_prioridad(priority)` que
+lance `InvalidPriorityError` si `priority` no es `"Alta"`/`"Media"`/`"Baja"`. Capturá
+el error con `except DomainError` (la clase **base**, no la subclase exacta) e
+imprime que se capturó.
+
+<details><summary>💡 ¿Sabías que…? — `except` sobre la clase padre captura también las hijas, sección 12</summary>
+
+Como `InvalidPriorityError` **hereda** de `DomainError`, un `except DomainError`
+también la atrapa — así se puede tener un único manejador para "cualquier error de
+negocio" sin listar cada subclase una por una.
+
+```python
+class DomainError(Exception):
+    pass
+
+class ProductoNoEncontradoError(DomainError):
+    pass
+
+class StockInvalidoError(DomainError):
+    pass
+
+def validar_stock(stock):
+    if stock < 0:
+        raise StockInvalidoError(f"Stock inválido: {stock}")
+
+try:
+    validar_stock(-3)
+except DomainError as e:
+    print("Error de dominio capturado:", e)
+```
+```
+Error de dominio capturado: Stock inválido: -3
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class DomainError(Exception):
+    pass
+
+class TicketNotFoundError(DomainError):
+    pass
+
+class InvalidPriorityError(DomainError):
+    pass
+
+def validar_prioridad(priority):
+    if priority not in ("Alta", "Media", "Baja"):
+        raise InvalidPriorityError(f"Prioridad inválida: {priority}")
+
+try:
+    validar_prioridad("Urgentisima")
+except DomainError as e:
+    print("Error de dominio capturado:", e)
+```
+```
+Error de dominio capturado: Prioridad inválida: Urgentisima
+```
+</details>
+
+### Ejercicio 26 — `logging` con niveles
+Configura `logging` con nivel `INFO` y formato `"%(levelname)s: %(message)s"`. Registra
+un `logger.info(...)` para "Ticket 1001 creado" y un `logger.warning(...)` para
+"Ticket 1002 sin prioridad asignada".
+
+<details><summary>💡 ¿Sabías que…? — por qué `logging` y no `print`, sección 13</summary>
+
+`print()` solo sirve si alguien está mirando la consola en vivo. `logging` deja un
+registro con **nivel de severidad** (para poder filtrar después "solo errores", por
+ejemplo) — necesario en un servicio corriendo en un servidor sin nadie mirando.
+
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logger = logging.getLogger("inventario")
+
+logger.info("Producto 2001 agregado al inventario")
+logger.warning("Producto 2002 con stock bajo")
+```
+```
+INFO: Producto 2001 agregado al inventario
+WARNING: Producto 2002 con stock bajo
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logger = logging.getLogger("tickets")
+
+logger.info("Ticket 1001 creado")
+logger.warning("Ticket 1002 sin prioridad asignada")
+```
+```
+INFO: Ticket 1001 creado
+WARNING: Ticket 1002 sin prioridad asignada
+```
+</details>
+
+### Ejercicio 27 — Variables de entorno con valor por defecto
+Lee `DB_HOST` y `DB_PORT` del entorno con `os.environ.get(...)`, con valores por
+defecto `"127.0.0.1"` y `"5432"` si no existen. Imprime
+`f"Conectando a {db_host}:{db_port}"`.
+
+<details><summary>💡 ¿Sabías que…? — segundo argumento de `.get()` como valor por defecto, sección 14</summary>
+
+`os.environ.get("CLAVE", "valor_por_defecto")` nunca lanza error aunque la variable no
+exista — a diferencia de `os.environ["CLAVE"]`, que lanzaría `KeyError` si no está
+definida. Útil para que el programa funcione igual en desarrollo sin configurar nada.
+
+```python
+import os
+
+api_key = os.environ.get("API_KEY", "clave-de-desarrollo")
+api_url = os.environ.get("API_URL", "http://localhost:8000")
+print(f"Usando {api_url} con clave {api_key}")
+```
+```
+Usando http://localhost:8000 con clave clave-de-desarrollo
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+import os
+
+db_host = os.environ.get("DB_HOST", "127.0.0.1")
+db_port = os.environ.get("DB_PORT", "5432")
+print(f"Conectando a {db_host}:{db_port}")
+```
+```
+Conectando a 127.0.0.1:5432
+```
+</details>
+
+### Ejercicio 28 — List comprehension: filtrar
+Con la lista de tickets del ejercicio 24, arma `solo_altas` (lista de `id`) usando
+una **comprehension**, solo con los de `priority == "Alta"`.
+
+<details><summary>💡 ¿Sabías que…? — la comprehension "es" el `for`+`if`+`append()`, sección 15</summary>
+
+`[t["id"] for t in tickets if t["priority"] == "Alta"]` hace exactamente lo mismo que
+un `for` con `if` y `.append()` en 3 líneas — no es magia nueva, es la versión
+compacta del mismo patrón ya practicado en el ejercicio 7.
+
+```python
+productos = [
+    {"id": 1, "stock": 0},
+    {"id": 2, "stock": 5},
+    {"id": 3, "stock": 0},
+]
+sin_stock = [p["id"] for p in productos if p["stock"] == 0]
+print(sin_stock)
+```
+```
+[1, 3]
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+tickets = [
+    {"id": 1001, "priority": "Alta"},
+    {"id": 1002, "priority": "Media"},
+    {"id": 1003, "priority": "Alta"},
+]
+solo_altas = [t["id"] for t in tickets if t["priority"] == "Alta"]
+print(solo_altas)
+```
+```
+[1001, 1003]
+```
+</details>
+
+### Ejercicio 29 — Dict comprehension: transformar
+Con `tickets = [{"id": 1001, "priority": "Alta"}, {"id": 1002, "priority":
+"Media"}]`, arma un diccionario `{id: priority}` usando una **dict comprehension**.
+
+<details><summary>💡 ¿Sabías que…? — comprehension de diccionario, no solo de lista, sección 15</summary>
+
+La sintaxis `{clave: valor for ... in ...}` (con `{}` y `:`) arma un `dict` en vez de
+una `list` — mismo principio de "azúcar sintáctico para un `for`", pero acumulando
+pares clave-valor en vez de elementos sueltos.
+
+```python
+productos = [
+    {"id": 1, "nombre": "Teclado"},
+    {"id": 2, "nombre": "Mouse"},
+]
+mapa_nombres = {p["id"]: p["nombre"] for p in productos}
+print(mapa_nombres)
+```
+```
+{1: 'Teclado', 2: 'Mouse'}
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+tickets = [
+    {"id": 1001, "priority": "Alta"},
+    {"id": 1002, "priority": "Media"},
+]
+mapa_prioridades = {t["id"]: t["priority"] for t in tickets}
+print(mapa_prioridades)
+```
+```
+{1001: 'Alta', 1002: 'Media'}
+```
+</details>
+
+### Ejercicio 30 — Integrador: `dataclass` + excepciones propias + `logging` + comprehension
+Junta todo lo anterior: una `dataclass` `Ticket` (`id`, `priority`,
+`tags: list[str] = field(default_factory=list)`), una excepción propia
+`InvalidPriorityError(DomainError)`, una función `validar(ticket)` que la lance si la
+prioridad no es válida, y `procesar_tickets(tickets)` que recorra la lista, valide
+cada uno con `try`/`except`, registre con `logger.info`/`logger.warning` según el
+caso, y devuelva los `id` válidos. Al final, arma también `solo_altas` con una
+comprehension. Prueba con 3 tickets (uno con prioridad inválida).
+
+<details><summary>💡 ¿Sabías que…? — por qué este es el ejercicio "más completo" de la clase</summary>
+
+No hay ningún concepto nuevo acá — es la **combinación** de 4 secciones ya
+practicadas por separado: `dataclass` (11) da la forma del dato, la jerarquía de
+excepciones (12) modela qué puede salir mal, `logging` (13) deja registro de cada
+caso, y la comprehension (15) arma el resumen final. Así se ve, en un solo lugar, cómo
+estas piezas se combinan en un backend real. Ejemplo de referencia (mismo patrón,
+otro dominio — productos e inventario):
+
+```python
+from dataclasses import dataclass, field
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logger = logging.getLogger("resumen")
+
+class DomainError(Exception):
+    pass
+
+class StockInvalidoError(DomainError):
+    pass
+
+@dataclass
+class Producto:
+    id: int
+    stock: int
+    etiquetas: list[str] = field(default_factory=list)
+
+def validar(producto: Producto) -> None:
+    if producto.stock < 0:
+        raise StockInvalidoError(f"Producto {producto.id}: stock inválido")
+
+def procesar_productos(productos: list[Producto]) -> list[int]:
+    validos = []
+    for p in productos:
+        try:
+            validar(p)
+            validos.append(p.id)
+            logger.info(f"Producto {p.id} válido")
+        except StockInvalidoError as e:
+            logger.warning(str(e))
+    return validos
+
+productos = [
+    Producto(id=1, stock=10),
+    Producto(id=2, stock=-5),
+    Producto(id=3, stock=0),
+]
+ids_validos = procesar_productos(productos)
+print("IDs válidos:", ids_validos)
+
+sin_stock = [p.id for p in productos if p.stock == 0]
+print("Sin stock:", sin_stock)
+```
+```
+INFO: Producto 1 válido
+WARNING: Producto 2: stock inválido
+INFO: Producto 3 válido
+IDs válidos: [1, 3]
+Sin stock: [3]
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from dataclasses import dataclass, field
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logger = logging.getLogger("resumen")
+
+class DomainError(Exception):
+    pass
+
+class InvalidPriorityError(DomainError):
+    pass
+
+@dataclass
+class Ticket:
+    id: int
+    priority: str
+    tags: list[str] = field(default_factory=list)
+
+def validar(ticket: Ticket) -> None:
+    if ticket.priority not in ("Alta", "Media", "Baja"):
+        raise InvalidPriorityError(f"Ticket {ticket.id}: prioridad inválida")
+
+def procesar_tickets(tickets: list[Ticket]) -> list[int]:
+    validos = []
+    for t in tickets:
+        try:
+            validar(t)
+            validos.append(t.id)
+            logger.info(f"Ticket {t.id} válido")
+        except InvalidPriorityError as e:
+            logger.warning(str(e))
+    return validos
+
+tickets = [
+    Ticket(id=1001, priority="Alta"),
+    Ticket(id=1002, priority="Urgentisima"),
+    Ticket(id=1003, priority="Media"),
+]
+ids_validos = procesar_tickets(tickets)
+print("IDs válidos:", ids_validos)
+
+solo_altas = [t.id for t in tickets if t.priority == "Alta"]
+print("Solo altas:", solo_altas)
+```
+```
+INFO: Ticket 1001 válido
+WARNING: Ticket 1002: prioridad inválida
+INFO: Ticket 1003 válido
+IDs válidos: [1001, 1003]
+Solo altas: [1001]
+```
+</details>
+
+
 ## ❓ Preguntas y respuestas (autoevaluación)
 
 **1. ¿Qué es el Backend, con tus palabras?**

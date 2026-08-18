@@ -232,6 +232,82 @@ class Ticket:
 | `close()` | Cierra el ticket. |
 | `get_summary()` | Devuelve un resumen legible del ticket. |
 
+### 🎫 Práctica: `objeto.py` — `Ticket` completo, atributos + métodos juntos
+Segunda práctica de clases (después de `ticket.py`, que solo tenía atributos):
+completar la clase `Ticket` de la teoría con sus tres métodos y probarlos en secuencia
+real — crear el ticket, asignarlo y pedir su resumen.
+
+```python
+class Ticket:
+    def __init__(self, ticket_id: int, title: str, priority: str):
+        self.ticket_id = ticket_id
+        self.title = title
+        self.priority = priority
+        self.status = "pendiente"
+
+    def assign(self, technician: str) -> None:
+        self.technician = technician
+        self.status = "Asignado"
+
+    def close(self) -> None:
+        self.status = "Cerrado"
+
+    def get_summary(self) -> str:
+        return (
+            f"{self.ticket_id} - "
+            f"{self.title} - "
+            f"{self.status} - "
+            f"{self.technician}"
+        )
+
+ticket_1 = Ticket(1001, "Error de impresión", "Alta")
+ticket_1.assign("Técnico 1")
+print(ticket_1.get_summary())
+```
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · objeto.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 objeto.py
+<span class="terminal-shot__output">1001 - Error de impresión - Asignado - Técnico 1</span></code></pre>
+</div>
+
+**Paso a paso, exactamente qué hace cada línea al ejecutarse:**
+
+| Paso | Línea | Qué pasa internamente |
+|---|---|---|
+| 1 | `ticket_1 = Ticket(1001, "Error de impresión", "Alta")` | Corre `__init__`: crea el objeto y le asigna 4 atributos (`ticket_id`, `title`, `priority`, `status="pendiente"`). **Todavía no existe** `self.technician` — no se le asignó ningún valor. |
+| 2 | `ticket_1.assign("Técnico 1")` | Corre `assign()`: **recién acá** se crea el atributo `self.technician = "Técnico 1"` (en Python los atributos se crean al asignarlos, no hace falta declararlos antes) y cambia `self.status` de `"pendiente"` a `"Asignado"`. |
+| 3 | `ticket_1.get_summary()` | Arma y devuelve el string final leyendo `self.ticket_id`, `self.title`, `self.status` (ya `"Asignado"`) y `self.technician` (ya existe porque el paso 2 corrió antes). |
+| 4 | `print(...)` | Imprime el string devuelto por `get_summary()`. |
+
+> ⚠️ **Orden importa:** si `get_summary()` se llamara **antes** de `assign(...)`, la
+> línea `f"{self.technician}"` lanzaría `AttributeError: 'Ticket' object has no
+> attribute 'technician'` — porque ese atributo todavía no existiría. Es una limitación
+> real de este diseño (se resuelve inicializando `self.technician = None` en
+> `__init__`, para que exista desde el arranque aunque esté vacío).
+
+> 📝 **Bug corregido — comas en `get_summary()`:** la primera versión tenía una coma al
+> final de cada línea dentro del `return (...)`:
+> ```python
+> return (
+>     f"{self.ticket_id} - ",
+>     f"{self.title} - ",
+>     f"{self.status}"
+> )
+> ```
+> Eso NO concatena strings — con comas, Python arma una **tupla** de 3 strings
+> separados: `('1001 - ', 'Error de impresión - ', 'Asignado')`. La versión corregida
+> **saca las comas**: varios strings literales escritos uno junto al otro (sin `+` ni
+> `,` entre ellos, solo separados por espacio o salto de línea) se **concatenan
+> automáticamente** en uno solo — es una regla propia de Python (*string literal
+> concatenation*), no algo exclusivo de f-strings. Por eso ahora `get_summary()`
+> devuelve un único `str` en vez de una tupla.
+
 ## 🔒 6. Encapsulamiento: proteger el estado interno
 El **encapsulamiento** centraliza las reglas de modificación y evita estados inválidos.
 En vez de dejar que cualquiera reasigne `ticket.status = "lo que sea"` desde afuera, el
@@ -545,6 +621,7 @@ ejercicios de POO.
 | [`02-Ejercicios/Clase-02/funciones.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/funciones.py) | Primera función propia (`def`), con parámetros y un `if`/`else` que devuelve un booleano. |
 | [`02-Ejercicios/Clase-02/gestortarea.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/gestortarea.py) | Gestor de tareas por consola: 3 funciones independientes (`mostrar_tarea`, `agregar_tarea`, `eliminar_tarea`) + un menú en bucle `while True`. |
 | [`02-Ejercicios/Clase-02/ticket.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/ticket.py) | Primera práctica de clases: `Ticket` (con `__init__` y `print()` de cada atributo) y `Perro` (tres instancias con estado propio). |
+| [`02-Ejercicios/Clase-02/objeto.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/objeto.py) | Segunda práctica de clases: `Ticket` completo con `__init__` + métodos (`assign()`, `close()`, `get_summary()`) — atributos **y** comportamiento juntos. |
 
 > 📝 **Reclasificados a la Clase 1:** al revisar la grabación, `main.py` (jubilación),
 > `contrasena.py`, `superheroes.py` y `calculadora.py` correspondían en realidad a la
