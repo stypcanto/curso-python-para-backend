@@ -181,8 +181,26 @@ estimated_hours = int(hours_text)   # "3" (str) -> 3 (int)
 | Diccionario (`dict`) | Pares **clave-valor**, acceso por nombre, es mutable | `request = {"id": 1001, "priority": "Alta"}` |
 | Lista de diccionarios | Colección de registros — ideal para varias entidades del mismo tipo | `requests = [{"id": 1001, "priority": "Alta"}, {"id": 1002, "priority": "Media"}]` |
 
+**Lista (`list`)** guarda varios valores en un **orden** que se mantiene, y se accede
+por **índice** (posición numérica, empezando en `0`) — sirve para "varias cosas del
+mismo tipo": categorías, tareas, nombres. Es **mutable**: se puede modificar después
+de creada (agregar, quitar, reemplazar elementos) sin crear una lista nueva.
+
+**Diccionario (`dict`)** guarda pares **clave → valor** y se accede por **clave**
+(un nombre elegido por quien escribe el código), no por posición — sirve para
+"describir una cosa con varios datos": una solicitud tiene `id`, `title`, `priority`.
+También es **mutable**: agregar una clave nueva o cambiar el valor de una existente no
+crea un diccionario nuevo.
+
+**Lista de diccionarios** combina ambas: una colección **ordenada** donde cada
+elemento es, a su vez, un **registro completo** (un diccionario). Es el patrón que más
+se repite en Backend — así se representa, por ejemplo, el resultado de una consulta a
+una base de datos (una fila = un diccionario, varias filas = una lista).
+
 ```python
 categories = ["Hardware", "Software", "Accesos"]
+categories[0]            # "Hardware" — acceso por índice (posición 0)
+categories.append("Redes")  # agrega al final — la lista es mutable
 
 request = {
     "id": 1001,
@@ -190,16 +208,24 @@ request = {
     "priority": "Alta",
     "active": True,
 }
+request["title"]          # "Error de acceso" — acceso por clave, no por posición
+request["priority"] = "Media"  # sobrescribe el valor de una clave existente
 
 requests = [
     {"id": 1001, "priority": "Alta"},
     {"id": 1002, "priority": "Media"},
 ]
+requests[0]["priority"]   # "Alta" — primero el índice de la lista, después la clave
 ```
 
 > 💡 La lista de diccionarios es el patrón que más se repite en Backend: así se
 > representa, por ejemplo, el resultado de una consulta a una base de datos (una fila =
 > un diccionario, varias filas = una lista).
+
+> 🧪 Tip de entrevista: ¿por qué un diccionario y no una lista para representar una
+> solicitud? Porque cada dato tiene un **nombre** (`id`, `priority`) y el orden en que
+> se escriben no importa para acceder a ellos — con una lista habría que recordar "la
+> prioridad está en la posición 2", algo frágil si el orden cambia.
 
 ## 🔀 6. Tomando decisiones y repitiendo procesos
 | Estructura | Qué hace |
