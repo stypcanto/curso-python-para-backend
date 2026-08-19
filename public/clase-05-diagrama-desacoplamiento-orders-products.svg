@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 720 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="clase05-desacople-title clase05-desacople-desc">
+      <title id="clase05-desacople-title">Bajo acoplamiento entre orders y products — Clase 5</title>
+      <desc id="clase05-desacople-desc">Diagrama: Order Service llama a Product Service por su API (contrato), y solo Product Service se conecta directo a la base de datos Products — Order Service nunca toca esa base de datos.</desc>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+      <!-- Arrows (behind boxes) -->
+      <line x1="200" y1="176" x2="360" y2="176" stroke="#eb6c36" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <line x1="440" y1="212" x2="440" y2="280" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- Arrow labels -->
+      <rect x="228" y="152" width="104" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="280" y="161" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.02em">GET /products/:id</text>
+
+      <rect x="452" y="238" width="96" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="500" y="247" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.02em">dueño exclusivo</text>
+
+      <!-- Node: Order Service -->
+      <rect x="40" y="140" width="160" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="40" y="140" width="160" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <rect x="48" y="148" width="24" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="60" y="157" fill="#2d3142" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">MS</text>
+      <text x="120" y="180" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Order Service</text>
+      <text x="120" y="196" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">orders</text>
+
+      <!-- Node: Product Service (focal) -->
+      <rect x="360" y="140" width="160" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="360" y="140" width="160" height="72" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <rect x="368" y="148" width="24" height="12" rx="2" fill="transparent" stroke="rgba(235,108,54,0.50)" stroke-width="0.8"/>
+      <text x="380" y="157" fill="#eb6c36" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">MS</text>
+      <text x="440" y="180" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Product Service</text>
+      <text x="440" y="196" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">products</text>
+
+      <!-- Node: Products DB -->
+      <rect x="360" y="280" width="160" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="360" y="280" width="160" height="72" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <rect x="368" y="288" width="28" height="12" rx="2" fill="transparent" stroke="rgba(79,93,117,0.50)" stroke-width="0.8"/>
+      <text x="382" y="297" fill="#4f5d75" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">DB</text>
+      <text x="440" y="320" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Products</text>
+      <text x="440" y="336" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Base de datos</text>
+
+      <!-- Ghost crossed-out line: what NOT to do -->
+      <path d="M 120,212 V 300 Q 120,316 136,316 H 356" fill="none" stroke="rgba(45,49,66,0.25)" stroke-width="1.2" stroke-dasharray="4,3"/>
+      <circle cx="236" cy="316" r="9" fill="none" stroke="rgba(45,49,66,0.35)" stroke-width="1.2"/>
+      <line x1="230" y1="310" x2="242" y2="322" stroke="rgba(45,49,66,0.35)" stroke-width="1.2"/>
+      <line x1="242" y1="310" x2="230" y2="322" stroke="rgba(45,49,66,0.35)" stroke-width="1.2"/>
+      <rect x="176" y="356" width="128" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="240" y="365" fill="rgba(45,49,66,0.45)" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.02em">orders NO lee esta DB</text>
+
+      <!-- Legend strip -->
+      <line x1="40" y1="392" x2="680" y2="392" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="40" y="408" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+
+      <rect x="40" y="424" width="14" height="10" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="60" y="432" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Foco (dueño del dato)</text>
+
+      <rect x="220" y="424" width="14" height="10" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="240" y="432" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Microservicio</text>
+
+      <line x1="356" y1="429" x2="384" y2="429" stroke="#eb6c36" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <text x="392" y="432" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Llamada por contrato</text>
+
+      <line x1="536" y1="429" x2="564" y2="429" stroke="rgba(45,49,66,0.25)" stroke-width="1.2" stroke-dasharray="4,3"/>
+      <text x="572" y="432" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Camino prohibido</text>
+    </svg>

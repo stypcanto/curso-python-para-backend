@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clase 5 · Mapa de Bounded Contexts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-accent:  #eb6c36;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 760px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">DDD · Clase 5 · Python para Backend</p>
+    <h1>Encontrando límites dentro del negocio: 4 Bounded Contexts</h1>
+
+    <svg viewBox="0 0 760 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="clase05-map-title clase05-map-desc">
+      <title id="clase05-map-title">Mapa de Bounded Contexts — Clase 5</title>
+      <desc id="clase05-map-desc">Diagrama: cuatro bounded contexts en cuadrícula — Identity (User, Role, Authentication), Catalog (Product, Category, Price), Orders (Order, OrderItem, OrderStatus) e Inventory (Stock, Reservation, Warehouse) — con líneas punteadas marcando qué contextos se relacionan entre sí: Identity con Catalog, Identity con Orders, Catalog con Inventory, y Orders con Inventory.</desc>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+      <!-- Dotted relationship connectors (behind boxes) -->
+      <line x1="320" y1="110" x2="380" y2="110" stroke="#4f5d75" stroke-width="1" stroke-dasharray="2,4"/>
+      <circle cx="350" cy="110" r="4" fill="#f5f5f5" stroke="#4f5d75" stroke-width="1"/>
+
+      <line x1="180" y1="180" x2="180" y2="240" stroke="#4f5d75" stroke-width="1" stroke-dasharray="2,4"/>
+      <circle cx="180" cy="210" r="4" fill="#f5f5f5" stroke="#4f5d75" stroke-width="1"/>
+
+      <line x1="520" y1="180" x2="520" y2="240" stroke="#4f5d75" stroke-width="1" stroke-dasharray="2,4"/>
+      <circle cx="520" cy="210" r="4" fill="#f5f5f5" stroke="#4f5d75" stroke-width="1"/>
+
+      <line x1="320" y1="310" x2="380" y2="310" stroke="#4f5d75" stroke-width="1" stroke-dasharray="2,4"/>
+      <circle cx="350" cy="310" r="4" fill="#f5f5f5" stroke="#4f5d75" stroke-width="1"/>
+
+      <!-- Node: Identity Context -->
+      <rect x="40" y="40" width="280" height="140" rx="8" fill="#f5f5f5"/>
+      <rect x="40" y="40" width="280" height="140" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <rect x="52" y="52" width="64" height="14" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="84" y="62" fill="#2d3142" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">CONTEXT</text>
+      <text x="180" y="100" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Identity</text>
+      <text x="180" y="120" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">User · Role · Authentication</text>
+      <text x="180" y="160" fill="#7a8399" font-size="8.5" font-family="'Geist', sans-serif" text-anchor="middle" font-style="italic">users-service</text>
+
+      <!-- Node: Catalog Context (focal) -->
+      <rect x="380" y="40" width="280" height="140" rx="8" fill="#f5f5f5"/>
+      <rect x="380" y="40" width="280" height="140" rx="8" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <rect x="392" y="52" width="64" height="14" rx="2" fill="transparent" stroke="rgba(235,108,54,0.50)" stroke-width="0.8"/>
+      <text x="424" y="62" fill="#eb6c36" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">CONTEXT</text>
+      <text x="520" y="100" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Catalog</text>
+      <text x="520" y="120" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Product · Category · Price</text>
+      <text x="520" y="160" fill="#7a8399" font-size="8.5" font-family="'Geist', sans-serif" text-anchor="middle" font-style="italic">products-service</text>
+
+      <!-- Node: Orders Context -->
+      <rect x="40" y="240" width="280" height="140" rx="8" fill="#f5f5f5"/>
+      <rect x="40" y="240" width="280" height="140" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <rect x="52" y="252" width="64" height="14" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="84" y="262" fill="#2d3142" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">CONTEXT</text>
+      <text x="180" y="300" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Orders</text>
+      <text x="180" y="320" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Order · OrderItem · OrderStatus</text>
+      <text x="180" y="360" fill="#7a8399" font-size="8.5" font-family="'Geist', sans-serif" text-anchor="middle" font-style="italic">orders (boceto)</text>
+
+      <!-- Node: Inventory Context -->
+      <rect x="380" y="240" width="280" height="140" rx="8" fill="#f5f5f5"/>
+      <rect x="380" y="240" width="280" height="140" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <rect x="392" y="252" width="64" height="14" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="424" y="262" fill="#2d3142" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">CONTEXT</text>
+      <text x="520" y="300" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Inventory</text>
+      <text x="520" y="320" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Stock · Reservation · Warehouse</text>
+      <text x="520" y="360" fill="#7a8399" font-size="8.5" font-family="'Geist', sans-serif" text-anchor="middle" font-style="italic">inventory_item.py</text>
+
+      <!-- Legend strip -->
+      <line x1="40" y1="408" x2="720" y2="408" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="40" y="424" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+
+      <rect x="40" y="440" width="14" height="10" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="60" y="448" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Contexto foco</text>
+
+      <rect x="188" y="440" width="14" height="10" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="208" y="448" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Bounded Context</text>
+
+      <line x1="360" y1="445" x2="388" y2="445" stroke="#4f5d75" stroke-width="1" stroke-dasharray="2,4"/>
+      <text x="396" y="448" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Relación entre contextos</text>
+    </svg>
+  </div>
+</body>
+</html>
