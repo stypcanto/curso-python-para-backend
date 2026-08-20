@@ -1,0 +1,201 @@
+<!doctype html>
+<meta charset="UTF-8">
+<title>Clase 2 — Principios SOLID</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --paper:       #ffffff;
+    --ink:         #0c4270;
+    --muted:       #64748b;
+    --soft:        #94a3b8;
+    --rule:        #e2e8f0;
+    --rule-solid:  #cbd5e1;
+    --accent:      #1d4ed8;
+    --accent-tint: rgba(29,78,216,0.07);
+    --font-sans:  'Geist', system-ui, sans-serif;
+    --font-serif: 'Instrument Serif', serif;
+    --font-mono:  'Geist Mono', ui-monospace, monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--paper);
+    color: var(--ink);
+    padding: 3rem 2rem 4rem;
+  }
+
+  .frame { max-width: 1240px; margin: 0 auto; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    max-width: 72ch;
+    margin-bottom: 2rem;
+    letter-spacing: 0.01em;
+  }
+
+  .subtitle b { color: var(--ink); font-weight: 600; }
+
+  svg { width: 100%; min-width: 900px; display: block; }
+
+  footer {
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+</style>
+
+<div class="frame">
+  <p class="eyebrow">Python para Backend · Clase 2 · Diagrama de clases</p>
+  <h1>Clase 2 — Principios SOLID en el dominio de tickets</h1>
+  <p class="subtitle"><b>S</b> Single Responsibility · <b>O</b> Open/Closed · <b>L</b> Liskov Substitution · <b>I</b> Interface Segregation · <b>D</b> Dependency Inversion — cada letra anclada a la relación real que la demuestra.</p>
+
+  <svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="clase02-solid-title clase02-solid-desc">
+    <title id="clase02-solid-title">Principios SOLID — Clase 2</title>
+    <desc id="clase02-solid-desc">Diagrama de clases del dominio de tickets con los cinco principios SOLID anclados a sus relaciones: Ticket sin responsabilidades de notificación (S), SMSNotification agregable sin tocar nada más (O), EmailNotification y SMSNotification intercambiables (L), NotificacionChannel con un único método (I), y TicketService dependiendo de la abstracción en vez de una clase concreta (D).</desc>
+    <defs>
+      <marker id="arrow-inherit" markerWidth="14" markerHeight="12" refX="11" refY="6" orient="auto">
+        <polygon points="0 0, 12 6, 0 12" fill="#ffffff" stroke="#0c4270" stroke-width="1.2"/>
+      </marker>
+    </defs>
+
+    <rect width="100%" height="100%" fill="#ffffff"/>
+
+    <!-- ============ ARROWS (behind boxes) ============ -->
+
+    <!-- Inheritance: EmailNotification -> NotificacionChannel -->
+    <path d="M 680,304 V 248 Q 680,240 688,240 H 752 Q 760,240 760,232 V 176"
+          fill="none" stroke="#0c4270" stroke-width="1.2" marker-end="url(#arrow-inherit)"/>
+
+    <!-- Inheritance: SMSNotification -> NotificacionChannel (hipotética, dashed) -->
+    <path d="M 1030,304 V 248 Q 1030,240 1022,240 H 948 Q 940,240 940,232 V 176"
+          fill="none" stroke="#0c4270" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-inherit)"/>
+
+    <!-- Composition: TicketService -> NotificacionChannel (diamond hand-drawn) -->
+    <line x1="850" y1="468" x2="850" y2="176" stroke="#0c4270" stroke-width="1.2"/>
+    <polygon points="850,480 844,474 850,468 856,474" fill="#0c4270"/>
+
+    <!-- Arrow label for composition -->
+    <rect x="826" y="316" width="48" height="12" rx="2" fill="#ffffff"/>
+    <text x="850" y="325" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">tiene un</text>
+
+    <!-- ============ NODE — Ticket ============ -->
+    <rect x="80" y="64" width="300" height="136" rx="6" fill="#ffffff"/>
+    <rect x="80" y="64" width="300" height="136" rx="6" fill="#ffffff" stroke="#0c4270" stroke-width="1"/>
+    <rect x="88" y="72" width="44" height="12" rx="2" fill="transparent" stroke="rgba(12,66,112,0.40)" stroke-width="0.8"/>
+    <text x="110" y="81" fill="#0c4270" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CLASE</text>
+    <text x="230" y="104" fill="#0c4270" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Ticket</text>
+    <line x1="88" y1="114" x2="372" y2="114" stroke="#cbd5e1" stroke-width="0.8"/>
+    <text x="96" y="132" fill="#0c4270" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">+ assign(technician) -&gt; None</text>
+    <text x="96" y="148" fill="#0c4270" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">+ close() -&gt; None</text>
+    <text x="96" y="164" fill="#0c4270" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">+ get_summary() -&gt; str</text>
+    <text x="96" y="182" fill="#64748b" font-style="italic" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">S — no envía correos ni guarda en BD</text>
+    <circle cx="366" cy="78" r="9" fill="#0c4270"/>
+    <text x="366" y="81" fill="#ffffff" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">S</text>
+
+    <!-- ============ NODE — NotificacionChannel (abstract, focal) ============ -->
+    <rect x="700" y="64" width="300" height="112" rx="6" fill="#ffffff"/>
+    <rect x="700" y="64" width="300" height="112" rx="6" fill="rgba(29,78,216,0.07)" stroke="#1d4ed8" stroke-width="1"/>
+    <rect x="708" y="72" width="64" height="12" rx="2" fill="transparent" stroke="rgba(29,78,216,0.40)" stroke-width="0.8"/>
+    <text x="740" y="81" fill="#1d4ed8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ABSTRACTA</text>
+    <text x="850" y="104" fill="#1d4ed8" font-size="12" font-weight="600" font-style="italic" font-family="'Geist', sans-serif" text-anchor="middle">NotificacionChannel</text>
+    <line x1="708" y1="114" x2="972" y2="114" stroke="#cbd5e1" stroke-width="0.8"/>
+    <text x="716" y="132" fill="#0c4270" font-size="8" font-style="italic" font-family="'Geist Mono', monospace" text-anchor="start">+ send(recipient, mensaje) -&gt; None</text>
+    <text x="716" y="150" fill="#64748b" font-style="italic" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">I — un solo método, nada de más</text>
+    <circle cx="986" cy="78" r="9" fill="#0c4270"/>
+    <text x="986" y="81" fill="#ffffff" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">I</text>
+
+    <!-- ============ NODE — EmailNotification ============ -->
+    <rect x="550" y="304" width="260" height="112" rx="6" fill="#ffffff"/>
+    <rect x="550" y="304" width="260" height="112" rx="6" fill="#ffffff" stroke="#0c4270" stroke-width="1"/>
+    <rect x="558" y="312" width="44" height="12" rx="2" fill="transparent" stroke="rgba(12,66,112,0.40)" stroke-width="0.8"/>
+    <text x="580" y="321" fill="#0c4270" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CLASE</text>
+    <text x="680" y="348" fill="#0c4270" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">EmailNotification</text>
+    <line x1="558" y1="358" x2="802" y2="358" stroke="#cbd5e1" stroke-width="0.8"/>
+    <text x="566" y="376" fill="#0c4270" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">+ send(recipient, message) -&gt; None</text>
+    <text x="566" y="396" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">-&gt; ya existe hoy</text>
+
+    <!-- ============ NODE — SMSNotification (hipotética, dashed) ============ -->
+    <rect x="900" y="304" width="260" height="128" rx="6" fill="#ffffff"/>
+    <rect x="900" y="304" width="260" height="128" rx="6" fill="rgba(12,66,112,0.02)" stroke="rgba(12,66,112,0.30)" stroke-width="1" stroke-dasharray="4,3"/>
+    <rect x="908" y="312" width="76" height="12" rx="2" fill="transparent" stroke="rgba(12,66,112,0.30)" stroke-width="0.8"/>
+    <text x="946" y="321" fill="#64748b" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">HIPOTÉTICA</text>
+    <text x="1030" y="348" fill="#0c4270" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">SMSNotification</text>
+    <line x1="908" y1="358" x2="1152" y2="358" stroke="#e2e8f0" stroke-width="0.8" stroke-dasharray="3,3"/>
+    <text x="916" y="376" fill="#0c4270" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">+ send(recipient, message) -&gt; None</text>
+    <text x="916" y="396" fill="#64748b" font-style="italic" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">O — se agrega sin tocar</text>
+    <text x="916" y="410" fill="#64748b" font-style="italic" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">nada más</text>
+    <circle cx="1146" cy="318" r="9" fill="#0c4270"/>
+    <text x="1146" y="321" fill="#ffffff" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">O</text>
+
+    <!-- ============ NODE — TicketService ============ -->
+    <rect x="710" y="480" width="280" height="128" rx="6" fill="#ffffff"/>
+    <rect x="710" y="480" width="280" height="128" rx="6" fill="#ffffff" stroke="#0c4270" stroke-width="1"/>
+    <rect x="718" y="488" width="44" height="12" rx="2" fill="transparent" stroke="rgba(12,66,112,0.40)" stroke-width="0.8"/>
+    <text x="740" y="497" fill="#0c4270" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CLASE</text>
+    <text x="850" y="524" fill="#0c4270" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">TicketService</text>
+    <line x1="718" y1="534" x2="982" y2="534" stroke="#cbd5e1" stroke-width="0.8"/>
+    <text x="726" y="552" fill="#0c4270" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">+ register(ticket, email) -&gt; None</text>
+    <text x="726" y="570" fill="#64748b" font-style="italic" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">D — depende de NotificacionChannel,</text>
+    <text x="726" y="584" fill="#64748b" font-style="italic" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">no de EmailNotification concreta</text>
+    <circle cx="976" cy="494" r="9" fill="#0c4270"/>
+    <text x="976" y="497" fill="#ffffff" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">D</text>
+
+    <!-- ============ Badge flotante — L (Liskov, entre ambos canales) ============ -->
+    <circle cx="1060" cy="100" r="9" fill="#0c4270"/>
+    <text x="1060" y="103" fill="#ffffff" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">L</text>
+    <text x="1075" y="98" fill="#64748b" font-style="italic" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">cualquier canal,</text>
+    <text x="1075" y="110" fill="#64748b" font-style="italic" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">mismo contrato</text>
+
+    <!-- ============ Legend ============ -->
+    <line x1="40" y1="644" x2="1240" y2="644" stroke="#e2e8f0" stroke-width="0.8"/>
+    <text x="40" y="658" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+
+    <rect x="40" y="672" width="14" height="10" rx="2" fill="rgba(29,78,216,0.07)" stroke="#1d4ed8" stroke-width="1"/>
+    <text x="60" y="680" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Abstracta</text>
+
+    <rect x="170" y="672" width="14" height="10" rx="2" fill="#ffffff" stroke="#0c4270" stroke-width="1"/>
+    <text x="190" y="680" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Clase concreta</text>
+
+    <rect x="330" y="672" width="14" height="10" rx="2" fill="rgba(12,66,112,0.02)" stroke="rgba(12,66,112,0.30)" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="350" y="680" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Hipotética (a agregar)</text>
+
+    <line x1="540" y1="677" x2="570" y2="677" stroke="#0c4270" stroke-width="1.2" marker-end="url(#arrow-inherit)"/>
+    <text x="580" y="680" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Herencia</text>
+
+    <line x1="690" y1="677" x2="720" y2="677" stroke="#0c4270" stroke-width="1.2"/>
+    <polygon points="690,677 696,673 702,677 696,681" fill="#0c4270"/>
+    <text x="730" y="680" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Composición</text>
+
+    <circle cx="880" cy="677" r="8" fill="#0c4270"/>
+    <text x="880" y="680" fill="#ffffff" font-size="8" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">S</text>
+    <text x="898" y="680" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Principio SOLID (ver subtítulo)</text>
+  </svg>
+
+  <footer>Clase 2 · Python para Backend · sección 10 (Principios SOLID) · SMSNotification es hipotética — todavía no existe en 02-Ejercicios/Clase-02/</footer>
+</div>

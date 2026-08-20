@@ -13,7 +13,9 @@ sidebar: "Clase 2 · POO y arquitectura"
 - Por qué mover la lógica de diccionarios sueltos a objetos con estado y comportamiento.
 - Clases, objetos, atributos y métodos (`Ticket`, `assign()`, `close()`, `get_summary()`).
 - Encapsulamiento con `_atributo` + `@property` para impedir estados inválidos.
-- Abstracción con `ABC` / `@abstractmethod` (`NotificationChannel`).
+- Abstracción con `ABC` / `@abstractmethod` (`NotificationChannel`) — resuelta en la
+  práctica con `notification_channel.py` → `EmailNotification` + `WhatsAppNotification`
+  → `main.py`.
 - Herencia ("es un") con `User` → `Technician`.
 - Composición ("tiene un") con `TicketService`, que usa un `NotificationChannel`.
 - Los 5 principios SOLID aplicados al dominio de tickets.
@@ -21,6 +23,39 @@ sidebar: "Clase 2 · POO y arquitectura"
   `notifications/`, `policies/`).
 - *(profundización propia)* Los patrones Singleton, Factory y Strategy con ejemplos
   completos — la presentación solo los menciona de pasada.
+
+## 🗂️ Índice de esta clase
+
+**📖 Parte teórica**
+1. [Definiciones clave](#📚-1-definiciones-clave)
+2. [Funciones: repaso y profundización](#🔧-2-funciones-repaso-y-profundizacion)
+3. [De datos aislados a objetos: por qué POO](#🧭-3-de-datos-aislados-a-objetos-por-que-poo)
+4. [La clase como plantilla](#🏗️-4-la-clase-como-plantilla)
+5. [Estado y comportamiento: atributos y métodos](#⚙️-5-estado-y-comportamiento-atributos-y-metodos)
+   - [Práctica: `objeto.py` — `Ticket` completo](#🎫-practica-objeto-py-—-ticket-completo-atributos-metodos-juntos)
+6. [Encapsulamiento: proteger el estado interno](#🔒-6-encapsulamiento-proteger-el-estado-interno)
+7. [Abstracción: mostrar lo necesario, ocultar la implementación](#🎭-7-abstraccion-mostrar-lo-necesario-ocultar-la-implementacion)
+8. [Herencia: especializar comportamientos existentes](#🧬-8-herencia-especializar-comportamientos-existentes)
+9. [Composición: construir objetos a partir de otros objetos](#🧩-9-composicion-construir-objetos-a-partir-de-otros-objetos)
+10. [Principios SOLID](#🧱-10-principios-solid) — con diagrama
+11. [Organización del proyecto](#📁-11-organizacion-del-proyecto)
+12. [Patrones de diseño (profundización propia)](#🧰-12-patrones-de-diseno-profundizacion-propia)
+    - [Singleton](#singleton-—-una-sola-instancia-compartida) ·
+      [Factory](#factory-—-centralizar-la-creacion-de-objetos) ·
+      [Strategy](#strategy-—-intercambiar-el-algoritmo-sin-tocar-quien-lo-usa)
+
+**💻 Parte práctica**
+- [Laboratorio de la clase](#🧪-laboratorio-de-la-clase)
+  - [`funciones.py`](#🔧-funciones-py-—-primera-funcion-propia-con-def) ·
+    [`gestortarea.py`](#📋-gestortarea-py-—-funciones-independientes-menu-en-bucle) ·
+    [`ticket.py`](#🎫-ticket-py-—-primera-practica-de-clases-y-objetos)
+- [Reto de POO propuesto en la diapositiva de cierre](#🎯-reto-de-poo-propuesto-en-la-diapositiva-de-cierre)
+  - [La abstracción en 4 archivos (resuelto)](#🔔-notification-channel-py-emailnotification-py-whatsapp-notifiaction-py-main-py-—-la-abstraccion-en-4-archivos)
+  - [`encapsulamiento.py`](#🔒-encapsulamiento-py-—-practicando-el-status-de-objeto-py)
+
+**🏋️ Ejercicios y autoevaluación**
+- [Ejercicios con solución](#🏋️-ejercicios-con-solucion) *(pendiente)*
+- [Preguntas y respuestas](#❓-preguntas-y-respuestas-autoevaluacion) *(pendiente)*
 
 # 📖 PARTE TEÓRICA
 
@@ -506,6 +541,14 @@ class Ticket:
 > pequeña" (S) con "clase de un solo método". SRP habla de **una sola razón de
 > negocio para cambiar**, no de un límite de líneas.
 
+![Diagrama de clases del dominio de tickets con los 5 principios SOLID anclados a su relación real: Ticket sin responsabilidades de notificación (S), SMSNotification agregable sin tocar nada más (O), EmailNotification y SMSNotification intercambiables detrás del mismo contrato (L), NotificacionChannel con un único método (I), y TicketService dependiendo de la abstracción en vez de EmailNotification concreta (D)](/clase-02-principios-solid.svg)
+
+> 📎 Versión interactiva en el
+> [Artifact publicado](https://claude.ai/code/artifact/998c914c-00bb-43e4-b563-51eeec5be6ef) —
+> fuente editable en `04-Recursos/diagramas/clase-02-principios-solid.html`.
+> `SMSNotification` es hipotética (todavía no existe en `02-Ejercicios/Clase-02/`) —
+> ilustra el ejemplo de la tabla ("agregar SMSNotification sin tocar las demás clases").
+
 ## 📁 11. Organización del proyecto
 La convención de la clase separa el proyecto por **responsabilidad** (parecido al
 principio S, pero a nivel de carpetas):
@@ -648,6 +691,11 @@ ejercicios de POO.
 | [`02-Ejercicios/Clase-02/gestortarea.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/gestortarea.py) | Gestor de tareas por consola: 3 funciones independientes (`mostrar_tarea`, `agregar_tarea`, `eliminar_tarea`) + un menú en bucle `while True`. |
 | [`02-Ejercicios/Clase-02/ticket.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/ticket.py) | Primera práctica de clases: `Ticket` (con `__init__` y `print()` de cada atributo) y `Perro` (tres instancias con estado propio). |
 | [`02-Ejercicios/Clase-02/objeto.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/objeto.py) | Segunda práctica de clases: `Ticket` completo con `__init__` + métodos (`assign()`, `close()`, `get_summary()`) — atributos **y** comportamiento juntos. |
+| [`02-Ejercicios/Clase-02/encapsulamiento.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/encapsulamiento.py) | Práctica de encapsulamiento: importa el `Ticket` de `objeto.py` y lee `ticket_1._status` directo (atributo "protegido"), para comprobar en carne propia que Python no lo bloquea de verdad. |
+| [`02-Ejercicios/Clase-02/notification_channel.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/notification_channel.py) | Reto de POO resuelto: la abstracción `NotificacionChannel(ABC)` con `@abstractmethod send()`. |
+| [`02-Ejercicios/Clase-02/emailnotification.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/emailnotification.py) | Implementación concreta 1: `EmailNotification` hereda de `NotificacionChannel` e implementa `send()`. |
+| [`02-Ejercicios/Clase-02/whatsapp_notifiaction.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/whatsapp_notifiaction.py) | Implementación concreta 2: `WhatsAppNotification` hereda de `NotificacionChannel` e implementa `send()`. |
+| [`02-Ejercicios/Clase-02/main.py`](https://github.com/stypcanto/curso-python-para-backend/blob/main/02-Ejercicios/Clase-02/main.py) | Punto de entrada: instancia `EmailNotification` y `WhatsAppNotification` y llama a `.send()` en cada una — la abstracción en acción. |
 
 > 📝 **Reclasificados a la Clase 1:** al revisar la grabación, `main.py` (jubilación),
 > `contrasena.py`, `superheroes.py` y `calculadora.py` correspondían en realidad a la
@@ -903,8 +951,170 @@ notificación puede cambiar sin modificar el servicio principal. Se pide constru
 3. **Separación en módulos** — responsabilidades claras, nombres descriptivos, tipos
    correctos y excepciones específicas (estructura `helpdesk/` de la sección 11).
 
-> 🔜 *(pendiente)* Todavía no está resuelto en `02-Ejercicios/Clase-02/` — cuando lo
-> tengas, se documenta acá con la salida verificada en terminal.
+> ✅ **Resuelto — parte 2 (la abstracción de canales).** `02-Ejercicios/Clase-02/` ya
+> tiene `notification_channel.py` + `emailnotification.py` + `whatsapp_notifiaction.py`
+> + `main.py` funcionando (ver sección siguiente). La parte 1 (`Ticket` encapsulado) ya
+> estaba resuelta desde antes en `objeto.py`/`encapsulamiento.py` (secciones 5 y 6). La
+> parte 3 (`TicketService` que **compone** un canal, estructura `helpdesk/`) sigue
+> pendiente — hoy `main.py` llama a `email.send(...)` directo, sin una clase de
+> servicio intermedia.
+
+### 🔔 `notification_channel.py` + `emailnotification.py` + `whatsapp_notifiaction.py` + `main.py` — la abstracción en 4 archivos
+Es la resolución práctica de la **sección 7 (Abstracción)**, ahora repartida en
+**módulos separados** en vez de un solo archivo — un paso real hacia la organización
+por carpetas de la sección 11 (`notifications/base.py`, `notifications/email.py`, …).
+
+![Diagrama de clases: NotificacionChannel (abstracta, con el método abstracto send) es implementada por EmailNotification y WhatsAppNotification, ambas usadas desde main.py mediante .send(); TicketService aparece punteado como composición pendiente](/clase-02-abstraccion-notificaciones.svg)
+
+> 📎 Versión interactiva (zoom/pan) en el
+> [Artifact publicado](https://claude.ai/code/artifact/258a2795-aee5-4d79-8202-5755cc9d9d73) —
+> fuente editable en `04-Recursos/diagramas/clase-02-abstraccion-notificaciones.html`.
+
+**1) `notification_channel.py` — el contrato (la abstracción):**
+```python
+from abc import ABC, abstractmethod
+
+class NotificacionChannel(ABC):
+    @abstractmethod
+    def send(
+        self,
+        recipient: str,
+        mensaje: str) -> None:
+        pass
+```
+Define **qué** debe poder hacer cualquier canal (`send(recipient, mensaje)`) sin decir
+**cómo** — igual que `NotificationChannel` en la teoría (sección 7). `ABC` +
+`@abstractmethod` impiden instanciar `NotificacionChannel()` directo y obligan a toda
+subclase a implementar `send()`, o Python no la deja instanciarse.
+
+**2) `emailnotification.py` y `whatsapp_notifiaction.py` — dos implementaciones concretas:**
+```python
+from notification_channel import NotificacionChannel
+
+class EmailNotification(NotificacionChannel):
+    def send(self, recipient: str, message: str) -> None:
+        print(f"Correo enviado a {recipient} con el mensaje: {message}")
+```
+```python
+from notification_channel import NotificacionChannel
+
+class WhatsAppNotification(NotificacionChannel):
+    def send(self, recipient: str, message: str) -> None:
+        print(f"Mensaje WhatsApp enviado a {recipient} con el mensaje: {message}")
+```
+Cada clase hereda de `NotificacionChannel` y **cumple el contrato** implementando
+`send()` a su manera — un canal imprime "Correo enviado...", el otro "Mensaje WhatsApp
+enviado...", pero ambos se usan exactamente igual desde afuera (mismo método, misma
+firma). Es la respuesta concreta a la pregunta de la sección 7 (*¿qué hay que tocar
+para agregar un canal nuevo?*): un archivo nuevo que herede de `NotificacionChannel` —
+nada de lo demás se toca.
+
+**3) `main.py` — el punto de entrada que las ejecuta:**
+```python
+from emailnotification import EmailNotification
+from whatsapp_notifiaction import WhatsAppNotification
+
+email = EmailNotification()
+email.send("Juan", "Hola ")
+
+whatsapp = WhatsAppNotification()
+whatsapp.send("Pedro", "Hola ")
+```
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · main.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 main.py
+<span class="terminal-shot__output">Correo enviado a Juan con el mensaje: Hola
+Mensaje WhatsApp enviado a Pedro con el mensaje: Hola </span></code></pre>
+</div>
+
+| Paso | Qué pasa |
+|---|---|
+| `email = EmailNotification()` | Crea un objeto concreto. Solo funciona porque `EmailNotification` **sí** implementó `send()` — si le faltara, Python tiraría `TypeError` al instanciar. |
+| `email.send("Juan", "Hola ")` | Llama al método concreto de `EmailNotification`, que imprime el mensaje de correo. |
+| `whatsapp = WhatsAppNotification()` / `.send(...)` | Mismo patrón, con la implementación de WhatsApp — **el mismo método `.send(...)`**, resultado distinto según la clase. |
+
+> 📝 **Detalles a corregir (no rompen el ejercicio, pero vale la pena anotarlos):**
+> - **Nombre en español vs. inglés:** la clase se llamó `NotificacionChannel` (sin la
+>   segunda "i", en español) en vez de `NotificationChannel` como en la teoría de la
+>   sección 7 — funciona igual, pero mezclar idiomas en nombres de clases no es
+>   consistente; lo ideal es elegir uno solo para todo el proyecto.
+> - **Nombre de archivo con typo:** `whatsapp_notifiaction.py` (falta la "c" antes de
+>   "tion" → sería `whatsapp_notification.py`). No afecta la ejecución (Python importa
+>   igual), pero conviene corregirlo antes de que otros archivos lo importen y el typo
+>   se propague.
+> - **Parámetro `mensaje` vs. `message`:** el método abstracto en
+>   `notification_channel.py` declara `def send(self, recipient: str, mensaje: str)`,
+>   pero **ambas** implementaciones concretas usan `message` (inglés). No rompe nada
+>   porque `main.py` pasa los argumentos **posicionales** (`email.send("Juan", "Hola ")`,
+>   sin nombrar el parámetro) — pero si alguna vez se llamara con keyword argument
+>   (`email.send(recipient="Juan", mensaje="Hola")`), fallaría con
+>   `TypeError: send() got an unexpected keyword argument 'mensaje'` porque la clase
+>   concreta espera `message`, no `mensaje`. Python **no exige** que el nombre del
+>   parámetro coincida entre la clase abstracta y sus implementaciones (solo el
+>   *contrato* de que el método exista), pero mantener el mismo nombre evita esta
+>   trampa.
+> - **Todavía sin `TicketService` ni excepciones:** este archivo resuelve la
+>   *abstracción* (parte 2 del reto) pero no la *composición* — no hay una clase
+>   `TicketService(notification: NotificacionChannel)` que reciba el canal como
+>   dependencia (sección 9) ni manejo de errores. Es el siguiente paso natural para
+>   completar el reto.
+
+### 🔒 `encapsulamiento.py` — practicando el `_status` de `objeto.py`
+Archivo aparte, **no relacionado** con la abstracción de arriba — reutiliza el
+`Ticket` de `objeto.py` (sección 5) y el `Perro` de `perro.py` (sección 4) para
+comprobar en la práctica el punto de la sección 6: `_status` es una convención, no una
+protección real.
+
+```python
+from objeto import Ticket
+from perro import Perro
+
+ticket_1 = Ticket(1001, "Error de impresión", "Alta")
+ticket_1.assign("Técnico Gustavo")
+print(ticket_1.get_summary())
+
+print(ticket_1._status)  # imprime "Asignado" porque el ticket fue asignado
+```
+
+<div class="terminal-shot">
+  <div class="terminal-shot__titlebar">
+    <span class="terminal-shot__dot terminal-shot__dot--red"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--yellow"></span>
+    <span class="terminal-shot__dot terminal-shot__dot--green"></span>
+    <span class="terminal-shot__title">zsh · encapsulamiento.py</span>
+  </div>
+  <pre class="terminal-shot__screen"><code><span class="terminal-shot__prompt">$</span> python3 encapsulamiento.py
+<span class="terminal-shot__output">1001 - Error de impresión - Asignado - Técnico Gustavo
+15.5 2.2 Golden
+1001 - Error de impresión - Asignado - Técnico Gustavo
+Asignado</span></code></pre>
+</div>
+
+> ⚠️ **Por qué salen 4 líneas y no 2:** ni `objeto.py` ni `perro.py` protegen su código
+> de ejecución con `if __name__ == "__main__":` — así que al hacer
+> `from objeto import Ticket`, Python **también ejecuta** el código suelto que ya
+> tiene `objeto.py` al final (su propio `ticket_1` de prueba + `print(...)`), y lo
+> mismo con `from perro import Perro`. Por eso las líneas 1 y 2 salen "gratis" solo por
+> importar, **antes** de que corra ninguna línea propia de `encapsulamiento.py` — recién
+> las líneas 3 y 4 son las que este archivo escribió. Se deja documentado porque es un
+> efecto secundario real de reutilizar módulos que no separan "definición" de
+> "ejecución", el mismo tipo de problema que resuelve la organización en carpetas de
+> la sección 11.
+>
+> 📝 **`objeto.py` cambió desde la última vez que se documentó:** ahora guarda el
+> estado en `self._status` (protegido, sección 6) en vez de `self.status`, que es
+> justo lo que permite este ejercicio. Pero además le quedó un bloque muerto al final
+> del archivo — un `@property def status(self): return self._status` escrito **fuera**
+> de la clase `Ticket` (sin la indentación de método), que Python acepta como una
+> función suelta sin dueño, nunca se llama y no cumple su propósito de exponer
+> `ticket.status` de solo lectura. No rompe nada porque nadie lo invoca, pero conviene
+> volver a indentarlo dentro de la clase para que la `@property` funcione de verdad.
 
 # 🏋️ EJERCICIOS CON SOLUCIÓN
 *(pendiente — se documentan 10 ejercicios graduales de POO cuando esté resuelto el reto
