@@ -72,14 +72,14 @@ el venv activado):
 | `docker images` | Lista las imágenes descargadas en tu Mac | `docker images` |
 | `docker run <imagen>` | Crea y arranca un contenedor nuevo a partir de una imagen | ver ejemplo completo abajo |
 | `docker stop <nombre\|id>` | Detiene un contenedor corriendo (sin borrarlo) | `docker stop n8n-local` |
-| `docker start <nombre\|id>` | Vuelve a arrancar un contenedor ya creado (que quedó detenido) | `docker start curso-postgres` |
-| `docker logs <nombre\|id>` | Muestra la salida/errores de un contenedor — el primer lugar donde mirar si algo no arranca | `docker logs curso-postgres` |
+| `docker start <nombre\|id>` | Vuelve a arrancar un contenedor ya creado (que quedó detenido) | `docker start bd_test_backend` |
+| `docker logs <nombre\|id>` | Muestra la salida/errores de un contenedor — el primer lugar donde mirar si algo no arranca | `docker logs bd_test_backend` |
 | `docker rm <nombre\|id>` | Borra un contenedor detenido (no lo corras sobre uno que quieras conservar) | `docker rm mi_contenedor_viejo` |
 
 **Ejemplo real usado en la Clase 4** — levantar Postgres:
 ```bash
 docker run -d \
-  --name curso-postgres \
+  --name bd_test_backend \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=postgres \
   -e POSTGRES_DB=curso_backend \
@@ -113,8 +113,8 @@ del curso sin instalar `psql` en el Mac:
 
 | Comando | Qué hace | Ejemplo |
 |---|---|---|
-| `docker exec -it <contenedor> psql -U <user> -d <db>` | Abre una **sesión interactiva** de `psql` — queda ahí escribiendo SQL hasta que salís con `\q` | `docker exec -it curso-postgres psql -U postgres -d curso_backend` |
-| `docker exec <contenedor> psql -U <user> -d <db> -c "<SQL>"` | Corre **una sola consulta** y vuelve directo a tu terminal — sin quedar "adentro" | `docker exec curso-postgres psql -U postgres -d curso_backend -c "SELECT COUNT(*) FROM tickets;"` |
+| `docker exec -it <contenedor> psql -U <user> -d <db>` | Abre una **sesión interactiva** de `psql` — queda ahí escribiendo SQL hasta que salís con `\q` | `docker exec -it bd_test_backend psql -U postgres -d curso_backend` |
+| `docker exec <contenedor> psql -U <user> -d <db> -c "<SQL>"` | Corre **una sola consulta** y vuelve directo a tu terminal — sin quedar "adentro" | `docker exec bd_test_backend psql -U postgres -d curso_backend -c "SELECT COUNT(*) FROM tickets;"` |
 
 > ⚠️ **`-it` vs. sin `-it`:** `-it` (*interactive* + *tty*) es para cuando vos vas a
 > tipear en la sesión de `psql`. Si el comando lo corre un script/otro proceso (no una
@@ -126,13 +126,13 @@ prueba (útil cuando un `POST /tickets/` da `500` por una FK a un `user`/`catego
 todavía no existe — ver [[500-foreign-key-inexistente-sin-datos-previos]]):
 ```bash
 # Ver qué tablas existen
-docker exec curso-postgres psql -U postgres -d curso_backend -c "\dt"
+docker exec bd_test_backend psql -U postgres -d curso_backend -c "\dt"
 
 # Contar filas de una tabla
-docker exec curso-postgres psql -U postgres -d curso_backend -c "SELECT COUNT(*) FROM tickets;"
+docker exec bd_test_backend psql -U postgres -d curso_backend -c "SELECT COUNT(*) FROM tickets;"
 
 # Insertar datos de prueba (varias -c seguidas = varias sentencias, en orden)
-docker exec curso-postgres psql -U postgres -d curso_backend -c \
+docker exec bd_test_backend psql -U postgres -d curso_backend -c \
   "INSERT INTO users (name, email) VALUES ('Styp Canto', 'styp@example.com');" \
   -c "INSERT INTO categories (name) VALUES ('Infraestructura');"
 ```
