@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1080 680" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="clase03-uvicorn-title clase03-uvicorn-desc">
+    <title id="clase03-uvicorn-title">Uvicorn y main.py — Clase 3</title>
+    <desc id="clase03-uvicorn-desc">Diagrama de arquitectura mostrando cómo Uvicorn, el servidor ASGI, recibe una petición GET del cliente, llama a la función read_root() dentro de app/main.py, y devuelve la respuesta — sin que el código Python maneje HTTP directamente. Debajo, el entorno virtual venv/ provee el ejecutable uvicorn y el paquete fastapi instalado.</desc>
+    <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
+      </marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#1d4ed8"/>
+      </marker>
+      <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#129d95"/>
+      </marker>
+    </defs>
+
+    <rect width="100%" height="100%" fill="#ffffff"/>
+
+    <!-- ============ ARROWS (behind boxes) ============ -->
+
+    <!-- M1: Cliente -> Uvicorn  GET / -->
+    <line x1="260" y1="220" x2="420" y2="220" stroke="#129d95" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+    <rect x="304" y="200" width="72" height="12" rx="2" fill="#ffffff"/>
+    <text x="340" y="209" fill="#129d95" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">GET /</text>
+
+    <!-- M2: Uvicorn -> main.py  llama a read_root() (headline) -->
+    <line x1="640" y1="220" x2="800" y2="220" stroke="#1d4ed8" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+    <rect x="656" y="200" width="128" height="12" rx="2" fill="#ffffff"/>
+    <text x="720" y="209" fill="#1d4ed8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.02em">LLAMA read_root()</text>
+
+    <!-- M3: main.py -> Uvicorn  return (dashed) -->
+    <line x1="800" y1="264" x2="640" y2="264" stroke="#64748b" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+    <rect x="668" y="244" width="104" height="12" rx="2" fill="#ffffff"/>
+    <text x="720" y="253" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.02em">RETURN {...}</text>
+
+    <!-- M4: Uvicorn -> Cliente  200 OK (dashed) -->
+    <line x1="420" y1="264" x2="260" y2="264" stroke="#64748b" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+    <rect x="296" y="244" width="88" height="12" rx="2" fill="#ffffff"/>
+    <text x="340" y="253" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">200 OK</text>
+
+    <!-- M5: venv -> Uvicorn  provee el ejecutable (dashed, soft) -->
+    <path d="M 650,420 V 368 Q 650,360 642,360 H 538 Q 530,360 530,352 V 300"
+          fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
+    <rect x="558" y="344" width="60" height="12" rx="2" fill="#ffffff"/>
+    <text x="588" y="353" fill="#94a3b8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.02em">bin/uvicorn</text>
+
+    <!-- M6: venv -> main.py  provee fastapi instalado (dashed, soft) -->
+    <path d="M 790,420 V 388 Q 790,380 798,380 H 902 Q 910,380 910,372 V 340"
+          fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
+    <rect x="818" y="364" width="76" height="12" rx="2" fill="#ffffff"/>
+    <text x="856" y="373" fill="#94a3b8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.02em">import fastapi</text>
+
+    <!-- ============ NODE — Cliente ============ -->
+    <rect x="60" y="188" width="200" height="112" rx="6" fill="#ffffff"/>
+    <rect x="60" y="188" width="200" height="112" rx="6" fill="rgba(100,116,139,0.08)" stroke="#94a3b8" stroke-width="1"/>
+    <rect x="68" y="196" width="32" height="12" rx="2" fill="transparent" stroke="rgba(148,163,184,0.50)" stroke-width="0.8"/>
+    <text x="84" y="205" fill="#64748b" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">APP</text>
+    <text x="160" y="228" fill="#0c4270" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Cliente</text>
+    <text x="160" y="246" fill="#64748b" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">navegador · curl</text>
+
+    <!-- ============ NODE — Uvicorn (focal) ============ -->
+    <rect x="420" y="176" width="220" height="124" rx="6" fill="#ffffff"/>
+    <rect x="420" y="176" width="220" height="124" rx="6" fill="rgba(29,78,216,0.07)" stroke="#1d4ed8" stroke-width="1"/>
+    <rect x="428" y="184" width="40" height="12" rx="2" fill="transparent" stroke="rgba(29,78,216,0.40)" stroke-width="0.8"/>
+    <text x="448" y="193" fill="#1d4ed8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ASGI</text>
+    <text x="530" y="216" fill="#1d4ed8" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Uvicorn</text>
+    <text x="530" y="234" fill="#64748b" font-size="9" font-family="'Geist', sans-serif" text-anchor="middle">servidor ASGI</text>
+    <text x="530" y="254" fill="#0c4270" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">uvicorn app.main:app --reload</text>
+
+    <!-- ============ NODE — app/main.py ============ -->
+    <rect x="800" y="160" width="220" height="180" rx="6" fill="#ffffff"/>
+    <rect x="800" y="160" width="220" height="180" rx="6" fill="#ffffff" stroke="#0c4270" stroke-width="1"/>
+    <rect x="808" y="168" width="56" height="12" rx="2" fill="transparent" stroke="rgba(12,66,112,0.40)" stroke-width="0.8"/>
+    <text x="836" y="177" fill="#0c4270" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">MODULE</text>
+    <text x="910" y="200" fill="#0c4270" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">app/main.py</text>
+    <line x1="808" y1="210" x2="1012" y2="210" stroke="#cbd5e1" stroke-width="0.8"/>
+    <text x="816" y="228" fill="#0c4270" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">app = FastAPI()</text>
+    <text x="816" y="244" fill="#0c4270" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">@app.get("/")</text>
+    <text x="816" y="260" fill="#0c4270" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">def read_root():</text>
+    <text x="816" y="276" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start">    return {"mensaje": ...}</text>
+
+    <!-- ============ NODE — venv/ (provee, store) ============ -->
+    <rect x="570" y="420" width="300" height="130" rx="6" fill="#ffffff"/>
+    <rect x="570" y="420" width="300" height="130" rx="6" fill="rgba(12,66,112,0.05)" stroke="#64748b" stroke-width="1"/>
+    <rect x="578" y="428" width="32" height="12" rx="2" fill="transparent" stroke="rgba(100,116,139,0.50)" stroke-width="0.8"/>
+    <text x="594" y="437" fill="#64748b" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ENV</text>
+    <text x="720" y="460" fill="#0c4270" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">venv/</text>
+    <line x1="578" y1="470" x2="862" y2="470" stroke="#cbd5e1" stroke-width="0.8"/>
+    <text x="720" y="488" fill="#0c4270" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">bin/uvicorn</text>
+    <text x="720" y="504" fill="#0c4270" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">lib/.../site-packages/fastapi</text>
+    <text x="720" y="522" fill="#64748b" font-size="8" font-style="italic" font-family="'Geist Mono', monospace" text-anchor="middle">(.venv/ en Clases 1 y 2)</text>
+
+    <!-- ============ Annotation callouts (max 2) ============ -->
+    <text x="530" y="100" fill="#0c4270" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="middle">1 import al arrancar,</text>
+    <text x="530" y="116" fill="#0c4270" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="middle">1 llamada por request</text>
+    <path d="M 530,120 Q 530,148 530,172" fill="none" stroke="rgba(12,66,112,0.40)" stroke-width="1" stroke-dasharray="4,3"/>
+    <circle cx="530" cy="176" r="2" fill="#0c4270"/>
+
+    <text x="910" y="128" fill="#0c4270" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="middle">app = variable, no la carpeta app/</text>
+    <path d="M 910,132 Q 910,146 910,156" fill="none" stroke="rgba(12,66,112,0.40)" stroke-width="1" stroke-dasharray="4,3"/>
+    <circle cx="910" cy="160" r="2" fill="#0c4270"/>
+
+    <!-- ============ Legend ============ -->
+    <line x1="60" y1="580" x2="1020" y2="580" stroke="#e2e8f0" stroke-width="0.8"/>
+    <text x="60" y="596" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+
+    <line x1="60" y1="618" x2="88" y2="618" stroke="#129d95" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+    <text x="96" y="621" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Petición HTTP</text>
+
+    <line x1="230" y1="618" x2="258" y2="618" stroke="#1d4ed8" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+    <text x="266" y="621" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Llamada ASGI → tu función</text>
+
+    <line x1="460" y1="618" x2="488" y2="618" stroke="#64748b" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+    <text x="496" y="621" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Retorno / respuesta</text>
+
+    <line x1="660" y1="618" x2="688" y2="618" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
+    <text x="696" y="621" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Provee (desde venv)</text>
+
+    <rect x="880" y="610" width="14" height="10" rx="2" fill="rgba(29,78,216,0.07)" stroke="#1d4ed8" stroke-width="1"/>
+    <text x="900" y="621" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Servidor ASGI</text>
+  </svg>

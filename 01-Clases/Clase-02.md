@@ -54,7 +54,7 @@ sidebar: "Clase 2 · POO y arquitectura"
   - [`encapsulamiento.py`](#🔒-encapsulamiento-py-—-practicando-el-status-de-objeto-py)
 
 **🏋️ Ejercicios y autoevaluación**
-- [Ejercicios con solución](#🏋️-ejercicios-con-solucion) *(pendiente)*
+- [Ejercicios con solución](#🏋️-ejercicios-con-solucion) — 24 de 24 listos
 - [Preguntas y respuestas](#❓-preguntas-y-respuestas-autoevaluacion) *(pendiente)*
 
 # 📖 PARTE TEÓRICA
@@ -1117,8 +1117,1338 @@ Asignado</span></code></pre>
 > volver a indentarlo dentro de la clase para que la `@property` funcione de verdad.
 
 # 🏋️ EJERCICIOS CON SOLUCIÓN
-*(pendiente — se documentan 10 ejercicios graduales de POO cuando esté resuelto el reto
-de arriba)*
+
+> 📌 24 ejercicios que repasan **toda la teoría de esta clase** (secciones 2 a 12), de lo más
+> básico (una clase con un método) a lo más completo (encapsulamiento + abstracción + composición
+> en un solo objeto). Cada uno tiene un desplegable **"💡 ¿Sabías que…?"** con el repaso del
+> concepto + un ejemplo ya verificado de la teoría de esta misma clase, y un desplegable
+> **"Ver solución"** — todo el código fue corrido en terminal antes de documentarlo. Abstracción
+> (8-11), herencia (12-15) y polimorfismo (16-19) tienen 4 ejercicios cada uno, de lo más básico a
+> lo más específico del concepto. Los ejercicios 1-20 son de un solo concepto; del 21 en adelante
+> combinan varios (SOLID, patrones), hasta el integrador final (24).
+
+### Ejercicio 1 — Clase simple con atributos + un método
+Crea la clase `Producto` con `nombre` y `precio`, y un método `aplicar_descuento(porcentaje)` que **devuelva** (no modifique) el precio con el descuento aplicado. Crea un producto, guarda el resultado en `precio_final` y muestra `precio_final` y `producto.precio` — comprobá que el original no cambió.
+
+<details><summary>💡 ¿Sabías que…? — la clase como plantilla, sección 4</summary>
+
+Una clase define qué datos y qué operaciones tendrá cada objeto; un método que **devuelve** un valor con `return` no modifica el objeto, solo calcula algo a partir de sus atributos.
+
+```python
+class Ticket:
+    def __init__(self, ticket_id: int, title: str, priority: str):
+        self.ticket_id = ticket_id
+        self.title = title
+        self.priority = priority
+        self.status = "Pendiente"
+
+
+ticket_1 = Ticket(
+    1001, "Error al iniciar sesión", "Alta"
+)
+print(ticket_1.priority)
+```
+```
+Alta
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class Producto:
+    def __init__(self, nombre: str, precio: float):
+        self.nombre = nombre
+        self.precio = precio
+
+    def aplicar_descuento(self, porcentaje: float) -> float:
+        return self.precio * (1 - porcentaje / 100)
+
+producto = Producto("Teclado mecánico", 50000)
+precio_final = producto.aplicar_descuento(20)
+print(precio_final)
+print(producto.precio)
+```
+```
+40000.0
+50000
+```
+</details>
+
+### Ejercicio 2 — Varios objetos, mismo molde, distinto estado
+Crea la clase `Empleado` con `nombre` y `salario`. Crea 3 empleados con salarios distintos y mostrá la **suma** de los 3 salarios (accediendo a cada objeto por su nombre de variable, sin lista todavía).
+
+<details><summary>💡 ¿Sabías que…? — la clase como plantilla — varios objetos, sección 4</summary>
+
+Dos objetos creados a partir de la misma clase son objetos **distintos** en memoria, aunque compartan la misma "forma" — cada uno guarda sus propios valores.
+
+```python
+class Perro:
+    def __init__(self, peso: float, talla: float, familia: str):
+        self.peso = peso
+        self.talla = talla
+        self.familia = familia
+
+
+perro_golden = Perro(15.5, 2.20, "Golden")
+perro_salchicha = Perro(2.2, 1.2, "Salchicha")
+
+print(perro_golden.peso, perro_salchicha.peso)
+```
+```
+15.5 2.2
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class Empleado:
+    def __init__(self, nombre: str, salario: float):
+        self.nombre = nombre
+        self.salario = salario
+
+empleado_ana = Empleado("Ana", 3000)
+empleado_luis = Empleado("Luis", 2500)
+empleado_sofia = Empleado("Sofía", 3200)
+
+total = empleado_ana.salario + empleado_luis.salario + empleado_sofia.salario
+print(total)
+```
+```
+8700
+```
+</details>
+
+### Ejercicio 3 — Método que modifica el estado (`self.attr = ...`)
+Crea la clase `Termostato` con `temperatura` inicial en `20` y un método `subir(grados)` que **modifique** `self.temperatura` sumándole `grados`. Llamalo dos veces y mostrá la temperatura final.
+
+<details><summary>💡 ¿Sabías que…? — estado y comportamiento — métodos que mutan `self`, sección 5</summary>
+
+A diferencia de un método que hace `return`, un método puede **cambiar directamente** el estado del objeto asignando sobre `self.atributo` — el cambio queda guardado en el objeto para las próximas llamadas.
+
+```python
+class Ticket:
+    def assign(self, technician: str) -> None:
+        self.technician = technician
+        self.status = "Asignado"
+
+t = Ticket()
+t.assign("Técnico Gustavo")
+print(t.status)
+```
+```
+Asignado
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class Termostato:
+    def __init__(self):
+        self.temperatura = 20
+
+    def subir(self, grados: int) -> None:
+        self.temperatura += grados
+
+t = Termostato()
+t.subir(3)
+t.subir(2)
+print(t.temperatura)
+```
+```
+25
+```
+</details>
+
+### Ejercicio 4 — Método que calcula y devuelve (`return`)
+Crea la clase `Rectangulo` con `base` y `altura`, y un método `area()` que **devuelva** el área (no la imprima). Guardá el resultado en una variable, mostralo, y mostrá también `r.area() * 2` para comprobar que podés reutilizar el valor devuelto en otra expresión.
+
+<details><summary>💡 ¿Sabías que…? — estado y comportamiento — `return` para reutilizar el resultado, sección 5</summary>
+
+`return` entrega el valor a quien llamó al método, para que se pueda **reutilizar** después (guardarlo, operarlo, pasarlo a otra función) — a diferencia de `print()`, que solo lo muestra y lo pierde.
+
+```python
+class Ticket:
+    def get_summary(self) -> str:
+        return f"{self.ticket_id} - {self.status}"
+
+t = Ticket()
+t.ticket_id, t.status = 1001, "Asignado"
+resumen = t.get_summary()
+print(resumen)
+```
+```
+1001 - Asignado
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class Rectangulo:
+    def __init__(self, base: float, altura: float):
+        self.base = base
+        self.altura = altura
+
+    def area(self) -> float:
+        return self.base * self.altura
+
+r = Rectangulo(4, 5)
+resultado = r.area()
+print(resultado)
+print(r.area() * 2)
+```
+```
+20
+40
+```
+</details>
+
+### Ejercicio 5 — Función suelta vs. método: mismo cálculo, dos formas
+Escribí el mismo cálculo del IVA (18%) de dos formas: una función suelta `calcular_iva_funcion(precio)` que recibe el precio como parámetro, y un método `Producto.calcular_iva()` que usa `self.precio`. Comprobá que ambas dan el mismo resultado con `==`.
+
+<details><summary>💡 ¿Sabías que…? — el puente entre función y método, sección 2</summary>
+
+Una función suelta necesita que **le pasen el dato explícitamente** en cada llamada; un método ya tiene el dato guardado en `self`, así que no hace falta pasarlo — es la misma idea que abre el salto de funciones a POO en esta clase.
+
+```python
+def agregar_tarea(lista, tarea):
+    lista.append(tarea)
+
+tareas = []
+agregar_tarea(tareas, "Programar en Python")
+print(tareas)
+```
+```
+['Programar en Python']
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+def calcular_iva_funcion(precio: float) -> float:
+    return precio * 0.18
+
+class Producto:
+    def __init__(self, precio: float):
+        self.precio = precio
+
+    def calcular_iva(self) -> float:
+        return self.precio * 0.18
+
+precio = 100
+iva_funcion = calcular_iva_funcion(precio)
+
+producto = Producto(100)
+iva_metodo = producto.calcular_iva()
+
+print(iva_funcion, iva_metodo)
+print(iva_funcion == iva_metodo)
+```
+```
+18.0 18.0
+True
+```
+</details>
+
+### Ejercicio 6 — Encapsulamiento: `_atributo` protegido + `@property`
+Crea `CuentaBancaria` con `_saldo` protegido (inicia en `0`), una `@property saldo` de solo lectura, y un método `depositar(monto)` que sume al saldo — pero que lance `ValueError` si `monto <= 0`. Probá un depósito válido y capturá el error de uno inválido con `try`/`except`.
+
+<details><summary>💡 ¿Sabías que…? — encapsulamiento — validar antes de cambiar el estado, sección 6</summary>
+
+El guion bajo (`_saldo`) es la convención "no lo toques directo"; la `@property` expone el valor de **solo lectura**, y el método (`depositar`) es el único lugar autorizado para cambiarlo — centralizando ahí la validación.
+
+```python
+class Ticket:
+    def close(self) -> None:
+        if self._status == "Cerrado":
+            raise ValueError("Ya está cerrada")
+        self._status = "Cerrado"
+
+t = Ticket()
+t._status = "Pendiente"
+t.close()
+print(t._status)
+```
+```
+Cerrado
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class CuentaBancaria:
+    def __init__(self):
+        self._saldo = 0
+
+    @property
+    def saldo(self) -> float:
+        return self._saldo
+
+    def depositar(self, monto: float) -> None:
+        if monto <= 0:
+            raise ValueError("El monto debe ser positivo")
+        self._saldo += monto
+
+cuenta = CuentaBancaria()
+cuenta.depositar(100)
+print(cuenta.saldo)
+
+try:
+    cuenta.depositar(-50)
+except ValueError as e:
+    print(f"Error: {e}")
+```
+```
+100
+Error: El monto debe ser positivo
+```
+</details>
+
+### Ejercicio 7 — Encapsulamiento: transición de estado controlada
+Crea `Pedido` con `_estado` protegido (inicia en `"creado"`) y un método `confirmar()` que solo permita pasar de `"creado"` a `"confirmado"` — si ya está confirmado, debe lanzar `ValueError`. Confirmalo una vez, mostrá el estado, y probá confirmarlo de nuevo capturando el error.
+
+<details><summary>💡 ¿Sabías que…? — encapsulamiento — transiciones de estado imposibles de romper, sección 6</summary>
+
+Centralizar la regla de negocio ("no se puede confirmar dos veces") en el método evita que cualquier parte del programa deje el objeto en un estado inválido — el mismo principio que `Ticket.close()` en la teoría.
+
+```python
+t = None
+try:
+    if True:
+        raise ValueError("Ya está cerrada")
+except ValueError as e:
+    print(f"Error: {e}")
+```
+```
+Error: Ya está cerrada
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class Pedido:
+    def __init__(self):
+        self._estado = "creado"
+
+    @property
+    def estado(self) -> str:
+        return self._estado
+
+    def confirmar(self) -> None:
+        if self._estado == "confirmado":
+            raise ValueError("El pedido ya está confirmado")
+        self._estado = "confirmado"
+
+pedido = Pedido()
+pedido.confirmar()
+print(pedido.estado)
+
+try:
+    pedido.confirmar()
+except ValueError as e:
+    print(f"Error: {e}")
+```
+```
+confirmado
+Error: El pedido ya está confirmado
+```
+</details>
+
+### Ejercicio 8 — Abstracción: `ABC` + dos implementaciones
+Crea la clase abstracta `MetodoPago(ABC)` con `@abstractmethod procesar(monto)`. Implementá `PagoTarjeta` y `PagoEfectivo`. Probá ambas con el mismo monto, y confirmá con `try`/`except TypeError` que `MetodoPago()` no se puede instanciar directo.
+
+<details><summary>💡 ¿Sabías que…? — abstracción — contrato sin implementación, sección 7</summary>
+
+`ABC` + `@abstractmethod` definen **qué** operación debe existir (`procesar`) sin decir cómo — Python bloquea instanciar la clase abstracta directo, y obliga a cada subclase a implementar el método o tampoco se puede instanciar.
+
+```python
+from abc import ABC, abstractmethod
+
+class NotificationChannel(ABC):
+    @abstractmethod
+    def send(self, recipient: str, message: str) -> None:
+        pass
+
+try:
+    NotificationChannel()
+except TypeError as e:
+    print(f"Error: {e}")
+```
+```
+Error: Can't instantiate abstract class NotificationChannel without an implementation for abstract method 'send'
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from abc import ABC, abstractmethod
+
+class MetodoPago(ABC):
+    @abstractmethod
+    def procesar(self, monto: float) -> None:
+        pass
+
+class PagoTarjeta(MetodoPago):
+    def procesar(self, monto: float) -> None:
+        print(f"Cobrando {monto} con tarjeta")
+
+class PagoEfectivo(MetodoPago):
+    def procesar(self, monto: float) -> None:
+        print(f"Cobrando {monto} en efectivo")
+
+tarjeta = PagoTarjeta()
+tarjeta.procesar(150)
+
+efectivo = PagoEfectivo()
+efectivo.procesar(150)
+
+try:
+    MetodoPago()
+except TypeError as e:
+    print(f"Error: {e}")
+```
+```
+Cobrando 150 con tarjeta
+Cobrando 150 en efectivo
+Error: Can't instantiate abstract class MetodoPago without an implementation for abstract method 'procesar'
+```
+</details>
+
+### Ejercicio 9 — Abstracción: varios métodos abstractos, todos obligatorios
+Crea `Figura(ABC)` con **dos** métodos abstractos: `area()` y `perimetro()`. Implementá `Circulo` con ambos. Después, probá crear una clase que implemente **solo uno** de los dos (dejando el otro sin implementar) y capturá con `try`/`except TypeError` que Python igual bloquea la instanciación.
+
+<details><summary>💡 ¿Sabías que…? — abstracción — ABC exige TODOS los métodos abstractos, no alguno, sección 7</summary>
+
+Cuando una clase abstracta declara varios `@abstractmethod`, una subclase que implemente solo algunos **sigue siendo abstracta** — Python no deja instanciarla hasta que estén los que faltan.
+
+```python
+from abc import ABC, abstractmethod
+
+class Instrumento(ABC):
+    @abstractmethod
+    def afinar(self) -> None:
+        pass
+
+    @abstractmethod
+    def tocar(self) -> None:
+        pass
+
+class Guitarra(Instrumento):
+    def afinar(self) -> None:
+        print("Afinando cuerdas")
+
+    def tocar(self) -> None:
+        print("Rasgueando")
+
+Guitarra().tocar()
+```
+```
+Rasgueando
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from abc import ABC, abstractmethod
+
+class Figura(ABC):
+    @abstractmethod
+    def area(self) -> float:
+        pass
+
+    @abstractmethod
+    def perimetro(self) -> float:
+        pass
+
+class Circulo(Figura):
+    def __init__(self, radio: float):
+        self.radio = radio
+
+    def area(self) -> float:
+        return 3.1416 * self.radio ** 2
+
+    def perimetro(self) -> float:
+        return 2 * 3.1416 * self.radio
+
+circulo = Circulo(3)
+print(circulo.area())
+print(circulo.perimetro())
+
+class CirculoIncompleto(Figura):
+    def __init__(self, radio: float):
+        self.radio = radio
+
+    def area(self) -> float:
+        return 3.1416 * self.radio ** 2
+    # falta implementar perimetro()
+
+try:
+    CirculoIncompleto(3)
+except TypeError as e:
+    print(f"Error: {e}")
+```
+```
+28.2744
+18.8496
+Error: Can't instantiate abstract class CirculoIncompleto without an implementation for abstract method 'perimetro'
+```
+</details>
+
+### Ejercicio 10 — Abstracción: método concreto + método abstracto en la misma ABC
+Crea `Reporte(ABC)` con un método **ya implementado** `imprimir_encabezado()` (concreto, no abstracto) y un método `generar_cuerpo()` **abstracto**. Implementá `ReporteVentas`, que solo define `generar_cuerpo()` pero hereda `imprimir_encabezado()` sin tocarlo.
+
+<details><summary>💡 ¿Sabías que…? — abstracción — una ABC puede tener comportamiento ya resuelto, sección 7</summary>
+
+`ABC` no obliga a que **todos** los métodos sean abstractos — puede combinar métodos concretos (compartidos tal cual por todas las subclases) con métodos abstractos (que cada subclase debe completar a su manera).
+
+```python
+from abc import ABC, abstractmethod
+
+class Documento(ABC):
+    def guardar(self) -> None:
+        print("Guardado en disco")
+
+    @abstractmethod
+    def render(self) -> str:
+        pass
+
+class DocumentoPDF(Documento):
+    def render(self) -> str:
+        return "contenido en PDF"
+
+doc = DocumentoPDF()
+doc.guardar()
+print(doc.render())
+```
+```
+Guardado en disco
+contenido en PDF
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from abc import ABC, abstractmethod
+
+class Reporte(ABC):
+    def imprimir_encabezado(self) -> None:
+        print("=== Reporte ===")
+
+    @abstractmethod
+    def generar_cuerpo(self) -> str:
+        pass
+
+class ReporteVentas(Reporte):
+    def __init__(self, total: float):
+        self.total = total
+
+    def generar_cuerpo(self) -> str:
+        return f"Ventas totales: {self.total}"
+
+reporte = ReporteVentas(15000)
+reporte.imprimir_encabezado()
+print(reporte.generar_cuerpo())
+```
+```
+=== Reporte ===
+Ventas totales: 15000
+```
+</details>
+
+### Ejercicio 11 — Abstracción: ABC con `__init__` real y estado compartido
+Crea `Empleado(ABC)` con `__init__(self, nombre)` que guarda `self.nombre`, y un método abstracto `calcular_sueldo()`. Implementá `Vendedor` (sueldo base + comisión) y `Gerente` (sueldo base + bono), ambos reutilizando `__init__` vía `super().__init__(nombre)`. Recorré una lista de ambos con un `for` mostrando nombre y sueldo.
+
+<details><summary>💡 ¿Sabías que…? — abstracción — una ABC también puede tener estado, no solo contratos vacíos, sección 7</summary>
+
+Una clase abstracta puede tener un `__init__` real con atributos — la parte "abstracta" es solo el método sin implementar; el resto (constructor, atributos, métodos concretos) funciona como en cualquier clase normal y se hereda igual.
+
+```python
+from abc import ABC, abstractmethod
+
+class Animal(ABC):
+    def __init__(self, nombre: str):
+        self.nombre = nombre
+
+    @abstractmethod
+    def hacer_sonido(self) -> str:
+        pass
+
+class Gato(Animal):
+    def hacer_sonido(self) -> str:
+        return "Miau"
+
+gato = Gato("Michi")
+print(gato.nombre, gato.hacer_sonido())
+```
+```
+Michi Miau
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from abc import ABC, abstractmethod
+
+class Empleado(ABC):
+    def __init__(self, nombre: str):
+        self.nombre = nombre
+
+    @abstractmethod
+    def calcular_sueldo(self) -> float:
+        pass
+
+class Vendedor(Empleado):
+    def __init__(self, nombre: str, comision: float):
+        super().__init__(nombre)
+        self.comision = comision
+
+    def calcular_sueldo(self) -> float:
+        return 1000 + self.comision
+
+class Gerente(Empleado):
+    def __init__(self, nombre: str, bono: float):
+        super().__init__(nombre)
+        self.bono = bono
+
+    def calcular_sueldo(self) -> float:
+        return 3000 + self.bono
+
+empleados = [Vendedor("Ana", 500), Gerente("Luis", 800)]
+for empleado in empleados:
+    print(empleado.nombre, empleado.calcular_sueldo())
+```
+```
+Ana 1500
+Luis 3800
+```
+</details>
+
+### Ejercicio 12 — Herencia: subclase + `super().__init__`
+Crea `Vehiculo` (marca, modelo) con un método `descripcion()`. Crea `Auto(Vehiculo)` que agrega `puertas` y reutiliza el constructor del padre con `super().__init__(...)`. Mostrá la descripción heredada, `puertas`, y confirmá con `isinstance(auto, Vehiculo)` que un `Auto` **es un** `Vehiculo`.
+
+<details><summary>💡 ¿Sabías que…? — herencia — reutilizar el constructor del padre, sección 8</summary>
+
+`super().__init__(...)` llama al constructor de la clase padre en vez de repetir sus asignaciones a mano — la subclase hereda automáticamente sus atributos y métodos, y agrega los propios.
+
+```python
+class User:
+    def __init__(self, name: str, email: str):
+        self.name = name
+        self.email = email
+
+class Technician(User):
+    def __init__(self, name: str, email: str, specialty: str):
+        super().__init__(name, email)
+        self.specialty = specialty
+
+tech = Technician("Gustavo", "g@mail.com", "Redes")
+print(tech.name, tech.specialty)
+print(isinstance(tech, User))
+```
+```
+Gustavo Redes
+True
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class Vehiculo:
+    def __init__(self, marca: str, modelo: str):
+        self.marca = marca
+        self.modelo = modelo
+
+    def descripcion(self) -> str:
+        return f"{self.marca} {self.modelo}"
+
+class Auto(Vehiculo):
+    def __init__(self, marca: str, modelo: str, puertas: int):
+        super().__init__(marca, modelo)
+        self.puertas = puertas
+
+auto = Auto("Toyota", "Corolla", 4)
+print(auto.descripcion())
+print(auto.puertas)
+print(isinstance(auto, Vehiculo))
+```
+```
+Toyota Corolla
+4
+True
+```
+</details>
+
+### Ejercicio 13 — Herencia: sobrescribir un método y extenderlo con `super()`
+Crea `Empleado` con `calcular_bono()` que devuelve `0`. Crea `Vendedor(Empleado)` que **sobrescribe** `calcular_bono()`, pero en vez de reemplazarlo del todo, llama a `super().calcular_bono()` y le suma un 10% del salario. Comprobá que un `Empleado` normal sigue dando `0` y un `Vendedor` da un valor distinto.
+
+<details><summary>💡 ¿Sabías que…? — herencia — sobrescribir (override) sin perder lo del padre, sección 8</summary>
+
+Sobrescribir un método no significa borrar el del padre — `super().metodo()` dentro del override permite **extender** el comportamiento heredado en vez de reemplazarlo por completo.
+
+```python
+class Forma:
+    def describir(self) -> str:
+        return "Forma genérica"
+
+class Triangulo(Forma):
+    def describir(self) -> str:
+        base = super().describir()
+        return f"{base} — con 3 lados"
+
+print(Triangulo().describir())
+```
+```
+Forma genérica — con 3 lados
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class Empleado:
+    def __init__(self, nombre: str, salario: float):
+        self.nombre = nombre
+        self.salario = salario
+
+    def calcular_bono(self) -> float:
+        return 0
+
+class Vendedor(Empleado):
+    def calcular_bono(self) -> float:
+        bono_base = super().calcular_bono()
+        return bono_base + self.salario * 0.10
+
+empleado = Empleado("Ana", 2000)
+vendedor = Vendedor("Luis", 2000)
+print(empleado.calcular_bono())
+print(vendedor.calcular_bono())
+```
+```
+0
+200.0
+```
+</details>
+
+### Ejercicio 14 — Herencia multinivel: abuelo → padre → nieto
+Crea `Ser` (nombre) → `Animal(Ser)` (agrega especie) → `Perro(Animal)` (agrega raza, fija `especie="Canino"` automáticamente). Creá un `Perro`, mostrá sus 3 atributos, y confirmá con `isinstance` que **es** tanto `Ser` como `Animal`.
+
+<details><summary>💡 ¿Sabías que…? — herencia — la cadena se hereda completa, no solo un nivel, sección 8</summary>
+
+La herencia no se detiene en el padre directo: un objeto de la clase más específica **es** instancia de **todos** los niveles de la cadena hacia arriba, no solo de su padre inmediato.
+
+```python
+class A:
+    def saludo(self) -> str:
+        return "Hola desde A"
+
+class B(A):
+    pass
+
+class C(B):
+    pass
+
+c = C()
+print(c.saludo())
+print(isinstance(c, A))
+```
+```
+Hola desde A
+True
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class Ser:
+    def __init__(self, nombre: str):
+        self.nombre = nombre
+
+class Animal(Ser):
+    def __init__(self, nombre: str, especie: str):
+        super().__init__(nombre)
+        self.especie = especie
+
+class Perro(Animal):
+    def __init__(self, nombre: str, raza: str):
+        super().__init__(nombre, especie="Canino")
+        self.raza = raza
+
+firulais = Perro("Firulais", "Labrador")
+print(firulais.nombre, firulais.especie, firulais.raza)
+print(isinstance(firulais, Ser), isinstance(firulais, Animal))
+```
+```
+Firulais Canino Labrador
+True True
+```
+</details>
+
+### Ejercicio 15 — Herencia múltiple (mixins): combinar dos clases base
+Crea `Loggable` (con `log(mensaje)`) y `Serializable` (con `to_dict()` que devuelve `self.__dict__`) como clases independientes, sin relación entre ellas. Crea `Pedido(Loggable, Serializable)` con sus propios atributos, y comprobá que puede usar los métodos de **ambas**.
+
+<details><summary>💡 ¿Sabías que…? — herencia múltiple — combinar comportamientos con mixins, sección 8</summary>
+
+Python permite heredar de **más de una** clase a la vez (`class Hija(A, B)`) — cada clase base aporta un comportamiento independiente ("mixin"), y la subclase termina con los métodos de todas.
+
+```python
+class Volador:
+    def volar(self) -> str:
+        return "Vuelo"
+
+class Nadador:
+    def nadar(self) -> str:
+        return "Nado"
+
+class Pato(Volador, Nadador):
+    pass
+
+pato = Pato()
+print(pato.volar(), pato.nadar())
+```
+```
+Vuelo Nado
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class Loggable:
+    def log(self, mensaje: str) -> None:
+        print(f"[LOG] {mensaje}")
+
+class Serializable:
+    def to_dict(self) -> dict:
+        return self.__dict__
+
+class Pedido(Loggable, Serializable):
+    def __init__(self, pedido_id: int, total: float):
+        self.pedido_id = pedido_id
+        self.total = total
+
+pedido = Pedido(1001, 250)
+pedido.log("Pedido creado")
+print(pedido.to_dict())
+```
+```
+[LOG] Pedido creado
+{'pedido_id': 1001, 'total': 250}
+```
+</details>
+
+### Ejercicio 16 — Polimorfismo: misma llamada, comportamiento distinto
+Reusando `MetodoPago`/`PagoTarjeta`/`PagoEfectivo` del ejercicio 8, escribí una función `cobrar(metodo: MetodoPago, monto)` que llame a `metodo.procesar(monto)` sin saber de qué subclase se trata. Probala recorriendo con un `for` una lista `[PagoTarjeta(), PagoEfectivo()]`.
+
+<details><summary>💡 ¿Sabías que…? — polimorfismo — programar contra el contrato, no contra la clase concreta, sección 8</summary>
+
+`cobrar()` no pregunta "¿sos tarjeta o efectivo?" — solo confía en que cualquier `MetodoPago` sabe `procesar()`. Es la misma idea que `TicketService` (sección 9), que usa un `NotificationChannel` sin importarle cuál sea.
+
+```python
+def notificar(canal, recipient, message):
+    canal.send(recipient, message)
+
+class EmailNotification:
+    def send(self, r, m): print(f"Correo enviado a {r}: {m}")
+
+notificar(EmailNotification(), "Juan", "Hola")
+```
+```
+Correo enviado a Juan: Hola
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from abc import ABC, abstractmethod
+
+class MetodoPago(ABC):
+    @abstractmethod
+    def procesar(self, monto: float) -> None:
+        pass
+
+class PagoTarjeta(MetodoPago):
+    def procesar(self, monto: float) -> None:
+        print(f"Tarjeta: {monto}")
+
+class PagoEfectivo(MetodoPago):
+    def procesar(self, monto: float) -> None:
+        print(f"Efectivo: {monto}")
+
+def cobrar(metodo: MetodoPago, monto: float) -> None:
+    metodo.procesar(monto)
+
+metodos = [PagoTarjeta(), PagoEfectivo()]
+for metodo in metodos:
+    cobrar(metodo, 200)
+```
+```
+Tarjeta: 200
+Efectivo: 200
+```
+</details>
+
+### Ejercicio 17 — Polimorfismo: duck typing sin una clase base en común
+Crea `Perro` y `Pato`, **sin ninguna relación de herencia entre ellas** (ni ABC en común), ambas con un método `hablar()`. Escribí `hacer_hablar(animal)` que llame a `animal.hablar()` y probala con un objeto de cada clase en un `for`.
+
+<details><summary>💡 ¿Sabías que…? — polimorfismo — duck typing: "si camina como pato y grazna como pato...", sección 8</summary>
+
+El polimorfismo de esta clase (secciones 7-8) se apoya en heredar de una base común — pero Python no lo exige: si dos clases **no relacionadas** tienen el mismo método, una función puede tratarlas igual sin que compartan ninguna clase padre. Se llama *duck typing*.
+
+```python
+class Perro:
+    def hablar(self) -> str:
+        return "Guau"
+
+class Pato:
+    def hablar(self) -> str:
+        return "Cuac"
+
+def hacer_hablar(animal) -> None:
+    print(animal.hablar())
+
+for animal in [Perro(), Pato()]:
+    hacer_hablar(animal)
+```
+```
+Guau
+Cuac
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class NotificadorInterno:
+    def enviar(self, mensaje: str) -> None:
+        print(f"Interno (Slack): {mensaje}")
+
+class NotificadorExterno:
+    def enviar(self, mensaje: str) -> None:
+        print(f"Externo (Email): {mensaje}")
+
+def avisar(notificador, mensaje: str) -> None:
+    notificador.enviar(mensaje)
+
+for notificador in [NotificadorInterno(), NotificadorExterno()]:
+    avisar(notificador, "Turno confirmado")
+```
+```
+Interno (Slack): Turno confirmado
+Externo (Email): Turno confirmado
+```
+</details>
+
+### Ejercicio 18 — Polimorfismo: mismo contrato, comportamiento distinto por figura
+Crea `Figura(ABC)` con `descripcion()` abstracto. Implementá `Circulo` y `Cuadrado`, cada una devolviendo un string distinto. Recorré `[Circulo(), Cuadrado()]` con un `for` llamando `figura.descripcion()` en cada una.
+
+<details><summary>💡 ¿Sabías que…? — polimorfismo — mismo método, resultado distinto según la clase real, sección 8</summary>
+
+El `for` no sabe (ni le importa) si cada `figura` es un `Circulo` o un `Cuadrado` — solo llama `descripcion()` y cada objeto responde según **su propia** implementación.
+
+```python
+from abc import ABC, abstractmethod
+
+class Idioma(ABC):
+    @abstractmethod
+    def saludar(self) -> str:
+        pass
+
+class Espanol(Idioma):
+    def saludar(self) -> str:
+        return "Hola"
+
+class Ingles(Idioma):
+    def saludar(self) -> str:
+        return "Hello"
+
+for idioma in [Espanol(), Ingles()]:
+    print(idioma.saludar())
+```
+```
+Hola
+Hello
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from abc import ABC, abstractmethod
+
+class Figura(ABC):
+    @abstractmethod
+    def descripcion(self) -> str:
+        pass
+
+class Circulo(Figura):
+    def descripcion(self) -> str:
+        return "Soy un círculo"
+
+class Cuadrado(Figura):
+    def descripcion(self) -> str:
+        return "Soy un cuadrado"
+
+figuras = [Circulo(), Cuadrado()]
+for figura in figuras:
+    print(figura.descripcion())
+```
+```
+Soy un círculo
+Soy un cuadrado
+```
+</details>
+
+### Ejercicio 19 — Polimorfismo: `isinstance` dentro de una función polimórfica
+Escribí `cobrar_con_descuento(metodo: MetodoPago, monto)` que llame a `metodo.procesar(monto)` polimórficamente, pero aplique un 5% de descuento **solo si** `metodo` es `PagoEfectivo` (usando `isinstance` para ese caso puntual). Probala con `PagoTarjeta` y con `PagoEfectivo`.
+
+<details><summary>💡 ¿Sabías que…? — polimorfismo — cuándo SÍ conviene usar `isinstance` dentro de código polimórfico, sección 8</summary>
+
+El ideal es no preguntar nunca "¿de qué clase sos?" — pero en casos reales, una regla de negocio puntual ("descuento solo en efectivo") a veces sí necesita un `isinstance` acotado, sin que eso rompa el resto del diseño polimórfico.
+
+```python
+class Paquete:
+    def calcular_envio(self) -> float:
+        return 10
+
+class PaqueteFragil(Paquete):
+    def calcular_envio(self) -> float:
+        return 10
+
+def cotizar(paquete: Paquete) -> float:
+    costo = paquete.calcular_envio()
+    if isinstance(paquete, PaqueteFragil):
+        costo += 5  # seguro extra solo para frágiles
+    return costo
+
+print(cotizar(Paquete()))
+print(cotizar(PaqueteFragil()))
+```
+```
+10
+15
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from abc import ABC, abstractmethod
+
+class MetodoPago(ABC):
+    @abstractmethod
+    def procesar(self, monto: float) -> float:
+        pass
+
+class PagoTarjeta(MetodoPago):
+    def procesar(self, monto: float) -> float:
+        return monto
+
+class PagoEfectivo(MetodoPago):
+    def procesar(self, monto: float) -> float:
+        return monto
+
+def cobrar_con_descuento(metodo: MetodoPago, monto: float) -> float:
+    total = metodo.procesar(monto)
+    if isinstance(metodo, PagoEfectivo):
+        total *= 0.95  # 5% de descuento solo en efectivo
+    return total
+
+print(cobrar_con_descuento(PagoTarjeta(), 100))
+print(cobrar_con_descuento(PagoEfectivo(), 100))
+```
+```
+100
+95.0
+```
+</details>
+
+### Ejercicio 20 — Composición: "tiene un" con inyección por constructor
+Crea `Motor` con un método `arrancar()`. Crea `Auto` que **recibe** un `Motor` por constructor (composición, no herencia) y un método `encender()` que delega en `self.motor.arrancar()`.
+
+<details><summary>💡 ¿Sabías que…? — composición — un objeto usa a otro para funcionar, sección 9</summary>
+
+La composición modela "tiene un": `Auto` no *es* un `Motor`, lo *usa*. El objeto se recibe ya armado por constructor — el mismo patrón que `TicketService(notification)` de la teoría.
+
+```python
+class TicketService:
+    def __init__(self, notification):
+        self.notification = notification
+
+    def register(self, ticket_id, email):
+        self.notification.send(email, f"Solicitud {ticket_id} registrada")
+
+class EmailNotification:
+    def send(self, r, m): print(f"Correo enviado a {r}: {m}")
+
+service = TicketService(EmailNotification())
+service.register(1001, "juan@mail.com")
+```
+```
+Correo enviado a juan@mail.com: Solicitud 1001 registrada
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class Motor:
+    def arrancar(self) -> None:
+        print("Motor arrancando...")
+
+class Auto:
+    def __init__(self, motor: Motor):
+        self.motor = motor
+
+    def encender(self) -> None:
+        print("Encendiendo el auto")
+        self.motor.arrancar()
+
+auto = Auto(Motor())
+auto.encender()
+```
+```
+Encendiendo el auto
+Motor arrancando...
+```
+</details>
+
+### Ejercicio 21 — SOLID (S): separar una clase con dos responsabilidades
+Refactorizá: en vez de que `Factura` tenga `calcular_total()` **y** `guardar_en_archivo()` (dos motivos de cambio en una sola clase), separá en `Factura` (solo calcula) y `FacturaRepositorio` (solo guarda, recibe la factura como parámetro).
+
+<details><summary>💡 ¿Sabías que…? — Single Responsibility — un solo motivo para cambiar, sección 10</summary>
+
+Si `Factura` cambia porque cambia el cálculo del total **y también** porque cambia el formato del archivo, tiene dos responsabilidades mezcladas — dos motivos de cambio distintos en una sola clase, justo lo que viola SRP.
+
+```python
+class Ticket:
+    def save_database(self): pass
+    def send_email(self): pass
+    def generate_pdf(self): pass
+
+# 3 motivos de cambio en una sola clase: viola SRP
+```
+```
+(no se ejecuta — es el antipatrón de la teoría, sección 10)
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+class Factura:
+    def __init__(self, items: list[float]):
+        self.items = items
+
+    def calcular_total(self) -> float:
+        return sum(self.items)
+
+class FacturaRepositorio:
+    def guardar(self, factura: Factura) -> None:
+        print(f"Guardando factura por {factura.calcular_total()}")
+
+factura = Factura([100, 250, 50])
+repositorio = FacturaRepositorio()
+repositorio.guardar(factura)
+print(factura.calcular_total())
+```
+```
+Guardando factura por 400
+400
+```
+</details>
+
+### Ejercicio 22 — SOLID (O + D): agregar un canal sin tocar nada existente
+Reusando el patrón `Notificador(ABC)` con `EmailNotificador`/`SMSNotificador`, agregá un tercer canal `ConsolaNotificador` **sin modificar** ninguna de las clases anteriores ni la función `notificar_todos(canales, mensaje)`. Agregalo a la lista de canales y confirmá que funciona igual.
+
+<details><summary>💡 ¿Sabías que…? — Open/Closed + Dependency Inversion, sección 10</summary>
+
+`notificar_todos` depende de la **abstracción** `Notificador`, no de una clase concreta (D) — por eso puede recibir un canal que ni existía cuando se escribió la función, sin que nadie la toque (O). Es exactamente el reto resuelto de esta clase (`notification_channel.py`).
+
+```python
+channels = {"email": "EmailChannel", "sms": "SMSChannel"}
+
+def channel_factory(kind: str):
+    if kind not in channels:
+        raise ValueError(f"Canal no soportado: {kind}")
+    return channels[kind]
+
+print(channel_factory("sms"))
+```
+```
+SMSChannel
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from abc import ABC, abstractmethod
+
+class Notificador(ABC):
+    @abstractmethod
+    def enviar(self, mensaje: str) -> None:
+        pass
+
+class EmailNotificador(Notificador):
+    def enviar(self, mensaje: str) -> None:
+        print(f"Email: {mensaje}")
+
+class SMSNotificador(Notificador):
+    def enviar(self, mensaje: str) -> None:
+        print(f"SMS: {mensaje}")
+
+# Canal nuevo — se agrega SIN tocar Notificador, EmailNotificador, SMSNotificador
+# ni la función notificar_todos() de más abajo.
+class ConsolaNotificador(Notificador):
+    def enviar(self, mensaje: str) -> None:
+        print(f"Consola: {mensaje}")
+
+def notificar_todos(canales: list[Notificador], mensaje: str) -> None:
+    for canal in canales:
+        canal.enviar(mensaje)
+
+canales = [EmailNotificador(), SMSNotificador(), ConsolaNotificador()]
+notificar_todos(canales, "Tu pedido fue enviado")
+```
+```
+Email: Tu pedido fue enviado
+SMS: Tu pedido fue enviado
+Consola: Tu pedido fue enviado
+```
+</details>
+
+### Ejercicio 23 — Patrón Factory: centralizar qué clase instanciar
+Escribí `crear_notificador(tipo: str) -> Notificador` que devuelva `EmailNotificador()` o `SMSNotificador()` según un string, y lance `ValueError` si el tipo no existe. Probalo con `"sms"` y con un tipo inválido (`"whatsapp"`) capturando el error.
+
+<details><summary>💡 ¿Sabías que…? — Factory — centralizar la decisión de qué instanciar, sección 12</summary>
+
+Cuando el código empieza a llenarse de `if`/`elif` para decidir qué clase crear, una función Factory concentra esa decisión en un solo lugar — quien la llama no necesita conocer las clases concretas, solo el string.
+
+```python
+def channel_factory(kind: str):
+    channels = {"email": "EmailChannel", "sms": "SMSChannel"}
+    if kind not in channels:
+        raise ValueError(f"Canal no soportado: {kind}")
+    return channels[kind]
+
+try:
+    channel_factory("fax")
+except ValueError as e:
+    print(f"Error: {e}")
+```
+```
+Error: Canal no soportado: fax
+```
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from abc import ABC, abstractmethod
+
+class Notificador(ABC):
+    @abstractmethod
+    def enviar(self, mensaje: str) -> None:
+        pass
+
+class EmailNotificador(Notificador):
+    def enviar(self, mensaje: str) -> None:
+        print(f"Email: {mensaje}")
+
+class SMSNotificador(Notificador):
+    def enviar(self, mensaje: str) -> None:
+        print(f"SMS: {mensaje}")
+
+def crear_notificador(tipo: str) -> Notificador:
+    tipos = {"email": EmailNotificador, "sms": SMSNotificador}
+    if tipo not in tipos:
+        raise ValueError(f"Tipo de notificador no soportado: {tipo}")
+    return tipos[tipo]()
+
+notificador = crear_notificador("sms")
+notificador.enviar("Tu código es 4821")
+
+try:
+    crear_notificador("whatsapp")
+except ValueError as e:
+    print(f"Error: {e}")
+```
+```
+SMS: Tu código es 4821
+Error: Tipo de notificador no soportado: whatsapp
+```
+</details>
+
+### Ejercicio 24 — Integrador: encapsulamiento + abstracción + composición
+Crea `Pedido` con `_estado` protegido (`property estado`) y un método `confirmar(notificador: Notificador)` que: (a) valide que no esté ya confirmado — **encapsulamiento**; (b) reciba el canal por constructor del método, sin conocer la clase concreta — **abstracción + composición**. Probalo con 2 pedidos distintos, cada uno confirmado con un notificador distinto.
+
+<details><summary>💡 ¿Sabías que…? — los 4 conceptos de esta clase, juntos, secciones 6, 7 y 9</summary>
+
+Es el reto completo de la diapositiva de cierre (ver sección "Reto de POO" más arriba), resuelto en un solo objeto: `_estado` protegido con transición validada (6), `Notificador` inyectado sin importar cuál sea (7 + 9).
+
+</details>
+
+<details><summary>Ver solución</summary>
+
+```python
+from abc import ABC, abstractmethod
+
+class Notificador(ABC):
+    @abstractmethod
+    def enviar(self, mensaje: str) -> None:
+        pass
+
+class EmailNotificador(Notificador):
+    def enviar(self, mensaje: str) -> None:
+        print(f"Email: {mensaje}")
+
+class SMSNotificador(Notificador):
+    def enviar(self, mensaje: str) -> None:
+        print(f"SMS: {mensaje}")
+
+class Pedido:
+    def __init__(self, pedido_id: int):
+        self.pedido_id = pedido_id
+        self._estado = "creado"
+
+    @property
+    def estado(self) -> str:
+        return self._estado
+
+    def confirmar(self, notificador: Notificador) -> None:
+        if self._estado == "confirmado":
+            raise ValueError("El pedido ya está confirmado")
+        self._estado = "confirmado"
+        notificador.enviar(f"Pedido {self.pedido_id} confirmado")
+
+pedido_1 = Pedido(101)
+pedido_1.confirmar(EmailNotificador())
+print(pedido_1.estado)
+
+pedido_2 = Pedido(102)
+pedido_2.confirmar(SMSNotificador())
+print(pedido_2.estado)
+```
+```
+Email: Pedido 101 confirmado
+confirmado
+SMS: Pedido 102 confirmado
+confirmado
+```
+</details>
 
 ## ❓ Preguntas y respuestas (autoevaluación)
 *(pendiente — 10 preguntas graduales sobre clases, encapsulamiento, abstracción,

@@ -44,3 +44,25 @@ source .venv/bin/activate     # el prompt debe mostrar (.venv) al inicio
 - [[python-command-not-found]]
 - [[pip-command-not-found-venv-inactivo]]
 - [00-Notas/01-Comandos.md](../00-Notas/01-Comandos.md)
+
+## 🔁 Recurrió en Clase 3 (2026-08-20)
+Mismo error, mismo motivo — esta vez con el venv llamado `venv` (sin punto, no `.venv`)
+en `02-Ejercicios/Clase-03/`:
+
+```bash
+❯ python3 -m venv venv
+❯ venv\Scripts\activate
+zsh: command not found: venvScriptsactivate
+```
+
+La solución fue la misma, ajustada al nombre de esta carpeta (`venv`, no `.venv`):
+
+```bash
+source venv/bin/activate
+```
+
+Con el venv ya activado, instaló FastAPI y Uvicorn — ver
+[Clase 3 — Primer proyecto](../01-Clases/Clase-03.md#🧪-primer-proyecto-—-02-ejercicios-clase-03):
+```bash
+pip install fastapi "uvicorn[standard]"
+```

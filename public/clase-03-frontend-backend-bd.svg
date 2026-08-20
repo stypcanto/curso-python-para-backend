@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="clase03-seq-title clase03-seq-desc">
+    <title id="clase03-seq-title">Frontend, backend y base de datos — Clase 3</title>
+    <desc id="clase03-seq-desc">Diagrama de secuencia: el Cliente pide GET /tickets/{id} a la API FastAPI. Un fragmento ALT muestra dos caminos — si el ticket existe, FastAPI consulta la base de datos, recibe la fila y responde 200 OK con el JSON; si no existe, la base de datos no devuelve resultados y FastAPI responde 404 Not Found. El cliente nunca se comunica directo con la base de datos.</desc>
+    <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
+      </marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#1d4ed8"/>
+      </marker>
+      <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#129d95"/>
+      </marker>
+    </defs>
+
+    <rect width="100%" height="100%" fill="#ffffff"/>
+
+    <!-- ============ LIFELINES ============ -->
+    <line x1="140" y1="128" x2="140" y2="580" stroke="rgba(12,66,112,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="500" y1="128" x2="500" y2="580" stroke="rgba(12,66,112,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="860" y1="128" x2="860" y2="580" stroke="rgba(12,66,112,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+
+    <!-- ============ ACTIVATION BARS ============ -->
+    <!-- FastAPI holds control through the whole exchange -->
+    <rect x="496" y="172" width="8" height="380" fill="rgba(12,66,112,0.06)" stroke="#64748b" stroke-width="0.8"/>
+    <!-- DB activation, region 1 (found) -->
+    <rect x="856" y="256" width="8" height="44" fill="rgba(12,66,112,0.06)" stroke="#64748b" stroke-width="0.8"/>
+    <!-- DB activation, region 2 (not found) -->
+    <rect x="856" y="408" width="8" height="44" fill="rgba(12,66,112,0.06)" stroke="#64748b" stroke-width="0.8"/>
+
+    <!-- ============ M1: Cliente -> FastAPI (before frame) ============ -->
+    <line x1="140" y1="176" x2="496" y2="176" stroke="#129d95" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+    <rect x="228" y="160" width="180" height="12" rx="2" fill="#ffffff"/>
+    <text x="318" y="170" fill="#129d95" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">GET /TICKETS/{ID}</text>
+
+    <!-- ============ ALT FRAME: x=88 y=204 w=804 h=316 ============ -->
+    <rect x="88" y="204" width="804" height="316" rx="4" fill="rgba(12,66,112,0.02)" stroke="rgba(12,66,112,0.22)" stroke-width="1"/>
+    <rect x="88" y="204" width="40" height="16" rx="2" fill="#ffffff" stroke="rgba(12,66,112,0.22)" stroke-width="1"/>
+    <text x="108" y="216" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">ALT</text>
+
+    <!-- Region 1 guard -->
+    <text x="140" y="236" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.02em">[ticket existe]</text>
+
+    <!-- M2: FastAPI -> DB  SELECT -->
+    <line x1="500" y1="264" x2="856" y2="264" stroke="#129d95" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+    <rect x="596" y="248" width="164" height="12" rx="2" fill="#ffffff"/>
+    <text x="678" y="258" fill="#129d95" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">SELECT WHERE id={id}</text>
+
+    <!-- M3: DB -> FastAPI  return (fila) -->
+    <line x1="856" y1="300" x2="504" y2="300" stroke="#64748b" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+    <rect x="620" y="284" width="116" height="12" rx="2" fill="#ffffff"/>
+    <text x="678" y="294" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">1 FILA ENCONTRADA</text>
+
+    <!-- M4: FastAPI -> Cliente  200 OK (headline, accent) -->
+    <line x1="496" y1="336" x2="144" y2="336" stroke="#1d4ed8" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+    <rect x="220" y="320" width="200" height="12" rx="2" fill="#ffffff"/>
+    <text x="320" y="330" fill="#1d4ed8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">200 OK · {"id":1001,...}</text>
+
+    <!-- Divider -->
+    <line x1="96" y1="360" x2="884" y2="360" stroke="rgba(12,66,112,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+
+    <!-- Region 2 guard -->
+    <text x="140" y="384" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.02em">[else · no existe]</text>
+
+    <!-- M5: FastAPI -> DB  SELECT (not found) -->
+    <line x1="500" y1="416" x2="856" y2="416" stroke="#129d95" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+    <rect x="596" y="400" width="164" height="12" rx="2" fill="#ffffff"/>
+    <text x="678" y="410" fill="#129d95" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">SELECT WHERE id={id}</text>
+
+    <!-- M6: DB -> FastAPI  return (sin resultados) -->
+    <line x1="856" y1="452" x2="504" y2="452" stroke="#64748b" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+    <rect x="612" y="436" width="132" height="12" rx="2" fill="#ffffff"/>
+    <text x="678" y="446" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">SIN RESULTADOS</text>
+
+    <!-- M7: FastAPI -> Cliente  404 (return) -->
+    <line x1="496" y1="488" x2="144" y2="488" stroke="#64748b" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+    <rect x="248" y="472" width="144" height="12" rx="2" fill="#ffffff"/>
+    <text x="320" y="482" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">404 · NOT FOUND</text>
+
+    <!-- ============ ACTOR BOXES (drawn after arrows) ============ -->
+    <!-- Cliente / Frontend (input) -->
+    <rect x="60" y="72" width="160" height="56" rx="6" fill="#ffffff"/>
+    <rect x="60" y="72" width="160" height="56" rx="6" fill="rgba(100,116,139,0.08)" stroke="#94a3b8" stroke-width="1"/>
+    <rect x="68" y="80" width="32" height="12" rx="2" fill="transparent" stroke="rgba(148,163,184,0.50)" stroke-width="0.8"/>
+    <text x="84" y="89" fill="#64748b" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">APP</text>
+    <text x="140" y="104" fill="#0c4270" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Cliente</text>
+    <text x="140" y="119" fill="#64748b" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">navegador · app</text>
+
+    <!-- FastAPI / Backend (focal) -->
+    <rect x="420" y="72" width="160" height="56" rx="6" fill="#ffffff"/>
+    <rect x="420" y="72" width="160" height="56" rx="6" fill="rgba(29,78,216,0.07)" stroke="#1d4ed8" stroke-width="1"/>
+    <rect x="428" y="80" width="32" height="12" rx="2" fill="transparent" stroke="rgba(29,78,216,0.40)" stroke-width="0.8"/>
+    <text x="444" y="89" fill="#1d4ed8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">API</text>
+    <text x="500" y="104" fill="#0c4270" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">FastAPI</text>
+    <text x="500" y="119" fill="#64748b" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">valida · decide</text>
+
+    <!-- Base de datos (store) -->
+    <rect x="780" y="72" width="160" height="56" rx="6" fill="#ffffff"/>
+    <rect x="780" y="72" width="160" height="56" rx="6" fill="rgba(12,66,112,0.05)" stroke="#64748b" stroke-width="1"/>
+    <rect x="788" y="80" width="24" height="12" rx="2" fill="transparent" stroke="rgba(100,116,139,0.50)" stroke-width="0.8"/>
+    <text x="800" y="89" fill="#64748b" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">DB</text>
+    <text x="860" y="104" fill="#0c4270" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Base de datos</text>
+    <text x="860" y="119" fill="#64748b" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">PostgreSQL</text>
+
+    <!-- ============ Annotation callouts (max 2) ============ -->
+    <text x="250" y="150" fill="#0c4270" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="start">recurso en la URL</text>
+    <path d="M 280,154 Q 300,164 300,172" fill="none" stroke="rgba(12,66,112,0.40)" stroke-width="1" stroke-dasharray="4,3"/>
+    <circle cx="300" cy="176" r="2" fill="#0c4270"/>
+
+    <text x="980" y="320" fill="#0c4270" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="end">JSON = representación,</text>
+    <text x="980" y="336" fill="#0c4270" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="end">no el objeto real</text>
+    <path d="M 950,340 Q 920,342 892,338" fill="none" stroke="rgba(12,66,112,0.40)" stroke-width="1" stroke-dasharray="4,3"/>
+    <circle cx="892" cy="336" r="2" fill="#0c4270"/>
+
+    <!-- ============ Legend ============ -->
+    <line x1="40" y1="600" x2="960" y2="600" stroke="#e2e8f0" stroke-width="0.8"/>
+    <text x="40" y="614" fill="#64748b" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+
+    <line x1="40" y1="632" x2="68" y2="632" stroke="#129d95" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+    <text x="76" y="635" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Llamada (call)</text>
+
+    <line x1="220" y1="632" x2="248" y2="632" stroke="#64748b" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+    <text x="256" y="635" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Retorno</text>
+
+    <line x1="380" y1="632" x2="408" y2="632" stroke="#1d4ed8" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+    <text x="416" y="635" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Respuesta exitosa</text>
+
+    <rect x="580" y="626" width="28" height="16" rx="2" fill="rgba(12,66,112,0.02)" stroke="rgba(12,66,112,0.22)" stroke-width="1"/>
+    <text x="594" y="637" fill="#64748b" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle">ALT</text>
+    <text x="616" y="635" fill="#64748b" font-size="8.5" font-family="'Geist', sans-serif">Camino alternativo (existe / no existe)</text>
+  </svg>
