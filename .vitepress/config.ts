@@ -185,7 +185,14 @@ export default defineConfig({
   ],
   lastUpdated: true,
   cleanUrls: true,
-  srcExclude: ['**/README.md', '**/CLAUDE.md', '**/node_modules/**', 'deploy/**'],
+  srcExclude: [
+    '**/README.md', '**/CLAUDE.md', '**/node_modules/**', 'deploy/**',
+    // Entornos virtuales de Python: la mayoría se llaman .venv (VitePress ya
+    // ignora dotfiles/dot-folders por defecto), pero 02-Ejercicios/Clase-03/
+    // usa "venv" sin punto — sin este patrón, los LICENSE.md de sus paquetes
+    // instalados (site-packages) se compilan como páginas y se publican.
+    '**/venv/**', '**/__pycache__/**',
+  ],
   markdown: {
     lineNumbers: false,
     config: (md) => {
