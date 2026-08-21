@@ -1,0 +1,70 @@
+digraph Clase06 {
+  rankdir=LR;
+  splines=ortho;
+  graph [
+    label="DIAGRAMA DE ARQUITECTURA\nClase 6 — users_service y products_service (Python para Backend)",
+    bgcolor="#FFFFFF", pad=0.4, margin=0.1, nodesep=0.55, ranksep=0.55,
+    fontname="Arial", fontsize=18, labelloc="t", labeljust="l",
+    outputorder="edgesfirst"
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Arial", fontsize=10,
+    margin="0.18,0.12", penwidth=1.4, color="#CBD5E1", fontcolor="#0F172A"
+  ];
+  edge [
+    fontname="Arial", fontsize=9, color="#64748B", fontcolor="#475569",
+    penwidth=1.2, arrowsize=0.75
+  ];
+
+  // ---- Leyenda (franja horizontal arriba) ----
+  subgraph cluster_legend {
+    label="Leyenda"; style="rounded,dashed"; color="#CBD5E1"; fontname="Arial"; fontsize=11;
+    legend_actor    [label="Cliente / actor",              fillcolor="#FEF3C7", color="#B45309", fontcolor="#92400E"];
+    legend_service  [label="Código del servicio",          fillcolor="#EEF2FF", color="#4338CA", fontcolor="#312E81"];
+    legend_data     [label="Datos en memoria\n(no persistente)", fillcolor="#F1F5F9", color="#475569", fontcolor="#334155"];
+    legend_http     [label="Llamada HTTP\nentre microservicios (httpx)", fillcolor="#F3E8FF", color="#7E22CE", fontcolor="#581C87"];
+    legend_actor -> legend_service -> legend_data -> legend_http [style=invis];
+  }
+
+  cliente [label="Cliente\n(curl / Swagger UI)", fillcolor="#FEF3C7", color="#B45309", fontcolor="#92400E"];
+
+  subgraph cluster_users {
+    label="users_service — puerto 8001 (su propio venv)"; style="rounded,filled";
+    fillcolor="#F8FAFC"; color="#CBD5E1"; fontname="Arial"; fontsize=13;
+
+    u_config [label="config.py\nSettings\n(app_name, port, ...)", fillcolor="#EEF2FF", color="#4338CA", fontcolor="#312E81"];
+    u_main   [label="main.py\nFastAPI app + /health", fillcolor="#EEF2FF", color="#4338CA", fontcolor="#312E81"];
+    u_router [label="routers/users.py\nPOST · GET · GET/{id} · PATCH", fillcolor="#EEF2FF", color="#4338CA", fontcolor="#312E81"];
+    u_data   [label="users: list[dict]\n(en memoria)", fillcolor="#F1F5F9", color="#475569", fontcolor="#334155"];
+
+    u_config -> u_main [label="settings"];
+    u_main -> u_router [label="include_router\nprefix /api/v1"];
+    u_router -> u_data;
+  }
+
+  subgraph cluster_products {
+    label="products_service — puerto 8002 (su propio venv)"; style="rounded,filled";
+    fillcolor="#F8FAFC"; color="#CBD5E1"; fontname="Arial"; fontsize=13;
+
+    p_config [label="config.py\nSettings\n(app_name, port, ...)", fillcolor="#EEF2FF", color="#4338CA", fontcolor="#312E81"];
+    p_main   [label="main.py\nFastAPI app + /health", fillcolor="#EEF2FF", color="#4338CA", fontcolor="#312E81"];
+    p_router [label="routers/products.py\nPOST · GET (filtros) · GET/{id} · DELETE", fillcolor="#EEF2FF", color="#4338CA", fontcolor="#312E81"];
+    p_data   [label="products: list[dict]\n(en memoria)", fillcolor="#F1F5F9", color="#475569", fontcolor="#334155"];
+
+    p_config -> p_main [label="settings"];
+    p_main -> p_router [label="include_router\nprefix /api/v1"];
+    p_router -> p_data;
+  }
+
+  cliente -> u_main [label="HTTP :8001"];
+  cliente -> p_main [label="HTTP :8002"];
+
+  // Ejercicio 10: products_service consulta a users_service por su API pública,
+  // nunca lee su modelo/datos internos directo (sección 2 de la Clase 6).
+  p_router -> u_router [
+    xlabel="httpx.get(...)\nGET /api/v1/users/{owner_id}\n(Ejercicio 10)",
+    style=dashed, color="#7E22CE", fontcolor="#581C87", constraint=false
+  ];
+
+  legend_http -> cliente [style=invis, constraint=false];
+}

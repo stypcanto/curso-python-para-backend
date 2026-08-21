@@ -19,7 +19,7 @@ sidebar: "📚 Índice de clases"
 | 3 | [Clase 3](Clase-03.md) | 2026-08-06 | Introducción a FastAPI y APIs REST — primer proyecto, endpoints y rutas, métodos HTTP, Pydantic, Request/Response, Swagger/OpenAPI, diseño RESTful, query strings, manejo de errores, middleware, versionamiento | 🔄 en curso |
 | 4 | [Clase 4](Clase-04.md) | 2026-08-11 | Integración a base de datos y arquitectura de persistencia de datos — modelado de datos, relaciones entre tablas, SQL esencial, integración con FastAPI, ORM con SQLAlchemy, CRUD completo, Repository Pattern, migraciones con Alembic | 🔄 en curso |
 | 5 | [Clase 5](Clase-05.md) | 2026-08-18 | Fundamentos de arquitectura de microservicios — monolito vs microservicios, DDD básico, Bounded Contexts, desacoplamiento, Database per Service, comunicación síncrona/asíncrona (gRPC, Kafka), seguridad (OAuth 2.0, JWT, mTLS), diseño del proyecto final | 🔄 en curso |
-| 6 | [Clase 6](Clase-06.md) | — | Construcción de microservicios con FastAPI — microservicio de usuarios, microservicio de productos, configuración y variables de entorno por servicio, documentación, ejecución y pruebas | — |
+| 6 | [Clase 6](Clase-06.md) | 2026-08-20 | Construcción de microservicios con FastAPI — microservicio de usuarios, microservicio de productos, configuración y variables de entorno por servicio, documentación, ejecución y pruebas | ✅ hecha |
 | 7 | [Clase 7](Clase-07.md) | — | Comunicación y seguridad en microservicios — REST síncrono, API Gateway Pattern, errores distribuidos, autenticación/autorización, JWT, login, roles y permisos | — |
 | 8 | [Clase 8](Clase-08.md) | — | Microservicios Serverless con AWS — API Gateway, AWS Lambda con Python, DynamoDB, integración Lambda + DynamoDB, casos de uso serverless | — |
 | 9 | [Clase 9](Clase-09.md) | — | Arquitecturas Event Driven — comunicación asíncrona, Amazon SQS, Amazon SNS, publicación/consumo de eventos, desacoplamiento con mensajería | — |
@@ -36,7 +36,7 @@ sidebar: "📚 Índice de clases"
 - [ ] Clase 3 — 2026-08-06 — Introducción a FastAPI y APIs REST
 - [ ] Clase 4 — 2026-08-11 — Integración a base de datos y arquitectura de persistencia de datos
 - [ ] Clase 5 — Fundamentos de arquitectura de microservicios
-- [ ] Clase 6 — Construcción de microservicios con FastAPI
+- [x] Clase 6 — 2026-08-20 — Construcción de microservicios con FastAPI
 - [ ] Clase 7 — Comunicación y seguridad en microservicios
 - [ ] Clase 8 — Microservicios Serverless con AWS
 - [ ] Clase 9 — Arquitecturas Event Driven

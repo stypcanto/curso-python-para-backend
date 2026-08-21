@@ -59,6 +59,63 @@ el venv activado):
 > print(calendar.month(2026, 8))   # no requiere instalar nada
 > ```
 
+## 🧩 Microservicios — un venv por servicio (Clase 6)
+
+Desde la Clase 6 cada microservicio (`users_service`, `products_service`, ...) vive en su
+propia carpeta con su **propio venv** — no se comparte con los demás servicios ni con
+otros ejercicios del curso (ver [[curso-python-backend]] → "Servicio independiente").
+Repetir esta secuencia dentro de la carpeta de **cada** servicio:
+
+```bash
+cd <nombre_del_servicio>       # p.ej. users_service, products_service
+python3 -m venv venv           # 1) crear el entorno (sin source)
+source venv/bin/activate       # 2) activarlo (con source)
+```
+
+**Dependencias instaladas en `users_service`** (mismo comando sirve para cualquier otro
+servicio nuevo — ajustando paquetes según lo que use):
+```bash
+pip install fastapi "uvicorn[standard]" pydantic sqlalchemy pydantic-settings
+```
+
+| Comando | Qué hace | Ejemplo |
+|---|---|---|
+| `pip install fastapi` | Framework de API — ya visto en [Clase 3](../01-Clases/Clase-03.md) | `pip install fastapi` |
+| `pip install "uvicorn[standard]"` | Servidor ASGI que corre la app + extras de rendimiento (`uvloop`, `websockets`, etc.). **Las comillas son obligatorias** en zsh: sin ellas, `[standard]` se interpreta como patrón glob — ver [[2026-08-20-falta-pip-install-uvicorn-standard]] | `pip install fastapi "uvicorn[standard]"` |
+| `pip install pydantic-settings` | Lee configuración (`Settings`) desde un `.env` — ver [Clase 4](../01-Clases/Clase-04.md) y [Clase 6](../01-Clases/Clase-06.md) | `pip install pydantic-settings` |
+| `pip install pytest httpx` | `pytest` (framework de testing) + `httpx` (cliente HTTP moderno, recomendado por FastAPI para testear endpoints) — para llenar la carpeta `tests/` de cada servicio ([Clase 6](../01-Clases/Clase-06.md)) | `pip install pytest httpx` |
+
+> ⚠️ Errores típicos al armar el venv de un servicio nuevo — ya documentados:
+> - `source python3 -m venv venv` → `source` no va con el comando de **crear**, solo con
+>   el de **activar** — ver [[2026-08-20-source-antes-de-python3-venv]].
+> - `venv\Scripts\activate` (sintaxis de Windows) en zsh → usar `venv/bin/activate` — ver
+>   [[2026-08-14-activate-sin-source-no-funciona]].
+> - `"uvicorn[standard]"` sin `pip install` adelante → no es un comando, es un argumento —
+>   ver [[2026-08-20-falta-pip-install-uvicorn-standard]].
+> - `ImportError: email-validator is not installed` al levantar el servidor (si el
+>   `schemas.py` del servicio usa `EmailStr`) → falta el extra `pydantic[email]` — ver
+>   [[2026-08-20-importerror-email-validator]].
+
+### ▶️ Levantar un microservicio (con el venv activado)
+
+| Comando | Qué hace | Ejemplo |
+|---|---|---|
+| `uvicorn app.main:app --port <puerto>` | Arranca el servidor ASGI, apuntando a la variable `app` de `app/main.py` | `uvicorn app.main:app --port 8001` |
+| `uvicorn app.main:app --port <puerto> --reload` | Igual, pero **reinicia solo** al guardar un cambio en el código — útil mientras se desarrolla | `uvicorn app.main:app --port 8001 --reload` |
+| `python3 -m uvicorn app.main:app --reload --port <puerto>` | Mismo resultado que el de arriba, pero pidiéndoselo a **ese `python3` puntual** (`-m`) en vez de confiar en qué `uvicorn` encuentre el `PATH` — mismo motivo que `python3 -m pip install` más arriba. Así lo corrió el profe (con `python` a secas, por estar en Windows) | `python3 -m uvicorn app.main:app --reload --port 8001` |
+
+Cada microservicio usa **su propio puerto** (definido en su `app/config.py` — ver
+[Clase 6](../01-Clases/Clase-06.md)), así los dos corren al mismo tiempo sin chocar:
+```bash
+# terminal 1 — dentro de users_service, venv activado
+uvicorn app.main:app --port 8001 --reload
+
+# terminal 2 — dentro de products_service, venv activado
+uvicorn app.main:app --port 8002 --reload
+```
+Con el servidor corriendo, la documentación interactiva (Swagger, vista en
+[Clase 3](../01-Clases/Clase-03.md)) queda en `http://127.0.0.1:<puerto>/docs`.
+
 ## 🐳 Docker
 
 > Desde la Clase 4 corremos PostgreSQL en un contenedor en vez de instalarlo directo en
